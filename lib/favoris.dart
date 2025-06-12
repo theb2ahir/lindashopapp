@@ -25,7 +25,7 @@ class _FavorisState extends State<Favoris> {
             labelStyle: TextStyle(fontSize: 13),
             tabs: [
               Tab(text: "Produits"),
-              Tab(text: "Dans la meme catégorie"),
+              Tab(text: "Dans la meme catégoriee"),
             ],
           ),
         ),
