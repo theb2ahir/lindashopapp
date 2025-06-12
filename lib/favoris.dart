@@ -42,7 +42,7 @@ class _FavorisState extends State<Favoris> {
                 ListTile(
                   leading: Icon(Icons.shopping_cart),
                   title: Text("Produit B"),
-                  subtitle: Text("Description du produit B"),
+                  subtitle: Text("Description du produit Bb"),
                 ),
               ],
             ),
