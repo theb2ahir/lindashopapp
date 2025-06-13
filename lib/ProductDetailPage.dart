@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, unnecessary_to_list_in_spreads
+// ignore_for_file: file_names, unnecessary_to_list_in_spreads, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:lindashopp/Elements/customtextfields.dart';
@@ -18,8 +18,6 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
-  bool isLoading = false;
-
   String position = 'Appuyez pour obtenir la position';
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
@@ -48,15 +46,36 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       //Provider pour ajouter l’item
       Provider.of<PanierProvider>(context, listen: false).ajouterItem(newItem);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Votre produit a bien été Ajouté au panier !')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.grey[900],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          duration: Duration(seconds: 5),
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.lightGreenAccent),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Produit ajouté au panier!',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 
       prenomController.clear();
       phoneController.clear();
       emailController.clear();
       quatityController.clear();
       nameController.clear();
+      latitude = null;
+      longitude = null;
     }
   }
 
@@ -64,10 +83,26 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   double? longitude;
 
   Future<void> _getLocation() async {
-    setState(() {
-      isLoading = true;
-    });
-
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        duration: Duration(seconds: 5),
+        content: Row(
+          children: [
+            Icon(Icons.lock_clock, color: Colors.blueGrey),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Recherche de la position...',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
@@ -102,9 +137,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         ),
       );
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.grey[900],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          duration: Duration(seconds: 5),
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.lightGreenAccent),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Position trouvée!',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
   }
 
@@ -147,9 +201,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
         ],
       ),
-      body: isLoading ? Center(
-              child: CircularProgressIndicator(),
-            ) :Padding(
+      body: Padding(
         padding: const EdgeInsets.all(13),
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -360,6 +412,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   Text('Longitude: ${longitude ?? "Inconnue"}'),
                 ],
               ),
+
               const SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -374,12 +427,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
-                    onPressed: () {
-
-                    }, 
-                    child: const Text('Ajouter au Favoris')
-                  )
-                  
+                    onPressed: () {},
+                    child: const Text('Ajouter au Favoris'),
+                  ),
                 ],
               ),
             ],

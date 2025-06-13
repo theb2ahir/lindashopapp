@@ -35,9 +35,31 @@ class _InquietudeState extends State<Inquietude> {
       emailController.clear();
       messageController.clear();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur : $e")),
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.grey[900],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          duration: Duration(seconds: 5),
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.redAccent),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'erreur : $e',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
+      
     }
   }
 
@@ -48,7 +70,10 @@ class _InquietudeState extends State<Inquietude> {
         iconTheme: const IconThemeData(
           color: Colors.white, // couleur de l’icône retour
         ),
-        title: const Text("Formulaire - Inquiétudes", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Formulaire - Inquiétudes",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF02204B),
       ),
       body: Padding(
@@ -73,14 +98,46 @@ class _InquietudeState extends State<Inquietude> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       submitToFirestore();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.grey[900],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          duration: Duration(seconds: 5),
+                          content: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.lightGreenAccent,
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Message envoyé!',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.greenAccent.shade400,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 15,
+                    ),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
                   child: const Text(
                     "Envoyer",
@@ -90,7 +147,7 @@ class _InquietudeState extends State<Inquietude> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),

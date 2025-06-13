@@ -34,8 +34,8 @@ class _NonLivreState extends State<NonLivre> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content:
-                Text("requête de commande non livré envoyées avec succès !")),
+          content: Text("requête de commande non livré envoyées avec succès !"),
+        ),
       );
       nameController.clear();
       prenomController.clear();
@@ -45,8 +45,29 @@ class _NonLivreState extends State<NonLivre> {
       emailController.clear();
       messageController.clear();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur : $e")),
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.grey[900],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          duration: Duration(seconds: 5),
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.redAccent),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Erreur : $e',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
   }
@@ -58,8 +79,10 @@ class _NonLivreState extends State<NonLivre> {
         iconTheme: const IconThemeData(
           color: Colors.white, // couleur de l’icône retour
         ),
-        title: const Text("Formulaire - non livré",
-            style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Formulaire - non livré",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF02204B),
       ),
       body: Padding(
@@ -69,8 +92,9 @@ class _NonLivreState extends State<NonLivre> {
           child: Column(
             children: [
               const Text(
-                  "Les informations que vous avez a fournir sont presentes sur votre reçu de paiement , veuillez ne pas faire de fautes dans la saisie pour nous faciliter la tache , merci Linda Shop",
-                  style: TextStyle(fontSize: 16, color: Colors.black)),
+                "Les informations que vous avez a fournir sont presentes sur votre reçu de paiement , veuillez ne pas faire de fautes dans la saisie pour nous faciliter la tache , merci Linda Shop",
+                style: TextStyle(fontSize: 16, color: Colors.black),
+              ),
               const SizedBox(height: 30),
               Form(
                 key: _formKey,
@@ -79,20 +103,29 @@ class _NonLivreState extends State<NonLivre> {
                     CustomTextField(controller: nameController, label: "Nom"),
                     const SizedBox(height: 15),
                     CustomTextField(
-                        controller: prenomController, label: "Prénom"),
+                      controller: prenomController,
+                      label: "Prénom",
+                    ),
                     const SizedBox(height: 15),
                     CustomTextField(
-                        controller: phoneController, label: "Téléphone"),
+                      controller: phoneController,
+                      label: "Téléphone",
+                    ),
                     const SizedBox(height: 15),
                     CustomTextField(
-                        controller: refController, label: "Référence"),
+                      controller: refController,
+                      label: "Référence",
+                    ),
                     const SizedBox(height: 15),
                     CustomTextField(
-                        controller: transactionIdController,
-                        label: "Transaction ID"),
+                      controller: transactionIdController,
+                      label: "Transaction ID",
+                    ),
                     const SizedBox(height: 15),
                     CustomTextField(
-                        controller: emailController, label: "Email"),
+                      controller: emailController,
+                      label: "Email",
+                    ),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: messageController,
@@ -105,14 +138,46 @@ class _NonLivreState extends State<NonLivre> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           submitToFirestore();
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.grey[900],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              duration: Duration(seconds: 5),
+                              content: Row(
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: Colors.lightGreenAccent,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Message envoyé!',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.greenAccent.shade400,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 15),
+                          horizontal: 40,
+                          vertical: 15,
+                        ),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
                       child: const Text(
                         "Envoyer",
@@ -122,7 +187,7 @@ class _NonLivreState extends State<NonLivre> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),

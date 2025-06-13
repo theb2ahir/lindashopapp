@@ -102,7 +102,7 @@ class _PaiementPageState extends State<PaiementPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF02204B),
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Paiement', style: TextStyle(color: Colors.white)),
+        title: const Text('Paiement via Yas togo', style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       body: Stepper(

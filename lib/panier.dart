@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:lindashopp/Elements/panierprovider.dart';
-import 'package:lindashopp/PaiementPage.dart';
+import 'package:lindashopp/PaiementPageFlooz.dart';
+import 'package:lindashopp/PaiementPageYas.dart';
 import 'package:provider/provider.dart';
 
 class PanierPage extends StatefulWidget {
@@ -27,8 +28,10 @@ class _PanierPageState extends State<PanierPage> with TickerProviderStateMixin {
         title: const Text('Mon Panier', style: TextStyle(color: Colors.white)),
         centerTitle: true,
         actions: [
-          Text("${panier.length} article(s)",
-              style: const TextStyle(color: Colors.white)),
+          Text(
+            "${panier.length} article(s)",
+            style: const TextStyle(color: Colors.white),
+          ),
           const SizedBox(width: 13),
         ],
       ),
@@ -77,7 +80,9 @@ class _PanierPageState extends State<PanierPage> with TickerProviderStateMixin {
                           Text(
                             item.productName,
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -100,34 +105,112 @@ class _PanierPageState extends State<PanierPage> with TickerProviderStateMixin {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.delete,
-                                    size: 20, color: Colors.red),
+                                icon: const Icon(
+                                  Icons.delete,
+                                  size: 20,
+                                  color: Colors.red,
+                                ),
                                 onPressed: () {
                                   try {
                                     panierProvider.removeItem(item);
                                   } catch (e) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      behavior: SnackBarBehavior.floating,
-                                      margin: const EdgeInsets.only(
-                                          top: 20, left: 20, right: 20),
-                                      backgroundColor: Colors.redAccent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        behavior: SnackBarBehavior.floating,
+                                        margin: const EdgeInsets.only(
+                                          top: 20,
+                                          left: 20,
+                                          right: 20,
+                                        ),
+                                        backgroundColor: Colors.redAccent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        content: Text('Erreur : $e'),
                                       ),
-                                      content: Text('Erreur : $e'),
-                                    ));
+                                    );
                                   }
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(Icons.payment,
-                                    size: 20, color: Colors.green),
-                                onPressed: () async {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => PaiementPage(item: item),
+                                icon: const Icon(
+                                  Icons.payment,
+                                  size: 20,
+                                  color: Colors.green,
+                                ),
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      behavior: SnackBarBehavior.floating,
+                                      backgroundColor: Color(0xFF02204B),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      duration: Duration(seconds: 3),
+                                      content: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.phone,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(width: 12),
+                                          Expanded(
+                                            child: Text(
+                                              'Choisissez un operateur',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          PaiementPage2(
+                                                            item: item,
+                                                          ),
+                                                    ),
+                                                  );
+                                                },
+                                                child: Text(
+                                                  "Flooz",
+                                                  style: TextStyle(
+                                                    color:
+                                                        Colors.lightGreenAccent,
+                                                  ),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          PaiementPage(
+                                                            item: item,
+                                                          ),
+                                                    ),
+                                                  );
+                                                },
+                                                child: Text(
+                                                  "Yas",
+                                                  style: TextStyle(
+                                                    color: Colors.yellowAccent,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 },
