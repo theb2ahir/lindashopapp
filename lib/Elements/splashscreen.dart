@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:lindashopp/homepage.dart';
+import 'package:lindashopp/auhtcheck.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     Future.delayed(splashDuration, () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const MyHomePage()),
+        MaterialPageRoute(builder: (_) => const Auhtcheck()),
       );
     });
   }

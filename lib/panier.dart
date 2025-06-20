@@ -70,7 +70,7 @@ class _PanierPageState extends State<PanierPage> with TickerProviderStateMixin {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.asset(
-                              'assets/${item.productImageUrl.replaceAll(r'\', '/')}',
+                              item.productImageUrl,
                               width: double.infinity,
                               height: 110,
                               fit: BoxFit.cover,
@@ -222,8 +222,8 @@ class _PanierPageState extends State<PanierPage> with TickerProviderStateMixin {
                             child: Column(
                               children: [
                                 Text('Username: ${item.username}'),
-                                Text('Prenom: ${item.prenom}'),
                                 Text('Phone: ${item.phone}'),
+                                Text('Phone: ${item.addressLivraison}'),
                                 Text('Email: ${item.email}'),
                               ],
                             ),

@@ -1,5 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:lindashopp/Elements/achatrecentprovider.dart';
+import 'package:lindashopp/Elements/favoriteProdvider.dart';
 import 'package:lindashopp/Elements/panierprovider.dart';
 import 'package:lindashopp/Elements/splashscreen.dart';
 import 'package:lindashopp/firebase_options.dart';
@@ -10,11 +12,13 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => PanierProvider(),
-      child: const MyApp(),
-    ),
+    MultiProvider(providers: [
+      ChangeNotifierProvider(create: (_) => PanierProvider()),
+      ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+      ChangeNotifierProvider(create: (_) => AcrProvider()),
+    ], child: const MyApp()),
   );
 }
 

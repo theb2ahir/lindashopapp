@@ -27,6 +27,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _tabController.dispose();
     super.dispose();
   }
+
   final List<Item> items = [];
   @override
   Widget build(BuildContext context) {
@@ -88,13 +89,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           actions: [
             IconButton(
               onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const PanierPage()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PanierPage()),
+                );
               },
-              icon: const Icon(
-                Icons.shopping_cart,
-                color: Colors.white,
-              ),
+              icon: const Icon(Icons.shopping_cart, color: Colors.white),
             ),
           ],
         ),
@@ -114,7 +114,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return const Center(
-                            child: Text('Erreur de chargement'));
+                          child: Text('Erreur de chargement'),
+                        );
                       }
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -142,12 +143,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
                           return GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailPage(produit: produit),
-                                ),
-                              );
+                              setState(() {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailPage(produit: produit),
+                                  ),
+                                );
+                              });
                             },
                             child: Card(
                               margin: const EdgeInsets.all(10),
@@ -172,8 +176,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                               width: 80,
                                               height: 80,
                                               color: Colors.grey[300],
-                                              child: const Icon(Icons.image,
-                                                  size: 40),
+                                              child: const Icon(
+                                                Icons.image,
+                                                size: 40,
+                                              ),
                                             ),
                                     ),
                                     const SizedBox(width: 12),
@@ -220,6 +226,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ),
               ],
             ),
+
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
@@ -231,7 +238,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return const Center(
-                            child: Text('Erreur de chargement'));
+                          child: Text('Erreur de chargement'),
+                        );
                       }
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -255,16 +263,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               produit['livraison'] ?? 'non spécifier';
                           final prix = produit['prix']?.toString() ?? '0';
                           final imageUrl = produit['imageURL'] ?? '';
-                          final cleanPath = imageUrl.replaceAll(r'\', '/');
 
                           return GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailPage(produit: produit),
-                                ),
-                              );
+                              setState(() {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailPage(produit: produit),
+                                  ),
+                                );
+                              });
                             },
                             child: Card(
                               margin: const EdgeInsets.all(10),
@@ -280,7 +290,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       borderRadius: BorderRadius.circular(8),
                                       child: imageUrl.isNotEmpty
                                           ? Image.asset(
-                                              'assets/$cleanPath',
+                                              '$imageUrl' ,
                                               width: 80,
                                               height: 80,
                                               fit: BoxFit.cover,
@@ -289,8 +299,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                               width: 80,
                                               height: 80,
                                               color: Colors.grey[300],
-                                              child: const Icon(Icons.image,
-                                                  size: 40),
+                                              child: const Icon(
+                                                Icons.image,
+                                                size: 40,
+                                              ),
                                             ),
                                     ),
                                     const SizedBox(width: 12),
@@ -348,7 +360,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return const Center(
-                            child: Text('Erreur de chargement'));
+                          child: Text('Erreur de chargement'),
+                        );
                       }
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -372,16 +385,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               produit['livraison'] ?? 'non spécifier';
                           final prix = produit['prix']?.toString() ?? '0';
                           final imageUrl = produit['imageURL'] ?? '';
-                          final cleanPath = imageUrl.replaceAll(r'\', '/');
 
                           return GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailPage(produit: produit),
-                                ),
-                              );
+                              setState(() {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailPage(produit: produit),
+                                  ),
+                                );
+                              });
                             },
                             child: Card(
                               margin: const EdgeInsets.all(10),
@@ -397,7 +412,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       borderRadius: BorderRadius.circular(8),
                                       child: imageUrl.isNotEmpty
                                           ? Image.asset(
-                                              'assets/$cleanPath',
+                                              '$imageUrl',
                                               width: 80,
                                               height: 80,
                                               fit: BoxFit.cover,
@@ -406,8 +421,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                               width: 80,
                                               height: 80,
                                               color: Colors.grey[300],
-                                              child: const Icon(Icons.image,
-                                                  size: 40),
+                                              child: const Icon(
+                                                Icons.image,
+                                                size: 40,
+                                              ),
                                             ),
                                     ),
                                     const SizedBox(width: 12),
@@ -465,7 +482,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return const Center(
-                            child: Text('Erreur de chargement'));
+                          child: Text('Erreur de chargement'),
+                        );
                       }
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -489,16 +507,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               produit['livraison'] ?? 'non spécifier';
                           final prix = produit['prix']?.toString() ?? '0';
                           final imageUrl = produit['imageURL'] ?? '';
-                          final cleanPath = imageUrl.replaceAll(r'\', '/');
 
                           return GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailPage(produit: produit),
-                                ),
-                              );
+                              setState(() {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailPage(produit: produit),
+                                  ),
+                                );
+                              });
                             },
                             child: Card(
                               margin: const EdgeInsets.all(10),
@@ -514,7 +534,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       borderRadius: BorderRadius.circular(8),
                                       child: imageUrl.isNotEmpty
                                           ? Image.asset(
-                                              'assets/$cleanPath',
+                                              '$imageUrl',
                                               width: 80,
                                               height: 80,
                                               fit: BoxFit.cover,
@@ -523,8 +543,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                               width: 80,
                                               height: 80,
                                               color: Colors.grey[300],
-                                              child: const Icon(Icons.image,
-                                                  size: 40),
+                                              child: const Icon(
+                                                Icons.image,
+                                                size: 40,
+                                              ),
                                             ),
                                     ),
                                     const SizedBox(width: 12),
@@ -582,7 +604,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return const Center(
-                            child: Text('Erreur de chargement'));
+                          child: Text('Erreur de chargement'),
+                        );
                       }
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -606,16 +629,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               produit['livraison'] ?? 'non spécifier';
                           final prix = produit['prix']?.toString() ?? '0';
                           final imageUrl = produit['imageURL'] ?? '';
-                          final cleanPath = imageUrl.replaceAll(r'\', '/');
 
                           return GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailPage(produit: produit),
-                                ),
-                              );
+                              setState(() {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailPage(produit: produit),
+                                  ),
+                                );
+                              });
                             },
                             child: Card(
                               margin: const EdgeInsets.all(10),
@@ -631,7 +656,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       borderRadius: BorderRadius.circular(8),
                                       child: imageUrl.isNotEmpty
                                           ? Image.asset(
-                                              'assets/$cleanPath',
+                                              '$imageUrl',
                                               width: 80,
                                               height: 80,
                                               fit: BoxFit.cover,
@@ -640,8 +665,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                               width: 80,
                                               height: 80,
                                               color: Colors.grey[300],
-                                              child: const Icon(Icons.image,
-                                                  size: 40),
+                                              child: const Icon(
+                                                Icons.image,
+                                                size: 40,
+                                              ),
                                             ),
                                     ),
                                     const SizedBox(width: 12),
@@ -699,7 +726,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return const Center(
-                            child: Text('Erreur de chargement'));
+                          child: Text('Erreur de chargement'),
+                        );
                       }
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -718,16 +746,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               produit['livraison'] ?? 'non spécifier';
                           final prix = produit['prix']?.toString() ?? '0';
                           final imageUrl = produit['imageURL'] ?? '';
-                          final cleanPath = imageUrl.replaceAll(r'\', '/');
 
                           return GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailPage(produit: produit),
-                                ),
-                              );
+                              setState(() {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailPage(produit: produit),
+                                  ),
+                                );
+                              });
                             },
                             child: Card(
                               margin: const EdgeInsets.all(10),
@@ -743,7 +773,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       borderRadius: BorderRadius.circular(8),
                                       child: imageUrl.isNotEmpty
                                           ? Image.asset(
-                                              'assets/$cleanPath',
+                                              '$imageUrl',
                                               width: 80,
                                               height: 80,
                                               fit: BoxFit.cover,
@@ -752,8 +782,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                               width: 80,
                                               height: 80,
                                               color: Colors.grey[300],
-                                              child: const Icon(Icons.image,
-                                                  size: 40),
+                                              child: const Icon(
+                                                Icons.image,
+                                                size: 40,
+                                              ),
                                             ),
                                     ),
                                     const SizedBox(width: 12),

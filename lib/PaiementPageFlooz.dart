@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:lindashopp/Elements/achatrec.dart';
+import 'package:lindashopp/Elements/achatrecentprovider.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:url_launcher/url_launcher.dart';  
-
-
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:permission_handler/permission_handler.dart'; // Ajoute cette dépendance
 // ignore_for_file: file_names, unrelated_type_equality_checks, use_build_context_synchronously
-
 
 class PaiementPage2 extends StatefulWidget {
   final dynamic item;
@@ -42,6 +42,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
     required int montant,
     required String reference,
     required String transactionId,
+    required String addressLivraison,
   }) async {
     final pdf = pw.Document();
 
@@ -50,13 +51,15 @@ class _PaiementPage2State extends State<PaiementPage2> {
         build: (pw.Context context) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text("REÇU DE PAIEMENT",
-                style:
-                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+            pw.Text(
+              "REÇU DE PAIEMENT",
+              style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+            ),
             pw.SizedBox(height: 20),
             pw.Text("Produit : $productName"),
             pw.Text("Montant : $montant FCFA"),
             pw.Text("Référence : $reference"),
+            pw.Text("Livraison : $addressLivraison"),
             pw.Text("Transaction ID : $transactionId"),
             pw.Text("Date : ${DateTime.now()}"),
           ],
@@ -64,12 +67,14 @@ class _PaiementPage2State extends State<PaiementPage2> {
       ),
     );
 
-    final output = await getExternalStorageDirectory();
-    final file = File('${output!.path}/recu_$transactionId.pdf');
-
-    await file.writeAsBytes(await pdf.save());
-
-    // Optionnel : message console
+    // Demander la permission si ce n’est pas encore fait
+    if (await Permission.storage.request().isGranted) {
+      final directory = Directory('/storage/emulated/0/Download');
+      final file = File('${directory.path}/recu_$transactionId.pdf');
+      await file.writeAsBytes(await pdf.save());
+    } else {
+      throw Exception("Permission de stockage refusée.");
+    }
   }
 
   String generateTransactionId() {
@@ -105,7 +110,10 @@ class _PaiementPage2State extends State<PaiementPage2> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF02204B),
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Paiement via Flooz', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Paiement via Flooz',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
       ),
       body: Stepper(
@@ -117,13 +125,17 @@ class _PaiementPage2State extends State<PaiementPage2> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text(
-                      "Veuillez renseigner la référence de paiement."),
+                    "Veuillez renseigner la référence de paiement.",
+                  ),
                   backgroundColor: Colors.redAccent,
                   behavior: SnackBarBehavior.floating,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               );
               return;
@@ -149,13 +161,28 @@ class _PaiementPage2State extends State<PaiementPage2> {
                 'productname': item.productName,
                 'productprice': item.productPrice,
                 'livraison': item.livraison,
+                'UserAdresse': item.addressLivraison,
                 'timestamp': DateTime.now(),
                 'usernamemiff': item.username,
-                'username': item.prenom,
                 'userephone': item.phone,
                 'useremail': item.email,
                 'ref': reference,
               });
+
+              final newacr = ACR(
+                addressLivraison: item.addressLivraison,
+                productName: item.productName,
+                productPrice: item.productPrice,
+                productImageUrl: item.productImageUrl,
+                quantity: item.quantity.toString(),
+                transactionId: transactionId,
+                reference: reference,
+                dateAjout: DateTime.now(),
+              );
+              Provider.of<AcrProvider>(
+                context,
+                listen: false,
+              ).ajouterACR(newacr);
 
               setState(() => isLoading = false);
 
@@ -170,6 +197,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
                         Navigator.pop(context); // Fermer la boîte de dialogue
 
                         await generateRecuPDF(
+                          addressLivraison: item.addressLivraison,
                           productName: item.productName,
                           montant: total.toInt(),
                           reference: reference,
@@ -183,16 +211,15 @@ class _PaiementPage2State extends State<PaiementPage2> {
                         );
                       },
                       child: const Text("OK"),
-                    )
+                    ),
                   ],
                 ),
               );
-
             } catch (e) {
               setState(() => isLoading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erreur : $e')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
             }
           } else {
             setState(() => currentStep += 1);
@@ -214,6 +241,8 @@ class _PaiementPage2State extends State<PaiementPage2> {
                 Text('Quantité : ${item.quantity}'),
                 Text('Total : $total FCFA'),
                 const SizedBox(height: 8),
+                Text('Livraison : ${item.addressLivraison}'),
+                const SizedBox(height: 8),
                 Text('Transaction ID : $transactionId'),
               ],
             ),
@@ -225,12 +254,14 @@ class _PaiementPage2State extends State<PaiementPage2> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                    'Effectuez le paiement en cliquant sur le bouton ci-dessous :'),
+                  'Effectuez le paiement en cliquant sur le bouton ci-dessous :',
+                ),
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () {
                     lancerUSSD(
-                        "*155*1*1*96368151*96368151*$total*1#"); // USSD personnalisé
+                      "*155*1*1*96368151*96368151*$total*1#",
+                    ); // USSD personnalisé
                   },
                   child: const Text("Lancer le code USSD"),
                 ),

@@ -1,8 +1,8 @@
 class Item {
   final double? latitude;
   final double? longitude;
+  final String addressLivraison;
   final String username;
-  final String prenom;
   final  String email;
   final  String phone;
   final int quantity;
@@ -13,10 +13,10 @@ class Item {
   final DateTime dateAjout;
   Item(
       {
+      required this.addressLivraison,
       required this.latitude,
       required this.longitude,
       required this.username,
-      required this.prenom,
       required this.email,
       required this.phone,
       required this.quantity,

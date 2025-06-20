@@ -4,11 +4,12 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final int maxLines;
-
+  final Widget? suffixIcon;
   const CustomTextField({
     super.key,
     required this.controller,
     required this.label,
+    this.suffixIcon,
     this.maxLines = 1,
   });
 

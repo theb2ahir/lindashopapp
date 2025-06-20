@@ -34,7 +34,19 @@ class _NonLivreState extends State<NonLivre> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("requête de commande non livré envoyées avec succès !"),
+          backgroundColor:  Color(0xFF02204B),
+          content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.lightGreenAccent),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'requête de commande non livré envoyées avec succès !',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
         ),
       );
       nameController.clear();

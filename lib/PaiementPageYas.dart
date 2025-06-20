@@ -2,10 +2,13 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:lindashopp/Elements/achatrec.dart';
+import 'package:lindashopp/Elements/achatrecentprovider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class PaiementPage extends StatefulWidget {
@@ -39,6 +42,7 @@ class _PaiementPageState extends State<PaiementPage> {
     required int montant,
     required String reference,
     required String transactionId,
+    required String addressLivraison,
   }) async {
     final pdf = pw.Document();
 
@@ -47,13 +51,15 @@ class _PaiementPageState extends State<PaiementPage> {
         build: (pw.Context context) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text("REÇU DE PAIEMENT",
-                style:
-                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+            pw.Text(
+              "REÇU DE PAIEMENT",
+              style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+            ),
             pw.SizedBox(height: 20),
             pw.Text("Produit : $productName"),
             pw.Text("Montant : $montant FCFA"),
             pw.Text("Référence : $reference"),
+            pw.Text("Livraison : $addressLivraison"),
             pw.Text("Transaction ID : $transactionId"),
             pw.Text("Date : ${DateTime.now()}"),
           ],
@@ -61,12 +67,14 @@ class _PaiementPageState extends State<PaiementPage> {
       ),
     );
 
-    final output = await getExternalStorageDirectory();
-    final file = File('${output!.path}/recu_$transactionId.pdf');
-
-    await file.writeAsBytes(await pdf.save());
-
-    // Optionnel : message console
+    // Demander la permission si ce n’est pas encore fait
+    if (await Permission.storage.request().isGranted) {
+      final directory = Directory('/storage/emulated/0/Download');
+      final file = File('${directory.path}/recu_$transactionId.pdf');
+      await file.writeAsBytes(await pdf.save());
+    } else {
+      throw Exception("Permission de stockage refusée.");
+    }
   }
 
   String generateTransactionId() {
@@ -102,7 +110,10 @@ class _PaiementPageState extends State<PaiementPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF02204B),
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Paiement via Yas togo', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Paiement via Yas togo',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
       ),
       body: Stepper(
@@ -114,13 +125,17 @@ class _PaiementPageState extends State<PaiementPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text(
-                      "Veuillez renseigner la référence de paiement."),
+                    "Veuillez renseigner la référence de paiement.",
+                  ),
                   backgroundColor: Colors.redAccent,
                   behavior: SnackBarBehavior.floating,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               );
               return;
@@ -148,11 +163,26 @@ class _PaiementPageState extends State<PaiementPage> {
                 'livraison': item.livraison,
                 'timestamp': DateTime.now(),
                 'usernamemiff': item.username,
-                'username': item.prenom,
                 'userephone': item.phone,
                 'useremail': item.email,
+                'UserAdresse': item.addressLivraison,
                 'ref': reference,
               });
+
+              final newacr = ACR(
+                addressLivraison: item.addressLivraison,
+                productName: item.productName,
+                productPrice: item.productPrice,
+                productImageUrl: item.productImageUrl,
+                quantity: item.quantity.toString(),
+                transactionId: transactionId,
+                reference: reference,
+                dateAjout: DateTime.now(),
+              );
+              Provider.of<AcrProvider>(
+                context,
+                listen: false,
+              ).ajouterACR(newacr);
 
               setState(() => isLoading = false);
 
@@ -168,6 +198,7 @@ class _PaiementPageState extends State<PaiementPage> {
 
                         await generateRecuPDF(
                           productName: item.productName,
+                          addressLivraison: item.addressLivraison,
                           montant: total.toInt(),
                           reference: reference,
                           transactionId: transactionId,
@@ -180,16 +211,15 @@ class _PaiementPageState extends State<PaiementPage> {
                         );
                       },
                       child: const Text("OK"),
-                    )
+                    ),
                   ],
                 ),
               );
-
             } catch (e) {
               setState(() => isLoading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erreur : $e')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
             }
           } else {
             setState(() => currentStep += 1);
@@ -211,6 +241,8 @@ class _PaiementPageState extends State<PaiementPage> {
                 Text('Quantité : ${item.quantity}'),
                 Text('Total : $total FCFA'),
                 const SizedBox(height: 8),
+                Text('Livraison : ${item.addressLivraison}'),
+                const SizedBox(height: 8),
                 Text('Transaction ID : $transactionId'),
               ],
             ),
@@ -222,12 +254,14 @@ class _PaiementPageState extends State<PaiementPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                    'Effectuez le paiement en cliquant sur le bouton ci-dessous :'),
+                  'Effectuez le paiement en cliquant sur le bouton ci-dessous :',
+                ),
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () {
                     lancerUSSD(
-                        "*145*1*$total*92349698*1#"); // USSD personnalisé
+                      "*145*1*$total*92349698*1#",
+                    ); // USSD personnalisé
                   },
                   child: const Text("Lancer le code USSD"),
                 ),
