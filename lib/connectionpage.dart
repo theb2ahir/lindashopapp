@@ -3,7 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/InscriptionPage.dart';
-import 'package:lindashopp/homepage.dart';
+import 'package:lindashopp/acceuilpage.dart';
 
 class Connection extends StatefulWidget {
   const Connection({super.key});
@@ -23,9 +23,8 @@ class _ConnectionState extends State<Connection> {
       isLoading = true;
     });
 
-
-
     if (emailCtrl.text.isEmpty || passwordCtrl.text.isEmpty) {
+      if (!mounted) return; // ✅ Sécurise l'appel
       setState(() {
         isLoading = false;
       });
@@ -54,9 +53,9 @@ class _ConnectionState extends State<Connection> {
       return;
     }
     if (!emailCtrl.text.contains('@gmail.com')) {
-      setState(() {
-        isLoading = false;
-      });
+      if (!mounted) return; // ✅ Sécurise l'appel
+      setState(() => isLoading = false);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: const Color(0xFF02204B),
@@ -90,8 +89,8 @@ class _ConnectionState extends State<Connection> {
         email: emailCtrl.text,
         password: passwordCtrl.text,
       );
-
-       setState(() => isLoading = false);
+      if (!mounted) return; // ✅ Sécurise l'appel
+      setState(() => isLoading = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -117,12 +116,12 @@ class _ConnectionState extends State<Connection> {
       );
 
       Navigator.pop(context);
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const MyHomePage()),
+        MaterialPageRoute(builder: (_) => const AcceuilPage()),
       );
-
     } catch (e) {
+      if (!mounted) return; // ✅ Sécurise l'appel
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -169,107 +168,163 @@ class _ConnectionState extends State<Connection> {
         ),
         centerTitle: true,
       ),
-      body: isLoading ? 
-      const Center(child: CircularProgressIndicator()) : SingleChildScrollView(
-        scrollDirection: Axis.vertical, 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 10),
-            Column(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    "assets/articlesImages/LindaLogo2.png",
-                    height: 300,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 10),
+                  Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          "assets/articlesImages/LindaLogo2.png",
+                          height: 300,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Center(
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: emailCtrl,
-                      decoration: InputDecoration(labelText: 'Email'),
-                    ),
-                    const SizedBox(height: 25),
-                    TextField(
-                      controller: passwordCtrl,
-                      decoration: InputDecoration(labelText: 'Mot de passe', 
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                          },
-                          icon:Icon(
-                            _obscurePassword ?
-                            Icons.visibility_off : Icons.visibility
-                          )
-                        )
-                      ),
-                      obscureText: _obscurePassword,
-                      
-                    ),
-                    const SizedBox(height: 45),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all<Color>(
-                            Colors.green,
-                          ),
-                        ),
-                        onPressed: () => login(context),
-                        child: Text(
-                          "Se connecter",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-        
-                    const SizedBox(height: 45),
-        
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Nouveau sur Linda Shop ?"),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const Inscription(),
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: emailCtrl,
+                            decoration: InputDecoration(
+                              labelStyle: const TextStyle(
+                                color: Color(0xFF02204B),
                               ),
-                            );
-                          },
-                          child: Text(
-                            "Inscrivez-vous",
-                            style: const TextStyle(
-                              color: Colors.blueAccent,
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              decorationColor: Colors.blueAccent,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF02204B),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Colors.green,
+                                  width: 2,
+                                ),
+                              ),
+                              labelText: 'Email',
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 25),
+                          TextField(
+                            controller: passwordCtrl,
+                            decoration: InputDecoration(
+                              labelStyle: const TextStyle(
+                                color: Color(0xFF02204B),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF02204B),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Colors.green,
+                                  width: 2,
+                                ),
+                              ),
+
+                              labelText: 'Mot de passe',
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                              ),
+                            ),
+                            obscureText: _obscurePassword,
+                          ),
+                          const SizedBox(height: 45),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(
+                                  Colors.green,
+                                ),
+                              ),
+                              onPressed: () => login(context),
+                              child: Text(
+                                "Se connecter",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 30),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  "mot de passe oublier ?",
+                                  style: const TextStyle(
+                                    color: Colors.blueAccent,
+                                    fontSize: 16,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.blueAccent,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("Nouveau sur Linda Shop ?"),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const Inscription(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  "Inscrivez-vous",
+                                  style: const TextStyle(
+                                    color: Colors.blueAccent,
+                                    fontSize: 16,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.blueAccent,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

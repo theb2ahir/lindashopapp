@@ -1,25 +1,25 @@
 // ignore_for_file: file_names, unrelated_type_equality_checks, use_build_context_synchronously
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lindashopp/Elements/achatrec.dart';
-import 'package:lindashopp/Elements/achatrecentprovider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'dart:io';
 
 class PaiementPage extends StatefulWidget {
-  final dynamic item;
-  const PaiementPage({super.key, required this.item});
+  final dynamic data;
+  const PaiementPage({super.key, required this.data});
 
   @override
   State<PaiementPage> createState() => _PaiementPageState();
 }
 
 class _PaiementPageState extends State<PaiementPage> {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+
   int currentStep = 0;
   late String transactionId;
   final TextEditingController referenceController = TextEditingController();
@@ -37,45 +37,7 @@ class _PaiementPageState extends State<PaiementPage> {
     super.dispose();
   }
 
-  Future<void> generateRecuPDF({
-    required String productName,
-    required int montant,
-    required String reference,
-    required String transactionId,
-    required String addressLivraison,
-  }) async {
-    final pdf = pw.Document();
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              "REÇU DE PAIEMENT",
-              style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.SizedBox(height: 20),
-            pw.Text("Produit : $productName"),
-            pw.Text("Montant : $montant FCFA"),
-            pw.Text("Référence : $reference"),
-            pw.Text("Livraison : $addressLivraison"),
-            pw.Text("Transaction ID : $transactionId"),
-            pw.Text("Date : ${DateTime.now()}"),
-          ],
-        ),
-      ),
-    );
-
-    // Demander la permission si ce n’est pas encore fait
-    if (await Permission.storage.request().isGranted) {
-      final directory = Directory('/storage/emulated/0/Download');
-      final file = File('${directory.path}/recu_$transactionId.pdf');
-      await file.writeAsBytes(await pdf.save());
-    } else {
-      throw Exception("Permission de stockage refusée.");
-    }
-  }
 
   String generateTransactionId() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -103,9 +65,9 @@ class _PaiementPageState extends State<PaiementPage> {
 
   @override
   Widget build(BuildContext context) {
-    final item = widget.item;
-    final int prixUnitaire = int.tryParse(item.productPrice.toString()) ?? 0;
-    final total = prixUnitaire * item.quantity;
+    final item = widget.data;
+    final int prixUnitaire = int.tryParse(item['productprice'].toString()) ?? 0;
+    final total = prixUnitaire * item['quantity'];
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF02204B),
@@ -116,189 +78,203 @@ class _PaiementPageState extends State<PaiementPage> {
         ),
         centerTitle: true,
       ),
-      body: Stepper(
-        currentStep: currentStep,
-        onStepContinue: () async {
-          if (currentStep == 2) {
-            final reference = referenceController.text.trim();
-            if (reference.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text(
-                    "Veuillez renseigner la référence de paiement.",
-                  ),
-                  backgroundColor: Colors.redAccent,
-                  behavior: SnackBarBehavior.floating,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
-              return;
-            }
-
-            if (!await hasInternetConnection()) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Pas de connexion Internet.")),
-              );
-              return;
-            }
-
-            setState(() => isLoading = true);
-
-            try {
-              await FirebaseFirestore.instance.collection('infouser').add({
-                'transactionId': transactionId,
-                'longi': item.longitude,
-                'lati': item.latitude,
-                'prixTotal': total,
-                'UserReseau': 'togocel',
-                'nomberitem': item.quantity,
-                'productname': item.productName,
-                'productprice': item.productPrice,
-                'livraison': item.livraison,
-                'timestamp': DateTime.now(),
-                'usernamemiff': item.username,
-                'userephone': item.phone,
-                'useremail': item.email,
-                'UserAdresse': item.addressLivraison,
-                'ref': reference,
-              });
-
-              final newacr = ACR(
-                addressLivraison: item.addressLivraison,
-                productName: item.productName,
-                productPrice: item.productPrice,
-                productImageUrl: item.productImageUrl,
-                quantity: item.quantity.toString(),
-                transactionId: transactionId,
-                reference: reference,
-                dateAjout: DateTime.now(),
-              );
-              Provider.of<AcrProvider>(
-                context,
-                listen: false,
-              ).ajouterACR(newacr);
-
-              setState(() => isLoading = false);
-
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("Confirmation"),
-                  content: const Text("Commande enregistrée avec succès !"),
-                  actions: [
-                    TextButton(
-                      onPressed: () async {
-                        Navigator.pop(context); // Fermer la boîte de dialogue
-
-                        await generateRecuPDF(
-                          productName: item.productName,
-                          addressLivraison: item.addressLivraison,
-                          montant: total.toInt(),
-                          reference: reference,
-                          transactionId: transactionId,
-                        );
-
-                        Navigator.pop(context); // Revenir à la page précédente
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Reçu PDF téléchargé.")),
-                        );
-                      },
-                      child: const Text("OK"),
+      body: Center(
+        child: Stepper(
+          currentStep: currentStep,
+          onStepContinue: () async {
+            if (currentStep == 2) {
+              final reference = referenceController.text.trim();
+              if (reference.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text(
+                      "Veuillez renseigner la référence de paiement.",
                     ),
-                  ],
-                ),
-              );
-            } catch (e) {
-              setState(() => isLoading = false);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
-            }
-          } else {
-            setState(() => currentStep += 1);
-          }
-        },
-        onStepCancel: () {
-          if (currentStep > 0) {
-            setState(() => currentStep -= 1);
-          }
-        },
-        steps: [
-          Step(
-            title: const Text('Informations'),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Nom du produit : ${item.productName}'),
-                Text('Prix unitaire : $prixUnitaire FCFA'),
-                Text('Quantité : ${item.quantity}'),
-                Text('Total : $total FCFA'),
-                const SizedBox(height: 8),
-                Text('Livraison : ${item.addressLivraison}'),
-                const SizedBox(height: 8),
-                Text('Transaction ID : $transactionId'),
-              ],
-            ),
-            isActive: currentStep >= 0,
-          ),
-          Step(
-            title: const Text('Paiement'),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Effectuez le paiement en cliquant sur le bouton ci-dessous :',
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    lancerUSSD(
-                      "*145*1*$total*92349698*1#",
-                    ); // USSD personnalisé
-                  },
-                  child: const Text("Lancer le code USSD"),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Après le paiement, collez la référence reçue par SMS dans le champ ci-dessous, puis cliquez sur Continuer.",
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: referenceController,
-                  onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(
-                    labelText: 'Coller la référence ici',
-                    border: OutlineInputBorder(),
+                    backgroundColor: Colors.redAccent,
+                    behavior: SnackBarBehavior.floating,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            isActive: currentStep >= 1,
-          ),
-          Step(
-            title: const Text('Reçu'),
-            content: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Transaction : $transactionId'),
-                      Text('Montant Total : $total FCFA'),
-                      Text('Référence : ${referenceController.text.trim()}'),
-                      const SizedBox(height: 16),
-                      const Text('Appuyez sur "Continuer" pour finaliser.'),
+                );
+                return;
+              }
+
+              if (!await hasInternetConnection()) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Pas de connexion Internet.")),
+                );
+                return;
+              }
+
+              setState(() => isLoading = true);
+
+              try {
+                // Ajouter à 'acr' et récupérer l'ID du document
+                DocumentReference acrRef = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(uid)
+                    .collection('acr')
+                    .add({
+                      'imageUrl': item['productImageUrl'],
+                      'productname': item['productname'],
+                      'quantity': item['quantity'],
+                      'reference': reference,
+                      'status': 'en cours de verification',
+                    });
+                final userid = uid; // ✅ Ici tu récupères l'ID
+                String acrId = acrRef.id; // ✅ Ici tu récupères l'ID
+
+                // Ensuite, ajouter dans 'infouser' avec l'acrid obtenu
+                await FirebaseFirestore.instance.collection('infouser').add({
+                  'userid': userid,
+                  'acrid': acrId, // ✅ On envoie l'ID ici
+                  'transactionId': transactionId,
+                  'longi': item['longitude'],
+                  'lati': item['latitude'],
+                  'prixTotal': total,
+                  'UserReseau': 'togocel',
+                  'nomberitem': item['quantity'],
+                  'productname': item['productname'],
+                  'productprice': item['productprice'],
+                  'livraison': item['livraison'],
+                  'timestamp': DateTime.now(),
+                  'usernamemiff': item['username'],
+                  'userephone': item['phone'],
+                  'useremail': item['email'],
+                  'UserAdresse': item['adresse'],
+                  'ref': reference,
+                });
+
+                setState(() => isLoading = false);
+
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text("Confirmation"),
+                    content: const Text("Commande enregistrée avec succès !"),
+                    actions: [
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.pop(context); // Fermer la boîte de dialogue
+
+
+                          Navigator.pop(
+                            context,
+                          ); // Revenir à la page précédente
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Reçu PDF téléchargé."),
+                            ),
+                          );
+                        },
+                        child: const Text("OK"),
+                      ),
                     ],
                   ),
-            isActive: currentStep >= 2,
-          ),
-        ],
+                );
+              } catch (e) {
+                setState(() => isLoading = false);
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
+              }
+            } else {
+              setState(() => currentStep += 1);
+            }
+          },
+          onStepCancel: () {
+            if (currentStep > 0) {
+              setState(() => currentStep -= 1);
+            }
+          },
+          steps: [
+            Step(
+              title: const Text(
+                'Informations',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              ),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Nom du produit : ${item['productname']}'),
+                  const SizedBox(height: 8),
+                  Text('Prix unitaire : $prixUnitaire FCFA'),
+                  const SizedBox(height: 8),
+                  Text('Quantité : ${item['quantity']}'),
+                  const SizedBox(height: 8),
+                  Text('Total : $total FCFA'),
+                  const SizedBox(height: 8),
+                  Text('Livraison : ${item['addressLivraison']}'),
+                  const SizedBox(height: 8),
+                  Text('Transaction ID : $transactionId'),
+                ],
+              ),
+              isActive: currentStep >= 0,
+            ),
+            Step(
+              title: const Text(
+                'Paiement',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              ),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Effectuez le paiement en cliquant sur le bouton ci-dessous :',
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      lancerUSSD(
+                        "*145*1*$total*92349698*1#",
+                      ); // USSD personnalisé
+                    },
+                    child: const Text("Lancer le code USSD"),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Après le paiement, collez la référence reçue par SMS dans le champ ci-dessous, puis cliquez sur Continuer.",
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: referenceController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: const InputDecoration(
+                      labelText: 'Coller la référence ici',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              isActive: currentStep >= 1,
+            ),
+            Step(
+              title: const Text(
+                'Reçu',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              ),
+              content: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Transaction : $transactionId'),
+                        Text('Montant Total : $total FCFA'),
+                        Text('Référence : ${referenceController.text.trim()}'),
+                        const SizedBox(height: 16),
+                        const Text('Appuyez sur "Continuer" pour finaliser.'),
+                      ],
+                    ),
+              isActive: currentStep >= 2,
+            ),
+          ],
+        ),
       ),
     );
   }

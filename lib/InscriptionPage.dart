@@ -1,10 +1,10 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
+// ignore_for_file: avoid_print, use_build_context_synchronously, file_names
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lindashopp/acceuilpage.dart';
 import 'package:lindashopp/connectionpage.dart';
-import 'package:lindashopp/homepage.dart';
 
 class Inscription extends StatefulWidget {
   const Inscription({super.key});
@@ -14,11 +14,17 @@ class Inscription extends StatefulWidget {
 }
 
 class _InscriptionState extends State<Inscription> {
+  int _stepIndex = 0;
   bool _obscurePassword = true;
+
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   final nameCtrl = TextEditingController();
   final phonectrl = TextEditingController();
+  final regionCtrl = TextEditingController();
+  final villeCtrl = TextEditingController();
+  final quartierCtrl = TextEditingController();
+  final precisionCtrl = TextEditingController();
 
   void signup() async {
     final auth = FirebaseAuth.instance;
@@ -28,93 +34,8 @@ class _InscriptionState extends State<Inscription> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => Center(child: CircularProgressIndicator()),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
-
-      if (nameCtrl.text.isEmpty ||
-          emailCtrl.text.isEmpty ||
-          passwordCtrl.text.isEmpty ||
-          phonectrl.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color(0xFF02204B),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            duration: Duration(seconds: 5),
-            content: Row(
-              children: [
-                Icon(Icons.error, color: Colors.red),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Veuillez remplir tous les champs',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-        return;
-      }
-
-      if (!emailCtrl.text.contains('@gmail.com')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color(0xFF02204B),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            duration: Duration(seconds: 5),
-            content: Row(
-              children: [
-                Icon(Icons.error, color: Colors.red),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Veuillez utiliser un email valide',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-
-        emailCtrl.text = "";
-        return;
-      }
-
-      if (passwordCtrl.text.length <= 5 || passwordCtrl.text.length > 10) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: const Color(0xFF02204B),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            duration: Duration(seconds: 5),
-            content: Row(
-              children: [
-                Icon(Icons.error, color: Colors.red),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Veuillez utiliser un mot de passe contenant entre 6 et 10 caractères',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-
-        passwordCtrl.text = "";
-        return;
-      }
 
       UserCredential result = await auth.createUserWithEmailAndPassword(
         email: emailCtrl.text,
@@ -125,17 +46,17 @@ class _InscriptionState extends State<Inscription> {
         'name': nameCtrl.text,
         'email': emailCtrl.text,
         'phone': phonectrl.text,
+        'adresse':
+            '${regionCtrl.text}, ${villeCtrl.text}, ${quartierCtrl.text}, ${precisionCtrl.text}',
       });
+
       Navigator.pop(context);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          behavior: SnackBarBehavior.floating,
           backgroundColor: const Color(0xFF02204B),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
           content: Row(
-            children: [
+            children: const [
               Icon(Icons.check_circle, color: Colors.lightGreenAccent),
               SizedBox(width: 12),
               Expanded(
@@ -146,32 +67,28 @@ class _InscriptionState extends State<Inscription> {
               ),
             ],
           ),
-          duration: Duration(seconds: 2),
         ),
       );
-      Future.delayed(Duration(seconds: 3), () {
+
+      Future.delayed(const Duration(seconds: 2), () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const MyHomePage()),
+          MaterialPageRoute(builder: (_) => const AcceuilPage()),
         );
       });
     } catch (e) {
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: const Color(0xFF02204B),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          duration: Duration(seconds: 5),
           content: Row(
             children: [
-              Icon(Icons.error, color: Colors.red),
-              SizedBox(width: 12),
+              const Icon(Icons.error, color: Colors.red),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  "Erreur dans le processus d'inscription $e",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  "Erreur: $e",
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             ],
@@ -181,150 +98,204 @@ class _InscriptionState extends State<Inscription> {
     }
   }
 
+  bool _allFieldsFilled(List<TextEditingController> controllers) {
+    return controllers.every((ctrl) => ctrl.text.isNotEmpty);
+  }
+
+  InputDecoration _customDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Color(0xFF02204B)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF02204B)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.green, width: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF02204B),
+        title: const Text("Inscription", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
-        title: Text(
-          "Inscription",
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        "assets/articlesImages/LindaLogo2.png",
-                        height: 300,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-        
-                    TextField(
-                      controller: nameCtrl,
-                      decoration: InputDecoration(labelText: 'Nom'),
-                    ),
-                    const SizedBox(height: 15),
-                    TextField(
-                      controller: emailCtrl,
-                      decoration: InputDecoration(labelText: 'Email'),
-                    ),
-                    const SizedBox(height: 15),
-                    TextField(
-                      controller: phonectrl,
-                      decoration: InputDecoration(
-                        labelText: 'Numéro de téléphone',
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    TextField(
-                      obscureText: _obscurePassword,
-                      controller: passwordCtrl,
-                      decoration: InputDecoration(
-                        labelText:
-                            'Mot de passe contenant au moins 6 et au plus 10 caractères',
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 45),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all<Color>(
-                            Colors.green,
-                          ),
-                        ),
-                        onPressed: signup,
-                        child: Text(
-                          "S'inscrire",
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            "mot de passe oublier ?",
-                            style: const TextStyle(
-                              color: Colors.blueAccent,
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              decorationColor: Colors.blueAccent,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Déjà inscrit ?",
-                          style: const TextStyle(fontSize: 17),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const Connection(),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            "connectez-vous",
-                            style: const TextStyle(
-                              color: Colors.blueAccent,
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              decorationColor: Colors.blueAccent,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+      body: Column(
+        children: [
+          const SizedBox(height: 20),
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                "assets/articlesImages/LindaLogo2.png",
+                height: 220,
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Theme(
+              data: ThemeData(
+                colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: const Color(0xFF02204B),
+                  onPrimary: Colors.white,
+                ),
+              ),
+              child: Stepper(
+                type: StepperType.horizontal,
+                elevation: 2,
+                margin: const EdgeInsets.all(16),
+                currentStep: _stepIndex,
+                onStepContinue: () {
+                  if (_stepIndex < 2) {
+                    setState(() => _stepIndex++);
+                  } else {
+                    if (_allFieldsFilled([
+                      nameCtrl,
+                      emailCtrl,
+                      passwordCtrl,
+                      phonectrl,
+                      regionCtrl,
+                      villeCtrl,
+                      quartierCtrl,
+                      precisionCtrl,
+                    ])) {
+                      signup();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: const Color(0xFF02204B),
+                          content: Row(
+                            children: const [
+                              Icon(Icons.error, color: Colors.red),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Veuillez remplir tous les champs',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                },
+                onStepCancel: () {
+                  if (_stepIndex > 0) {
+                    setState(() => _stepIndex--);
+                  }
+                },
+                steps: [
+                  Step(
+                    title: const Text("Infos"),
+                    isActive: _stepIndex >= 0,
+                    content: Column(
+                      children: [
+                        TextField(
+                          controller: nameCtrl,
+                          decoration: _customDecoration('Nom'),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: emailCtrl,
+                          decoration: _customDecoration('Email'),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          obscureText: _obscurePassword,
+                          controller: passwordCtrl,
+                          decoration:
+                              _customDecoration(
+                                'Mot de passe (max 9 caractères)',
+                              ).copyWith(
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color: const Color(0xFF02204B),
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                                ),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Step(
+                    title: const Text("Contact"),
+                    isActive: _stepIndex >= 1,
+                    content: TextField(
+                      controller: phonectrl,
+                      decoration: _customDecoration('Numéro de téléphone'),
+                    ),
+                  ),
+                  Step(
+                    title: const Text("Adresse"),
+                    isActive: _stepIndex >= 2,
+                    content: Column(
+                      children: [
+                        TextField(
+                          controller: regionCtrl,
+                          decoration: _customDecoration('Région'),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: villeCtrl,
+                          decoration: _customDecoration('Ville'),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: quartierCtrl,
+                          decoration: _customDecoration('Quartier'),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: precisionCtrl,
+                          decoration: _customDecoration(
+                            'Indice pour vous retrouver',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+
+          Padding(
+            padding: const EdgeInsets.all(19.0),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("vous avez deja un compte ?"),
+                  TextButton(onPressed: () {
+                    Navigator.push(context, 
+                    MaterialPageRoute(builder: (_) => Connection())
+                  );
+                  }, child: Text("connectez-vous"))
+                ],
+              ),
+            ),
+          )
+        
+        ],
       ),
     );
   }

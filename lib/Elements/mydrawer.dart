@@ -5,7 +5,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lindashopp/favoris.dart';
 import 'package:lindashopp/inquietude.dart';
 import 'package:lindashopp/nonlivre.dart';
-import 'package:lindashopp/profil.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MyDrawer extends StatefulWidget {
@@ -23,11 +22,13 @@ class _MyDrawerState extends State<MyDrawer> {
       backgroundColor: Colors.transparent, // fond blanc
       child: SafeArea(
         top: true,
-        bottom: false,
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(10),
+              bottomRight: Radius.circular(10) 
+            )
           ),
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
@@ -51,19 +52,6 @@ class _MyDrawerState extends State<MyDrawer> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const Profile(),
-                                    ),
-                                  );
-                                },
-                                child: Text("Mon profil", 
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
                               Text(
                                 "linda@example.com",
                                 style: TextStyle(

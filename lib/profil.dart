@@ -3,10 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lindashopp/achatrecent.dart';
+import 'package:lindashopp/suiviscommande.dart';
 import 'package:lindashopp/connectionpage.dart';
 import 'package:lindashopp/favoris.dart';
 import 'package:lindashopp/panier.dart';
+import 'package:lindashopp/parametre.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -30,7 +31,7 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        automaticallyImplyLeading: false,
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: const Color.fromARGB(255, 1, 15, 41),
         title: Text(
@@ -44,7 +45,7 @@ class _ProfileState extends State<Profile> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: Icon(Icons.logout , color: Colors.red),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               Navigator.pushReplacement(
@@ -73,22 +74,68 @@ class _ProfileState extends State<Profile> {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        const SizedBox(height: 24,),
                         ClipRRect(
-                          child: Image.asset(
-                            "assets/articlesImages/LindaLogo2.png",
-                            height: 250,
-                          ),
+                          child: Container(
+                            height: 200,
+                            width: 200,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF02204B),
+                              borderRadius: BorderRadius.circular(200)
+                            ),
+                            child: Center(
+                              child: Text(
+                                user['name'].substring(0, 2).toUpperCase() ,style: TextStyle(color: Colors.white, fontSize: 90),
+                              ),
+                            ),
+                          )
                         ),
-                        Text(
-                          user['name'] ?? 'Non renseigné',
-                          style: const TextStyle(fontSize: 18),
+                        const SizedBox(height: 50,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.person),
+                            Text(
+                              "  ${user['name'] ?? 'Non renseigné'}",
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "${user['email']}",
-                          style: const TextStyle(fontSize: 18),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.email),
+                            Text(
+                              "  ${user['email'] ?? 'Non renseigné'}",
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 12),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.phone),
+                            Text(
+                              "  ${user['phone'] ?? 'Non renseigné'}",
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.location_city),
+                            Text(
+                              "  ${user['adresse'] ?? 'Non renseigné'}",
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ],
@@ -118,42 +165,25 @@ class _ProfileState extends State<Profile> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const AchatRecent(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const AcrListPage()),
                       );
                     },
                     icon: const Icon(Icons.arrow_right),
                   ),
-                  title: const Text('Mes recentes achats'),
+                  title: const Text('Mes achats'),
                 ),
 
                 ListTile(
-                  leading: const Icon(Icons.shopping_cart, color: Color.fromARGB(255, 2, 16, 42)),
+                  leading: const Icon(
+                    Icons.shopping_cart,
+                    color: Color.fromARGB(255, 2, 16, 42),
+                  ),
                   title: const Text('Mon panier'),
                   trailing: IconButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const PanierPage(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_right),
-                  ),
-                ),
-
-                ListTile(
-                  leading: const Icon(Icons.shape_line, color: Colors.black),
-                  title: const Text("Articles qui pourraient m'intéresser"),
-                  trailing: IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const PanierPage(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const PanierPage()),
                       );
                     },
                     icon: const Icon(Icons.arrow_right),
@@ -168,7 +198,7 @@ class _ProfileState extends State<Profile> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const PanierPage(),
+                          builder: (context) => const Parametre(),
                         ),
                       );
                     },

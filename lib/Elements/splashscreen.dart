@@ -69,9 +69,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 30),
               const Text(
-                "Votre boutique de confiance, en un clic.",
+                "Votre boutique de confiance,avec achat en un clic.",
                 style: TextStyle(
                   fontSize: 16,
                   fontStyle: FontStyle.italic,

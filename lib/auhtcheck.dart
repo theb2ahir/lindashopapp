@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lindashopp/acceuilpage.dart';
 import 'package:lindashopp/connectionpage.dart';
-import 'package:lindashopp/homepage.dart';
 
 
 class Auhtcheck extends StatelessWidget {
@@ -16,7 +16,7 @@ class Auhtcheck extends StatelessWidget {
           return CircularProgressIndicator();
         }
         if (snapshot.hasData) {
-          return MyHomePage();
+          return AcceuilPage();
         } else {
           return Connection();
         }
