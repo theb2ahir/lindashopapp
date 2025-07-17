@@ -394,7 +394,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ? Center(
                           child: ClipRRect(
                             borderRadius: BorderRadiusGeometry.circular(23),
-                            child: Image.network(imageUrl, height: 280),
+                            child: Image.network(imageUrl, height: 350),
                           ),
                         )
                       : const Icon(Icons.image, size: 150),

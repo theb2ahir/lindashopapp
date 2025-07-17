@@ -15,7 +15,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late final AnimationController _controller;
   late final Animation<double> _animation;
 
-  final Duration splashDuration = const Duration(seconds: 6);
+  final Duration splashDuration = const Duration(seconds: 5);
 
   @override
   void initState() {
@@ -47,46 +47,20 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF02204B),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 14.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/articlesImages/LindaLogo2.png',
-                height: 230,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                "Bienvenue sur Linda Shop",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              const Text(
-                "Votre boutique de confiance,avec achat en un clic.",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
               Lottie.asset(
                 'assets/images/Animationdelivery.json',
-                width: 250,
-                height: 250,
+                width: 450,
+                height: 450,
                 fit: BoxFit.contain,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 60),
               AnimatedBuilder(
                 animation: _animation,
                 builder: (context, child) {
@@ -100,12 +74,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ),
               const SizedBox(height: 20),
               const Text(
-                "Préparez-vous à une expérience de shopping unique !",
+                "l'application se charge veillez patienter!",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Pacifico',
-                  color: Colors.black54,
+                  color: Colors.white,
                 ),
                 textAlign: TextAlign.center,
               ),

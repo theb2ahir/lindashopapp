@@ -1,12 +1,9 @@
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:permission_handler/permission_handler.dart'; // Ajoute cette dépendance
 // ignore_for_file: file_names, unrelated_type_equality_checks, use_build_context_synchronously
 
 class PaiementPage2 extends StatefulWidget {
@@ -122,7 +119,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
                       'productname': item['productname'],
                       'quantity': item['quantity'],
                       'reference': reference,
-                      'status': 'en cours de verification',
+                      'status': 'en verification',
                     });
                 final userid = uid; // ✅ Ici tu récupères l'ID
                 String acrId = acrRef.id; // ✅ Ici tu récupères l'ID
@@ -144,7 +141,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
                   'usernamemiff': item['username'],
                   'userephone': item['phone'],
                   'useremail': item['email'],
-                  'UserAdresse': item['adresse'],
+                  'UserAdresse': item['addressLivraison'],
                   'ref': reference,
                 });
 

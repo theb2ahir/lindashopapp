@@ -3,11 +3,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'dart:io';
 
 class PaiementPage extends StatefulWidget {
   final dynamic data;
@@ -124,8 +121,8 @@ class _PaiementPageState extends State<PaiementPage> {
                       'productname': item['productname'],
                       'quantity': item['quantity'],
                       'reference': reference,
-                      'status': 'en cours de verification',
-                    });
+                      'status': 'en verification',
+                    }); 
                 final userid = uid; // ✅ Ici tu récupères l'ID
                 String acrId = acrRef.id; // ✅ Ici tu récupères l'ID
 
@@ -146,7 +143,7 @@ class _PaiementPageState extends State<PaiementPage> {
                   'usernamemiff': item['username'],
                   'userephone': item['phone'],
                   'useremail': item['email'],
-                  'UserAdresse': item['adresse'],
+                  'UserAdresse': item['addressLivraison'],
                   'ref': reference,
                 });
 

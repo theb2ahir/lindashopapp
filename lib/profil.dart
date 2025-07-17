@@ -3,10 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lindashopp/suiviscommande.dart';
 import 'package:lindashopp/connectionpage.dart';
 import 'package:lindashopp/favoris.dart';
-import 'package:lindashopp/panier.dart';
 import 'package:lindashopp/parametre.dart';
 
 class Profile extends StatefulWidget {
@@ -153,37 +151,6 @@ class _ProfileState extends State<Profile> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const Favoris()),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_right),
-                  ),
-                ),
-
-                ListTile(
-                  leading: const Icon(Icons.list_alt, color: Colors.blueAccent),
-                  trailing: IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const AcrListPage()),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_right),
-                  ),
-                  title: const Text('Mes achats'),
-                ),
-
-                ListTile(
-                  leading: const Icon(
-                    Icons.shopping_cart,
-                    color: Color.fromARGB(255, 2, 16, 42),
-                  ),
-                  title: const Text('Mon panier'),
-                  trailing: IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const PanierPage()),
                       );
                     },
                     icon: const Icon(Icons.arrow_right),

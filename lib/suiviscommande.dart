@@ -97,12 +97,56 @@ class _AcrListPageState extends State<AcrListPage> {
                     children: [
                       Text('Référence: $ref'),
                       Text('Quantité: $quantity'),
-                      Text('Statut: $status'),
+                      Row(
+                        children: [
+                          Text(
+                            "Statut : ",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            status,
+                            style: TextStyle(
+                              color: const Color.fromARGB(255, 10, 176, 5),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => supprimerAcr(doc.id, context),
+                    icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                    onPressed: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Confirmation"),
+                          content: const Text(
+                            "Voulez-vous vraiment supprimer cette commande ?",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.of(context).pop(false), // Annuler
+                              child: const Text("Non"),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.of(context).pop(true), // Confirmer
+                              child: const Text("Oui"),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        supprimerAcr(doc.id, context);
+                      }
+                    },
                   ),
                 ),
               );

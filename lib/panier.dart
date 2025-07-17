@@ -1,8 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/PaiementPageFlooz.dart';
 import 'package:lindashopp/PaiementPageYas.dart';
+import 'package:lindashopp/buyallpage.dart';
 
 class PanierPage extends StatefulWidget {
   const PanierPage({super.key});
@@ -17,9 +20,7 @@ class _PanierPageState extends State<PanierPage> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
-      return Scaffold(
-        body: Center(child: Text("Utilisateur non connecté")),
-      );
+      return Scaffold(body: Center(child: Text("Utilisateur non connecté")));
     }
 
     return Scaffold(
@@ -60,6 +61,11 @@ class _PanierPageState extends State<PanierPage> {
             ),
             itemBuilder: (context, index) {
               final data = commandes[index].data() as Map<String, dynamic>;
+              final int price =
+                  int.tryParse(data['productprice'].toString()) ?? 0;
+              final int quantity = data['quantity'] is int
+                  ? data['quantity']
+                  : int.tryParse(data['quantity'].toString()) ?? 1;
 
               return Container(
                 decoration: BoxDecoration(
@@ -100,17 +106,10 @@ class _PanierPageState extends State<PanierPage> {
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('${data['productprice']} FCFA'),
-                          Text('Qté: ${data['quantity']}'),
-                        ],
+                        children: [Text('$price FCFA'), Text('Qté: $quantity')],
                       ),
                       Text(
-                        "Total à payer : ${int.parse(data['productprice']) * (data['quantity'] ?? 1)} FCFA",
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      Text(
-                        'Ajouté le : ${(data['dateAjout'] as Timestamp).toDate().toString().substring(0, 16)}',
+                        "Total à payer : ${price * quantity} FCFA",
                         style: const TextStyle(fontSize: 12),
                       ),
                       Row(
@@ -123,14 +122,41 @@ class _PanierPageState extends State<PanierPage> {
                               color: Colors.red,
                             ),
                             onPressed: () async {
-                              await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(uid)
-                                  .collection('commandes')
-                                  .doc(commandes[index].id)
-                                  .delete();
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text("Confirmation"),
+                                  content: const Text(
+                                    "Voulez-vous vraiment supprimer cette commande ?",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(
+                                        context,
+                                      ).pop(false), // Annuler
+                                      child: const Text("Non"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(
+                                        context,
+                                      ).pop(true), // Confirmer
+                                      child: const Text("Oui"),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (confirm == true) {
+                                await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(uid)
+                                    .collection('commandes')
+                                    .doc(commandes[index].id)
+                                    .delete();
+                              }
                             },
                           ),
+
                           IconButton(
                             icon: const Icon(
                               Icons.payment,
@@ -166,9 +192,8 @@ class _PanierPageState extends State<PanierPage> {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                  builder: (_) => PaiementPage2(
-                                                    data: data,
-                                                  ),
+                                                  builder: (_) =>
+                                                      PaiementPage2(data: data),
                                                 ),
                                               );
                                             },
@@ -184,9 +209,8 @@ class _PanierPageState extends State<PanierPage> {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                  builder: (_) => PaiementPage(
-                                                    data: data,
-                                                  ),
+                                                  builder: (_) =>
+                                                      PaiementPage(data: data),
                                                 ),
                                               );
                                             },
@@ -215,6 +239,25 @@ class _PanierPageState extends State<PanierPage> {
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final snapshot = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .collection('commandes')
+              .get();
+
+          final List<Map<String, dynamic>> commandes = snapshot.docs
+              .map((doc) => doc.data())
+              .toList();
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => BuyAllPage(commandes: commandes)),
+          );
+        },
+        child: const Icon(Icons.add_shopping_cart),
       ),
     );
   }

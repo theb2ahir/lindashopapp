@@ -115,11 +115,12 @@ class _ConnectionState extends State<Connection> {
         ),
       );
 
-      Navigator.pop(context);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const AcceuilPage()),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AcceuilPage()),
+        );
+      });
     } catch (e) {
       if (!mounted) return; // ✅ Sécurise l'appel
       setState(() => isLoading = false);
@@ -130,7 +131,7 @@ class _ConnectionState extends State<Connection> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 2),
           content: Row(
             children: [
               Icon(Icons.error, color: Colors.red),
