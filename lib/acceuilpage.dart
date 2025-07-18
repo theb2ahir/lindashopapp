@@ -46,8 +46,8 @@ class AcceuilPageState extends State<AcceuilPage> {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Accueil',
+            icon: Icon(Icons.shop_2_sharp),
+            label: 'boutique',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),

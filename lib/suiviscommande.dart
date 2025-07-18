@@ -40,12 +40,11 @@ class _AcrListPageState extends State<AcrListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF02204B),
         automaticallyImplyLeading: false,
         centerTitle: true,
         title: const Text(
           'mes achats',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(

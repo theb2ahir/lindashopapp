@@ -27,32 +27,16 @@ class _ProfileState extends State<Profile> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        iconTheme: IconThemeData(color: Colors.white),
-        backgroundColor: const Color.fromARGB(255, 1, 15, 41),
         title: Text(
           "Linda Shop",
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout , color: Colors.red),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const Connection()),
-              );
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -72,23 +56,27 @@ class _ProfileState extends State<Profile> {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 24,),
+                        const SizedBox(height: 24),
                         ClipRRect(
                           child: Container(
-                            height: 200,
-                            width: 200,
+                            height: 140,
+                            width: 140,
                             decoration: BoxDecoration(
                               color: Color(0xFF02204B),
-                              borderRadius: BorderRadius.circular(200)
+                              borderRadius: BorderRadius.circular(200),
                             ),
                             child: Center(
                               child: Text(
-                                user['name'].substring(0, 2).toUpperCase() ,style: TextStyle(color: Colors.white, fontSize: 90),
+                                user['name'].substring(0, 2).toUpperCase(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 90,
+                                ),
                               ),
                             ),
-                          )
+                          ),
                         ),
-                        const SizedBox(height: 50,),
+                        const SizedBox(height: 50),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -170,6 +158,22 @@ class _ProfileState extends State<Profile> {
                       );
                     },
                     icon: const Icon(Icons.arrow_right),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.person_2, color: Colors.black),
+                  title: const Text('Me deconnecter'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.logout, color: Colors.red),
+                    onPressed: () async {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Connection(),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

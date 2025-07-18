@@ -1,11 +1,13 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/Elements/avis.dart';
 import 'package:lindashopp/Elements/items.dart';
 import 'package:lindashopp/Elements/mydrawer.dart';
 import 'package:lindashopp/ProductDetailPage.dart';
+import 'package:lindashopp/favoris.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -15,6 +17,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  Future<int> getNumberOfFavorites() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('favoris')
+        .get();
+
+    return querySnapshot.docs.length;
+  }
+
   int? selectedIndex; // null = aucune sélection
   late TabController _tabController;
   String searchQuery = '';
@@ -47,6 +60,66 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.favorite,
+                      color: Color.fromARGB(255, 255, 18, 1),
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const Favoris()),
+                      );
+                    },
+                  ),
+                  FutureBuilder<int>(
+                    future: getNumberOfFavorites(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox.shrink(); // rien pendant le chargement
+                      }
+                      if (snapshot.hasError ||
+                          !snapshot.hasData ||
+                          snapshot.data == 0) {
+                        return const SizedBox.shrink(); // pas de badge si erreur ou 0 favoris
+                      }
+                      return Positioned(
+                        right: 1,
+                        top: 1,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${snapshot.data}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           title: Column(
             children: [
               Container(

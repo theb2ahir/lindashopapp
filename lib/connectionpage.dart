@@ -99,7 +99,7 @@ class _ConnectionState extends State<Connection> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 2),
           content: Row(
             children: [
               Icon(Icons.check_circle, color: Colors.lightGreenAccent),

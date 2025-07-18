@@ -48,41 +48,11 @@ class _MyDrawerState extends State<MyDrawer> {
                             height: 150,
                             width: 150,
                           ),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "linda@example.com",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
+                          const SizedBox(width: 30),
                         ],
                       ),
                     ),
                     const Divider(),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.favorite,
-                        color: Color.fromARGB(255, 245, 5, 5),
-                      ),
-                      title: const Text(
-                        'Favoris',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Favoris(),
-                          ),
-                        );
-                      },
-                    ),
                     ListTile(
                       leading: const Icon(
                         Icons.cancel_schedule_send,

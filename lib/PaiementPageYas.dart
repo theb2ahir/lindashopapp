@@ -67,13 +67,11 @@ class _PaiementPageState extends State<PaiementPage> {
     final total = prixUnitaire * item['quantity'];
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF02204B),
-        iconTheme: const IconThemeData(color: Colors.white),
+        automaticallyImplyLeading: false,
         title: const Text(
           'Paiement via Yas togo',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black , fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
       ),
       body: Center(
         child: Stepper(

@@ -26,126 +26,129 @@ class _PanierPageState extends State<PanierPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromARGB(255, 1, 15, 41),
         title: const Text(
           'Mon Panier',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('commandes')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: SafeArea(
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .collection('commandes')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Aucun article dans le panier'));
-          }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('Aucun article dans le panier'));
+            }
 
-          final commandes = snapshot.data!.docs;
+            final commandes = snapshot.data!.docs;
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: commandes.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 0.7,
-            ),
-            itemBuilder: (context, index) {
-              final data = commandes[index].data() as Map<String, dynamic>;
-              final int price =
-                  int.tryParse(data['productprice'].toString()) ?? 0;
-              final int quantity = data['quantity'] is int
-                  ? data['quantity']
-                  : int.tryParse(data['quantity'].toString()) ?? 1;
+            return ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: commandes.length,
+              itemBuilder: (context, index) {
+                final data = commandes[index].data() as Map<String, dynamic>;
+                final int price =
+                    int.tryParse(data['productprice'].toString()) ?? 0;
+                final int quantity = data['quantity'] is int
+                    ? data['quantity']
+                    : int.tryParse(data['quantity'].toString()) ?? 1;
+                final String productName = data['productname'] ?? '';
+                final String imageUrl = data['productImageUrl'] ?? '';
+                final date =( data['dateAjout'] as Timestamp).toDate().toString().substring(0, 16);
 
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white,
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 4,
-                      offset: Offset(2, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(10),
-                child: SingleChildScrollView(
-                  child: Column(
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 15),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 30),
+                      // 🖼 Image du produit
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(10),
                         child: Image.network(
-                          data['productImageUrl'] ?? '',
-                          width: double.infinity,
-                          height: 110,
+                          imageUrl,
+                          width: 80,
+                          height: 80,
                           fit: BoxFit.cover,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        data['productname'] ?? '',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [Text('$price FCFA'), Text('Qté: $quantity')],
-                      ),
-                      Text(
-                        "Total à payer : ${price * quantity} FCFA",
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete,
-                              size: 20,
-                              color: Colors.red,
+                      const SizedBox(width: 12),
+
+                      // 📄 Détails du produit
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              productName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
+                            Text(
+                              'Ajouté le : $date',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              '\$$price',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text('Qté: $quantity'),
+                          ],
+                        ),
+                      ),
+
+                      // 🛒 Icônes d’action
+                      Column(
+                        children: [
+                          // Supprimer
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () async {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   title: const Text("Confirmation"),
                                   content: const Text(
-                                    "Voulez-vous vraiment supprimer cette commande ?",
+                                    "Supprimer cette commande ?",
                                   ),
                                   actions: [
                                     TextButton(
-                                      onPressed: () => Navigator.of(
-                                        context,
-                                      ).pop(false), // Annuler
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
                                       child: const Text("Non"),
                                     ),
                                     TextButton(
-                                      onPressed: () => Navigator.of(
-                                        context,
-                                      ).pop(true), // Confirmer
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
                                       child: const Text("Oui"),
                                     ),
                                   ],
                                 ),
                               );
-
                               if (confirm == true) {
                                 await FirebaseFirestore.instance
                                     .collection('users')
@@ -156,11 +159,10 @@ class _PanierPageState extends State<PanierPage> {
                               }
                             },
                           ),
-
+                          // Acheter
                           IconButton(
                             icon: const Icon(
                               Icons.payment,
-                              size: 20,
                               color: Colors.green,
                             ),
                             onPressed: () {
@@ -185,44 +187,40 @@ class _PanierPageState extends State<PanierPage> {
                                           ),
                                         ),
                                       ),
-                                      Row(
-                                        children: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      PaiementPage2(data: data),
-                                                ),
-                                              );
-                                            },
-                                            child: Text(
-                                              "Flooz",
-                                              style: TextStyle(
-                                                color: Colors.lightGreenAccent,
-                                              ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  PaiementPage2(data: data),
                                             ),
+                                          );
+                                        },
+                                        child: Text(
+                                          "Flooz",
+                                          style: TextStyle(
+                                            color: Colors.lightGreenAccent,
                                           ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      PaiementPage(data: data),
-                                                ),
-                                              );
-                                            },
-                                            child: Text(
-                                              "Yas",
-                                              style: TextStyle(
-                                                color: Colors.yellowAccent,
-                                                fontSize: 16,
-                                              ),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  PaiementPage(data: data),
                                             ),
+                                          );
+                                        },
+                                        child: Text(
+                                          "Yas",
+                                          style: TextStyle(
+                                            color: Colors.yellowAccent,
+                                            fontSize: 16,
                                           ),
-                                        ],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -232,13 +230,15 @@ class _PanierPageState extends State<PanierPage> {
                           ),
                         ],
                       ),
+                    
+                    
                     ],
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {

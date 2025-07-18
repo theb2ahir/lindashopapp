@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -65,11 +64,10 @@ class _PaiementPage2State extends State<PaiementPage2> {
     final total = prixUnitaire * item['quantity'];
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF02204B),
-        iconTheme: const IconThemeData(color: Colors.white),
+        automaticallyImplyLeading: false,
         title: const Text(
           'Paiement via Flooz',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -196,14 +194,100 @@ class _PaiementPage2State extends State<PaiementPage2> {
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Nom du produit : ${item['productname']}'),
-                  Text('Prix unitaire : $prixUnitaire FCFA'),
-                  Text('Quantité : ${item['quantity']}'),
-                  Text('Total : $total FCFA'),
-                  const SizedBox(height: 8),
-                  Text('Livraison : ${item['addressLivraison']}'),
-                  const SizedBox(height: 8),
-                  Text('Transaction ID : $transactionId'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Nom du produit :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' ${item['productname']}'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Prix unitaire :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' $prixUnitaire FCFA'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Quantité :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' ${item['quantity']}'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Total :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' $total FCFA'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "adresse :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(
+                        item['addressLivraison'] != null &&
+                                item['addressLivraison'].length >= 20
+                            ? item['addressLivraison'].substring(0, 15) + " ..."
+                            : item['addressLivraison'] ?? '',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Transaction ID :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' $transactionId'),
+                    ],
+                  ),
                 ],
               ),
               isActive: currentStep >= 0,
@@ -255,10 +339,45 @@ class _PaiementPage2State extends State<PaiementPage2> {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Transaction : $transactionId'),
-                        Text('Montant Total : $total FCFA'),
-                        Text('Référence : ${referenceController.text.trim()}'),
-                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Transaction : ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(transactionId),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Montant Total : ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text('$total FCFA'),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Référence : ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(referenceController.text.trim()),
+                          ],
+                        ),
                         const Text('Appuyez sur "Continuer" pour finaliser.'),
                       ],
                     ),

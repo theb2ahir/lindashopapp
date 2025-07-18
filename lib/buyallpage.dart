@@ -157,48 +157,60 @@ class _BuyAllPageState extends State<BuyAllPage> {
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          "Résumé des commandes",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color.fromARGB(255, 1, 15, 41),
+        automaticallyImplyLeading: false,
+        title: Text("Valider mon panier", style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: SafeArea(
+            bottom: true,
+            top: true,
             child: Column(
               children: [
-                const SizedBox(height: 20),
-
-                // Liste des produits commandés
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.4,
                   child: ListView.builder(
                     itemCount: widget.commandes.length,
                     itemBuilder: (context, index) {
                       final item = widget.commandes[index];
-                      return ListTile(
-                        leading: Image.network(
-                          item['productImageUrl'] ?? '',
-                          width: 70,
-                          height: 70,
-                          fit: BoxFit.cover,
-                        ),
-                        title: Text(item['productname'] ?? 'Produit'),
-                        subtitle: Text(
-                          'Qté: ${item['quantity']} - ${item['productprice']} FCFA',
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                                offset: Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                item['productImageUrl'] ?? '',
+                                height:80,
+                                width: 80,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            title: Text(item['productname'] ?? 'Produit', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+                            subtitle: Text(
+                              '${item['quantity']} * ${item['productprice']} FCFA',
+                            ),
+                          ),
                         ),
                       );
                     },
                   ),
                 ),
-
+                const SizedBox(height: 16),
                 const Divider(),
-
-                // Choix du réseau
+                const SizedBox(height: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -266,10 +278,11 @@ class _BuyAllPageState extends State<BuyAllPage> {
                     ),
                   ],
                 ),
-
+                const SizedBox(height: 16),
+                const Divider(),
                 const SizedBox(height: 16),
                 Text(
-                  '💰 Total à payer : $total FCFA',
+                  '💰$total FCFA',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -285,7 +298,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                   onPressed: () => envoyerInfosAuServeur(context),
                   icon: const Icon(Icons.check, color: Colors.white),
                   label: const Text(
-                    "Valider la commande",
+                    "Valider le panier",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

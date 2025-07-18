@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lindashopp/Elements/avis.dart';
 import 'package:lindashopp/acceuilpage.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -353,6 +354,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final description = widget.produit['description'] ?? 'indisponible';
     final imageUrl = widget.produit['imageURL'] ?? '';
     final pourcentage = widget.produit['pourcentage'] ?? '';
+    final avis = widget.produit['avis'] ?? '';
 
     final List<dynamic> caracteristiqueTechnique = widget.produit['ct'] ?? [];
     final List<dynamic> avantageEtUtilsation = widget.produit['au'] ?? [];
@@ -362,15 +364,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: const Color(0xFF02204B),
           iconTheme: const IconThemeData(
-            color: Colors.white, // couleur de l’icône retour
+            color: Colors.black, // couleur de l’icône retour
           ),
           centerTitle: true,
           title: Text(
             nom,
             style: const TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -420,6 +421,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -457,9 +459,45 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ),
                               ],
                             ),
-
-                            const SizedBox(height: 55),
-
+                            const SizedBox(height: 14),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                StarRating(rating: avis.toDouble()),
+                                const SizedBox(width: 10),
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: " plus de ",
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      WidgetSpan(
+                                        alignment: PlaceholderAlignment.middle,
+                                        child: Text(
+                                          avis.toString(),
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                      const TextSpan(
+                                        text: " avis",
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                            const SizedBox(height: 30),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -531,7 +569,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             SizedBox(
                               child: Column(
@@ -540,7 +578,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                     padding: const EdgeInsets.all(8.0),
                                     child: Column(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                          MainAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
@@ -567,7 +605,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: 20),
+                                  const SizedBox(width: 20), 
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: SingleChildScrollView(
@@ -719,6 +757,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     ),
                   ),
+                
+                
                 ],
               ),
             ),
