@@ -15,7 +15,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late final AnimationController _controller;
   late final Animation<double> _animation;
 
-  final Duration splashDuration = const Duration(seconds: 5);
+  final Duration splashDuration = const Duration(seconds: 8);
 
   @override
   void initState() {
@@ -47,7 +47,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF02204B),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14.0),
@@ -67,8 +66,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   return LinearProgressIndicator(
                     value: _animation.value,
                     minHeight: 6,
-                    backgroundColor: const Color(0xFFE0E0E0),
-                    color: const Color(0xFF6C63FF),
+                    backgroundColor: const Color.fromARGB(255, 194, 52, 52),
+                    color: const Color.fromARGB(255, 4, 1, 68),
                   );
                 },
               ),
@@ -76,10 +75,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               const Text(
                 "l'application se charge veillez patienter!",
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
                   fontFamily: 'Pacifico',
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),

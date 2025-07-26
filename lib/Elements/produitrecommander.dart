@@ -1,0 +1,125 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lindashopp/ProductDetailPage.dart';
+ // Assurez-vous que ce fichier existe
+
+class ProduitsRecommandes extends StatelessWidget {
+  const ProduitsRecommandes({super.key});
+
+  Future<List<QueryDocumentSnapshot>> _fetchAllCollections() async {
+    
+    final electronique = await FirebaseFirestore.instance.collection('electronique').get();
+    final promotions = await FirebaseFirestore.instance.collection('promotions').get();
+    final modegosse = await FirebaseFirestore.instance.collection('produit-mode-et-enfant').get();
+    final fring = await FirebaseFirestore.instance.collection('fring').get();
+
+    // Combine tous les documents
+    return [
+      ...electronique.docs,
+      ...promotions.docs,
+      ...modegosse.docs,
+      ...fring.docs,
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<QueryDocumentSnapshot>>(
+      future: _fetchAllCollections(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(child: Text('Erreur de chargement'));
+        }
+
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final products = snapshot.data!;
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final produit = products[index].data() as Map<String, dynamic>;
+            final nom = produit['name'] ?? 'Sans nom';
+            final prix = produit['prix']?.toString() ?? '0';
+            final imageUrl = produit['imageURL'] ?? '';
+            final pourcentage = produit['pourcentage'] ?? '';
+            final avis = produit['avis'] ?? 0;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(12),
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      width: 70,
+                      height: 70,
+                    ),
+                  ),
+                  title: Text(
+                    nom,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("$prix FCFA"),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.local_offer,
+                            color: Colors.redAccent,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "${pourcentage ?? 0}% de réduction",
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Spacer(),
+                          const Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 2),
+                          Text("$avis"),
+                        ],
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailPage(produit: produit),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}

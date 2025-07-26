@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lindashopp/homepage.dart';
 import 'package:lindashopp/panier.dart';
-import 'package:lindashopp/profil.dart';
+import 'package:lindashopp/parametre.dart';
 import 'package:lindashopp/suiviscommande.dart'; // Assure-toi que ce fichier existe
 
 class AcceuilPage extends StatefulWidget {
@@ -16,7 +16,7 @@ class AcceuilPageState extends State<AcceuilPage> {
     MyHomePage(),
     PanierPage(),
     AcrListPage(),
-    Profile(),
+    Parametre(),
   ];
 
   int myIndex = 0;
@@ -24,18 +24,18 @@ class AcceuilPageState extends State<AcceuilPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
-      body: IndexedStack(
-        index: myIndex,
-        children: screenList,
-      ),
+      body: IndexedStack(index: myIndex, children: screenList),
       bottomNavigationBar: BottomNavigationBar(
         iconSize: 27,
-        selectedIconTheme: const IconThemeData(color: Color.fromARGB(255, 1, 31, 56)),
-        unselectedIconTheme: const IconThemeData(color: Color.fromARGB(255, 79, 78, 78)),
-        showSelectedLabels: true, 
-        backgroundColor:  const Color(0xFF02204B),
-        showUnselectedLabels: true, 
+        selectedIconTheme: const IconThemeData(
+          color: Color.fromARGB(255, 1, 31, 56),
+        ),
+        unselectedIconTheme: const IconThemeData(
+          color: Color.fromARGB(255, 79, 78, 78),
+        ),
+        showSelectedLabels: true,
+        backgroundColor: const Color(0xFF02204B),
+        showUnselectedLabels: true,
         selectedItemColor: const Color.fromARGB(255, 2, 32, 57),
         unselectedItemColor: const Color.fromARGB(255, 11, 10, 10),
         currentIndex: myIndex,
@@ -58,8 +58,8 @@ class AcceuilPageState extends State<AcceuilPage> {
             label: 'Commandes',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
+            icon: Icon(Icons.settings),
+            label: 'Paramètres',
           ),
         ],
       ),

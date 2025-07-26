@@ -61,7 +61,8 @@ class _PaiementPage2State extends State<PaiementPage2> {
   Widget build(BuildContext context) {
     final item = widget.data;
     final int prixUnitaire = int.tryParse(item['productprice'].toString()) ?? 0;
-    final total = prixUnitaire * item['quantity'];
+    final int quantite = int.tryParse(item['quantity'].toString()) ?? 0;
+    final int total = prixUnitaire * quantite;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -116,8 +117,10 @@ class _PaiementPage2State extends State<PaiementPage2> {
                       'imageUrl': item['productImageUrl'],
                       'productname': item['productname'],
                       'quantity': item['quantity'],
+                      'productprice': item['productprice'],
                       'reference': reference,
                       'status': 'en verification',
+                      'date': DateTime.now(),
                     });
                 final userid = uid; // ✅ Ici tu récupères l'ID
                 String acrId = acrRef.id; // ✅ Ici tu récupères l'ID

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:lindashopp/PaiementPageFlooz.dart';
 import 'package:lindashopp/PaiementPageYas.dart';
 import 'package:lindashopp/buyallpage.dart';
+import 'package:intl/intl.dart';
 
 class PanierPage extends StatefulWidget {
   const PanierPage({super.key});
@@ -15,6 +16,17 @@ class PanierPage extends StatefulWidget {
 }
 
 class _PanierPageState extends State<PanierPage> {
+  Future<int> getNumberOfCommandes() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('commandes')
+        .get();
+
+    return querySnapshot.docs.length;
+  }
+
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -26,9 +38,51 @@ class _PanierPageState extends State<PanierPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
-          'Mon Panier',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            const Text(
+              'Mon Panier',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 10),
+            FutureBuilder<int>(
+              future: getNumberOfCommandes(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox.shrink(); // rien pendant le chargement
+                }
+                if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data == 0) {
+                  return const SizedBox.shrink(); // pas de badge si erreur ou 0 favoris
+                }
+                return Positioned(
+                  right: 1,
+                  top: 1,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(shape: BoxShape.circle),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '${snapshot.data}',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
       body: SafeArea(
@@ -61,7 +115,11 @@ class _PanierPageState extends State<PanierPage> {
                     : int.tryParse(data['quantity'].toString()) ?? 1;
                 final String productName = data['productname'] ?? '';
                 final String imageUrl = data['productImageUrl'] ?? '';
-                final date =( data['dateAjout'] as Timestamp).toDate().toString().substring(0, 16);
+                final timestamp = data['dateAjout'] as Timestamp;
+                final parsedDate = timestamp.toDate();
+                final displayDate = DateFormat(
+                  'dd-MM-yy HH:mm',
+                ).format(parsedDate);
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 15),
@@ -105,23 +163,21 @@ class _PanierPageState extends State<PanierPage> {
                               ),
                             ),
                             Text(
-                              'Ajouté le : $date',
+                              displayDate,
                               style: const TextStyle(fontSize: 12),
                             ),
                             const SizedBox(height: 14),
                             Text(
-                              '\$$price',
+                              '$quantity x $price FCFA',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
                               ),
                             ),
-                            Text('Qté: $quantity'),
                           ],
                         ),
                       ),
 
-                      // 🛒 Icônes d’action
                       Column(
                         children: [
                           // Supprimer
@@ -230,8 +286,6 @@ class _PanierPageState extends State<PanierPage> {
                           ),
                         ],
                       ),
-                    
-                    
                     ],
                   ),
                 );

@@ -153,7 +153,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     }
   }
 
-
   Future<void> _ajouterAuFavoris() async {
     // Affiche un indicateur de chargement
     showDialog(
@@ -262,7 +261,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     }
   }
 
-  
   double? latitude;
   double? longitude;
 
@@ -360,409 +358,394 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final List<dynamic> avantageEtUtilsation = widget.produit['au'] ?? [];
     final List<dynamic> contenuDuPackage = widget.produit['cp'] ?? [];
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          iconTheme: const IconThemeData(
-            color: Colors.black, // couleur de l’icône retour
-          ),
-          centerTitle: true,
-          title: Text(
-            nom,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          actions: [
-            IconButton(
-              onPressed: _getLocation,
-              icon: const Icon(Icons.location_on, color: Colors.red),
-              tooltip: 'Partager ma position',
-            ),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        iconTheme: const IconThemeData(
+          color: Colors.black, // couleur de l’icône retour
         ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  imageUrl.isNotEmpty
-                      ? Center(
-                          child: ClipRRect(
-                            borderRadius: BorderRadiusGeometry.circular(23),
-                            child: Image.network(imageUrl, height: 350),
+        actions: [
+          IconButton(
+            onPressed: _getLocation,
+            icon: const Icon(Icons.location_on, color: Colors.red),
+            tooltip: 'Partager ma position',
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    imageUrl.isNotEmpty
+                        ? Center(
+                            child: ClipRRect(
+                              borderRadius: BorderRadiusGeometry.circular(23),
+                              child: Image.network(imageUrl, height: 350),
+                            ),
+                          )
+                        : const Icon(Icons.image, size: 200),
+
+                    const SizedBox(height: 35),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          nom,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                           ),
-                        )
-                      : const Icon(Icons.image, size: 150),
-                ],
-              ),
-            ),
-
-            const TabBar(
-              tabs: [
-                Tab(text: 'Partie Achat'),
-                Tab(text: 'Information du produit'),
-              ],
-              labelColor: Colors.blue,
-              unselectedLabelColor: Colors.black,
-            ),
-
-            Expanded(
-              child: TabBarView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Center(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        ),
+                        Row(
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                            Icon(
+                              Icons.local_offer,
+                              color: livraison
+                                  ? Colors.green
+                                  : Colors.red,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              livraison
+                                  ? "Livraison gratuite"
+                                  : "Livraison payante",
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: livraison 
+                                    ? Colors.green
+                                    : Colors.red,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 13),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        StarRating(rating: avis.toDouble()),
+                        const SizedBox(width: 10),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: Text(
+                                  avis.toString(),
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              const TextSpan(
+                                text: " avis",
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+                      ],
+                    ),
+
+                    const SizedBox(height: 13),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '$prix fcfa',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        Text(
+                          "- ${pourcentage.toString()} %",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    Row(
+                      children: [
+                        Text(
+                          "Description",
+                          style: const TextStyle(
+                            fontSize: 21,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                description ?? '',
+                                textAlign: TextAlign.start,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Informations supplémentaires ➡️",
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                          ),
+                          builder: (context) => DraggableScrollableSheet(
+                            expand: false,
+                            initialChildSize: 0.6,
+                            minChildSize: 0.4,
+                            maxChildSize: 0.95,
+                            builder: (context, scrollController) {
+                              return Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20),
+                                  ),
+                                ),
+                                child: ListView(
+                                  controller: scrollController,
                                   children: [
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      '$prix FCFA${pourcentage != '' ? ' - $pourcentage%' : ''}',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.green,
+                                    Center(
+                                      child: Container(
+                                        width: 50,
+                                        height: 5,
+                                        margin: const EdgeInsets.only(
+                                          bottom: 16,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[400],
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // 📌 Caractéristiques Techniques
+                                    const Text(
+                                      "Caractéristiques Techniques",
+                                      style: TextStyle(
+                                        fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
+                                    const SizedBox(height: 10),
+                                    ...caracteristiqueTechnique.map(
+                                      (e) => ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        leading: const Icon(
+                                          Icons.check_circle_outline,
+                                          color: Colors.blue,
+                                        ),
+                                        title: Text(
+                                          e.toString(),
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ),
+                                    ),
+                                    const Divider(height: 30, thickness: 1.5),
 
-                                    Text(
-                                      'Livraison incluse? : $livraison',
-                                      style: const TextStyle(fontSize: 13),
+                                    // 📌 Avantages et Utilisation
+                                    const Text(
+                                      "Avantages & Utilisation",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                     const SizedBox(height: 10),
+                                    ...avantageEtUtilsation.map(
+                                      (e) => ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        leading: const Icon(
+                                          Icons.check_circle_outline,
+                                          color: Colors.green,
+                                        ),
+                                        title: Text(
+                                          e.toString(),
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ),
+                                    ),
+                                    const Divider(height: 30, thickness: 1.5),
+
+                                    // 📌 Contenu du Package
+                                    const Text(
+                                      "Contenu du Package",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    ...contenuDuPackage.map(
+                                      (e) => ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        leading: const Icon(
+                                          Icons.inbox_outlined,
+                                          color: Colors.deepPurple,
+                                        ),
+                                        title: Text(
+                                          e.toString(),
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
                                   ],
                                 ),
-
-                                IconButton(
-                                  onPressed: () {
-                                    _ajouterAuFavoris();
-                                  },
-                                  icon: Icon(
-                                    Icons.favorite,
-                                    color: Colors.red,
-                                    size: 23,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 14),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                StarRating(rating: avis.toDouble()),
-                                const SizedBox(width: 10),
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: " plus de ",
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      WidgetSpan(
-                                        alignment: PlaceholderAlignment.middle,
-                                        child: Text(
-                                          avis.toString(),
-                                          style: TextStyle(
-                                            color: Colors.red,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ),
-                                      const TextSpan(
-                                        text: " avis",
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                            const SizedBox(height: 30),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    border: Border.all(),
-                                  ),
-                                  height: 50,
-
-                                  child: Row(
-                                    children: [
-                                      IconButton(
-                                        onPressed: decrement,
-                                        icon: const Icon(Icons.remove),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.black12,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          "$quantity",
-                                          style: const TextStyle(fontSize: 18),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        onPressed: increment,
-                                        icon: const Icon(Icons.add),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                IconButton(
-                                  onPressed: () {
-                                    _ajouterAuPanier();
-                                  },
-                                  icon: Icon(
-                                    Icons.add_shopping_cart,
-                                    color: const Color.fromARGB(
-                                      255,
-                                      50,
-                                      193,
-                                      55,
-                                    ),
-                                    size: 30,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.info, color: Colors.blue),
                     ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(13.0),
-                    child: Center(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.description,
-                                              color: Colors.black,
-                                              size: 20,
-                                            ),
-                                            const SizedBox(width: 10),
-                                            const Text(
-                                              "Description",
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 20),
-                                        Text(
-                                          "$description",
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 20), 
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.vertical,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.build,
-                                                color: Colors.black,
-                                                size: 20,
-                                              ),
-                                              const SizedBox(width: 10),
-                                              const Text(
-                                                "Carctéristiques technique",
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 20),
-                                          ...caracteristiqueTechnique
-                                              .map((item) => Text('• $item'))
-                                              .toList(),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.vertical,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.thumb_up_alt,
-                                                color: Colors.black,
-                                                size: 20,
-                                              ),
-                                              const SizedBox(width: 10),
-                                              const Text(
-                                                "Avantage et utilisation",
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 20),
-                                          ...avantageEtUtilsation
-                                              .map((item) => Text('• $item'))
-                                              .toList(),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.inventory_2,
-                                              color: Colors.black,
-                                              size: 20,
-                                            ),
-                                            const SizedBox(width: 10),
-                                            const Text(
-                                              "Contenu du package",
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 20),
-                                        ...contenuDuPackage
-                                            .map((item) => Text('• $item'))
-                                            .toList(),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Offstage(
-                              offstage: true,
-                              child: Form(
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  child: Card(
-                                    elevation: 4,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    margin: const EdgeInsets.all(16),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(height: 20),
-                                          Text(
-                                            "👤 Nom : ${userData?['name'] ?? ''}",
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 15),
-                                          Text(
-                                            "📧 Email : ${userData?['email'] ?? ''}",
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 15),
-                                          Text(
-                                            "📱 Téléphone : ${userData?['phone'] ?? ''}",
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                
-                
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(),
+                          ),
+                          height: 50,
+
+                          child: Row(
+                            children: [
+                              IconButton(
+                                onPressed: decrement,
+                                icon: const Icon(Icons.remove),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.black12),
+                                ),
+                                child: Text(
+                                  "$quantity",
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: increment,
+                                icon: const Icon(Icons.add),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          width: 130,
+                          child: Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  _ajouterAuFavoris();
+                                },
+                                icon: Icon(
+                                  Icons.favorite,
+                                  color: Colors.red,
+                                  size: 23,
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              IconButton(
+                                onPressed: () {
+                                  _ajouterAuPanier();
+                                },
+                                icon: Icon(
+                                  Icons.add_shopping_cart,
+                                  color: const Color.fromARGB(255, 50, 193, 55),
+                                  size: 30,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

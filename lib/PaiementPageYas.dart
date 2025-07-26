@@ -34,8 +34,6 @@ class _PaiementPageState extends State<PaiementPage> {
     super.dispose();
   }
 
-
-
   String generateTransactionId() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final random = 1000 + (DateTime.now().microsecond % 9000);
@@ -64,13 +62,14 @@ class _PaiementPageState extends State<PaiementPage> {
   Widget build(BuildContext context) {
     final item = widget.data;
     final int prixUnitaire = int.tryParse(item['productprice'].toString()) ?? 0;
-    final total = prixUnitaire * item['quantity'];
+    final int quantite = int.tryParse(item['quantity'].toString()) ?? 0;
+    final int total = prixUnitaire * quantite;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text(
           'Paiement via Yas togo',
-          style: TextStyle(color: Colors.black , fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: Center(
@@ -119,8 +118,9 @@ class _PaiementPageState extends State<PaiementPage> {
                       'productname': item['productname'],
                       'quantity': item['quantity'],
                       'reference': reference,
+                      'productprice': item['productprice'],
                       'status': 'en verification',
-                    }); 
+                    });
                 final userid = uid; // ✅ Ici tu récupères l'ID
                 String acrId = acrRef.id; // ✅ Ici tu récupères l'ID
 
@@ -156,7 +156,6 @@ class _PaiementPageState extends State<PaiementPage> {
                       TextButton(
                         onPressed: () async {
                           Navigator.pop(context); // Fermer la boîte de dialogue
-
 
                           Navigator.pop(
                             context,

@@ -124,7 +124,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
           "useremail": useremail,
           "userephone": userephone,
           "usernamemiff": usernamemiff,
-          "lati": lati, 
+          "lati": lati,
           "longi": longi,
           'transactionId': transactionId,
           'ref': referenceController.text.trim(),
@@ -158,7 +158,13 @@ class _BuyAllPageState extends State<BuyAllPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text("Valider mon panier", style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
+        title: Text(
+          "Valider mon panier",
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -188,19 +194,63 @@ class _BuyAllPageState extends State<BuyAllPage> {
                               ),
                             ],
                           ),
-                          child: ListTile(
-                            leading: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                item['productImageUrl'] ?? '',
-                                height:80,
-                                width: 80,
-                                fit: BoxFit.cover,
-                              ),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey,
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            title: Text(item['productname'] ?? 'Produit', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-                            subtitle: Text(
-                              '${item['quantity']} * ${item['productprice']} FCFA',
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    item['productImageUrl'] ?? '',
+                                    height: 60,
+                                    width: 60,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item['productname'] ?? '',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${item['quantity']} x ${item['productprice']} FCFA',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  '${(int.tryParse(item['productprice'].toString()) ?? 0) * (int.tryParse(item['quantity'].toString()) ?? 0)} FCFA',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -218,6 +268,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                       "Choisissez votre réseau et lancez le code USSD :",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
+                    const SizedBox(height: 10),
                     CheckboxListTile(
                       title: const Text("Moov"),
                       value: reseauChoisi == "Moov",
@@ -281,12 +332,19 @@ class _BuyAllPageState extends State<BuyAllPage> {
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 16),
-                Text(
-                  '💰$total FCFA',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Total", style: TextStyle(fontWeight: FontWeight.bold , fontSize: 23),),
+                    Text(
+                      '$total FCFA',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 16),

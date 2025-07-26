@@ -5,9 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/Elements/avis.dart';
 import 'package:lindashopp/Elements/items.dart';
-import 'package:lindashopp/Elements/mydrawer.dart';
 import 'package:lindashopp/ProductDetailPage.dart';
 import 'package:lindashopp/favoris.dart';
+import 'package:lindashopp/promopage.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -17,6 +17,32 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  String promoEleve = "";
+  Future<void> fetchPromotionMax() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('promotions')
+        .get();
+    double max = 0;
+
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      double pourcentage = 0;
+
+      if (data.containsKey('pourcentage')) {
+        pourcentage = (data['pourcentage'] as num).toDouble();
+      } else if (data.containsKey('discount')) {
+        final raw = data['discount'].toString().replaceAll('%', '');
+        pourcentage = double.tryParse(raw) ?? 0;
+      }
+      if (pourcentage > max) {
+        max = pourcentage;
+      }
+    }
+    setState(() {
+      promoEleve = "${max.toInt()}% ";
+    });
+  }
+
   Future<int> getNumberOfFavorites() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final querySnapshot = await FirebaseFirestore.instance
@@ -34,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    fetchPromotionMax();
     _tabController = TabController(length: 6, vsync: this);
   }
 
@@ -51,15 +78,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       length: 6,
       child: Scaffold(
         appBar: AppBar(
-          centerTitle: true,
-          leading: Builder(
-            builder: (context) => IconButton(
-              padding: EdgeInsets.zero,
-              iconSize: 30,
-              icon: const Icon(Icons.menu, color: Colors.white),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          ),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -105,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           child: Text(
                             '${snapshot.data}',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
@@ -131,12 +149,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       searchQuery = value.toLowerCase();
                     });
                   },
-                  style: const TextStyle(fontSize: 14),
+                  style: const TextStyle(fontSize: 14, color: Colors.black),
                   decoration: InputDecoration(
+                    hintStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                     hintText: "Rechercher un produit...",
                     filled: true,
-                    fillColor: Colors.white,
-                    prefixIcon: const Icon(Icons.search),
+                    fillColor: const Color.fromARGB(255, 88, 107, 144),
+                    prefixIcon: const Icon(Icons.search, color: Colors.white),
                     contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -147,161 +169,103 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ],
           ),
-          backgroundColor: const Color.fromARGB(255, 1, 15, 41),
         ),
-
-        drawer: const MyDrawer(),
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Text(
-                    "Les promotions",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
+              padding: const EdgeInsets.all(12.0),
+              child: Container(
+                height: 160,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(255, 131, 131, 131),
+                      blurRadius: 10,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Stack(
                   children: [
-                    Expanded(
-                      child: StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('promotions')
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return const Center(
-                              child: Text('Erreur de chargement'),
-                            );
-                          }
-
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-
-                          final produits = snapshot.data!.docs.where((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            final nom =
-                                data['name']?.toString().toLowerCase() ?? '';
-                            return nom.contains(searchQuery.toLowerCase());
-                          }).toList();
-
-                          return ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: produits.length,
-                            itemBuilder: (context, index) {
-                              final produit =
-                                  produits[index].data()
-                                      as Map<String, dynamic>;
-                              final nom = produit['name'] ?? 'Sans nom';
-                              final livrasion =
-                                  produit['livraison'] ?? 'non spécifier';
-                              final prix = produit['prix']?.toString() ?? '0';
-                              final imageUrl = produit['imageURL'] ?? '';
-                              final pourcentage = produit['pourcentage'] ?? '';
-                              final avis = produit['avis'] ?? 0;
-
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            ProductDetailPage(produit: produit),
-                                      ),
-                                    );
-                                  });
-                                },
-                                child: SizedBox(
-                                  width: 350,
-                                  height: 250,
-                                  child: Card(
-                                    margin: const EdgeInsets.all(10),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 4,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Row(
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                            child: imageUrl.isNotEmpty
-                                                ? Image.network(
-                                                    imageUrl,
-                                                    width: 80,
-                                                    height: 80,
-                                                    fit: BoxFit.cover,
-                                                  )
-                                                : Container(
-                                                    width: 80,
-                                                    height: 80,
-                                                    color: Colors.grey[300],
-                                                    child: const Icon(
-                                                      Icons.image,
-                                                      size: 40,
-                                                    ),
-                                                  ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  nom,
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 6),
-                                                Text(
-                                                  'une reduction de $pourcentage% sur $prix FCFA',
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    color: Colors.green,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 6),
-                                                StarRating(
-                                                  rating: avis.toDouble(),
-                                                ),
-                                                Text(
-                                                  'Livraison incluse? : $livrasion',
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        "assets/images/promo.jpg",
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
+                    Positioned(
+                      right: 6,
+                      bottom: 25,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Jusqu\'à ',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20,
+                                      color: Colors.white,
                                     ),
                                   ),
+                                  TextSpan(
+                                    text: promoEleve, // Exemple: "10%"
+                                    style: TextStyle(
+                                      color: Colors.redAccent,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 37,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: ' de réduction',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const PromoPage(),
                                 ),
                               );
                             },
-                          );
-                        },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurple,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              "Voir les promotions",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -326,7 +290,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               controller: _tabController,
               unselectedLabelStyle: const TextStyle(color: Colors.black),
               labelStyle: const TextStyle(fontSize: 14),
-              tabs: const [
+              tabs: [
                 Tab(text: "Electronique"),
                 Tab(text: "Construction"),
                 Tab(text: "habillement"),

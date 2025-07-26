@@ -114,13 +114,10 @@ class _ConnectionState extends State<Connection> {
           ),
         ),
       );
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AcceuilPage()),
-        );
-      });
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const AcceuilPage()),
+      );
     } catch (e) {
       if (!mounted) return; // ✅ Sécurise l'appel
       setState(() => isLoading = false);
@@ -138,7 +135,7 @@ class _ConnectionState extends State<Connection> {
               SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Erreur de connexion $e',
+                  'Erreur de connexion veuillez bien verifier votre adresse email et votre mot de passe et ressayer',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
@@ -153,22 +150,6 @@ class _ConnectionState extends State<Connection> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFF02204B),
-        iconTheme: const IconThemeData(
-          color: Colors.white, // couleur de l’icône retour
-        ),
-        title: Text(
-          "Me connecter",
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

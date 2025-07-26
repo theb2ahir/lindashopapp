@@ -87,7 +87,7 @@ class _InscriptionState extends State<Inscription> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  "Erreur: $e",
+                  "Erreur losrs de linscription : $e",
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),

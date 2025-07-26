@@ -68,7 +68,6 @@ class _FavorisState extends State<Favoris> {
                   ],
                 ),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
@@ -95,13 +94,12 @@ class _FavorisState extends State<Favoris> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            '${data['productprice']} FCFA',
+                            '${data['quantity']} x ${data['productprice']} FCFA',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
                             ),
                           ),
-                          Text('Qté: ${data['quantity']}'),
                         ],
                       ),
                     ),
@@ -109,7 +107,6 @@ class _FavorisState extends State<Favoris> {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Supprimer
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () async {
@@ -144,7 +141,6 @@ class _FavorisState extends State<Favoris> {
                             }
                           },
                         ),
-                        // Acheter
                         IconButton(
                           icon: const Icon(Icons.payment, color: Colors.green),
                           onPressed: () {
