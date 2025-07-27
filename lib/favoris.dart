@@ -115,7 +115,7 @@ class _FavorisState extends State<Favoris> {
                               builder: (context) => AlertDialog(
                                 title: const Text("Confirmation"),
                                 content: const Text(
-                                  "Supprimer cette commande ?",
+                                  "Supprimer ce produit ?",
                                 ),
                                 actions: [
                                   TextButton(

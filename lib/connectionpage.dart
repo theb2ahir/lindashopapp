@@ -259,14 +259,57 @@ class _ConnectionState extends State<Connection> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               TextButton(
-                                onPressed: () {},
-                                child: Text(
-                                  "mot de passe oublier ?",
-                                  style: const TextStyle(
-                                    color: Colors.blueAccent,
-                                    fontSize: 16,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: Colors.blueAccent,
+                                onPressed: () {
+                                  final email = emailCtrl.text.trim();
+
+                                  if (email.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Veuillez entrer votre adresse email.',
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  FirebaseAuth.instance
+                                      .sendPasswordResetEmail(email: email)
+                                      .then((_) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (_) => AlertDialog(
+                                            title: const Text('Email envoyé'),
+                                            content: const Text(
+                                              'Un lien de réinitialisation a été envoyé à votre adresse email si vous ne le voyez pas , verifiez vos spams.',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      })
+                                      .catchError((e) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Erreur : ${e.message ?? e.toString()}',
+                                            ),
+                                          ),
+                                        );
+                                      });
+                                },
+                                child: const Text(
+                                  "Mot de passe oublié ?",
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),

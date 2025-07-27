@@ -7,6 +7,7 @@ import 'package:lindashopp/Elements/avis.dart';
 import 'package:lindashopp/Elements/items.dart';
 import 'package:lindashopp/ProductDetailPage.dart';
 import 'package:lindashopp/favoris.dart';
+import 'package:lindashopp/notifications.dart';
 import 'package:lindashopp/promopage.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -53,6 +54,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     return querySnapshot.docs.length;
   }
+  Future<int> getNumberOffNotif() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .get();
+
+    return querySnapshot.docs.length;
+  }
 
   int? selectedIndex; // null = aucune sélection
   late TabController _tabController;
@@ -78,7 +89,69 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       length: 6,
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.notifications,
+                      color: Color.fromARGB(255, 15, 14, 14),
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NotificationsPage()),
+                      );
+                    },
+                  ),
+                  FutureBuilder<int>(
+                    future: getNumberOffNotif(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting ||
+                          snapshot.hasError ||
+                          !snapshot.hasData ||
+                          snapshot.data == 0) {
+                        return const SizedBox.shrink(); // ne rien afficher
+                      }
+
+                      return Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color.fromARGB(255, 4, 4, 4)),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 20,
+                            minHeight: 20,
+                          ),
+                          child: Text(
+                            '${snapshot.data}',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          
+          
+          
             Padding(
               padding: const EdgeInsets.only(right: 12),
               child: Stack(
@@ -100,31 +173,32 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   FutureBuilder<int>(
                     future: getNumberOfFavorites(),
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const SizedBox.shrink(); // rien pendant le chargement
-                      }
-                      if (snapshot.hasError ||
+                      if (snapshot.connectionState == ConnectionState.waiting ||
+                          snapshot.hasError ||
                           !snapshot.hasData ||
                           snapshot.data == 0) {
-                        return const SizedBox.shrink(); // pas de badge si erreur ou 0 favoris
+                        return const SizedBox.shrink(); // ne rien afficher
                       }
+
                       return Positioned(
-                        right: 1,
-                        top: 1,
+                        top: 4,
+                        right: 4,
                         child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
                             shape: BoxShape.circle,
+                            border: Border.all(color: Colors.red),
                           ),
                           constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
+                            minWidth: 20,
+                            minHeight: 20,
                           ),
                           child: Text(
                             '${snapshot.data}',
                             style: const TextStyle(
                               color: Colors.black,
-                              fontSize: 16,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                             textAlign: TextAlign.center,
@@ -136,6 +210,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ],
               ),
             ),
+          
+          
+          
           ],
 
           title: Column(
@@ -384,37 +461,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         child: Stack(
                                           children: [
                                             // Image produit
-                                            Positioned.fill(
-                                              child: Image.network(
-                                                imageUrl,
-                                                fit: BoxFit.fill,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => const Center(
-                                                      child: Icon(
-                                                        Icons
-                                                            .image_not_supported,
-                                                      ),
+                                            Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.fill,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Center(
+                                                    child: Icon(
+                                                      Icons
+                                                          .image_not_supported,
                                                     ),
-                                                loadingBuilder:
-                                                    (
-                                                      context,
-                                                      child,
-                                                      loadingProgress,
-                                                    ) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-                                                      return const Center(
-                                                        child:
-                                                            CircularProgressIndicator(),
-                                                      );
-                                                    },
-                                              ),
+                                                  ),
+                                              loadingBuilder:
+                                                  (
+                                                    context,
+                                                    child,
+                                                    loadingProgress,
+                                                  ) {
+                                                    if (loadingProgress ==
+                                                        null) {
+                                                      return child;
+                                                    }
+                                                    return const Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    );
+                                                  },
                                             ),
 
                                             // Overlay flouté
@@ -432,11 +507,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                   padding: const EdgeInsets.all(
                                                     12,
                                                   ),
-                                                  color: const Color.fromRGBO(
-                                                    255,
-                                                    255,
-                                                    255,
-                                                    0.9,
+                                                  color: const Color.fromARGB(
+                                                    221,
+                                                    202,
+                                                    202,
+                                                    202,
                                                   ),
                                                   child: Column(
                                                     crossAxisAlignment:
@@ -572,37 +647,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         child: Stack(
                                           children: [
                                             // Image produit
-                                            Positioned.fill(
-                                              child: Image.network(
-                                                imageUrl,
-                                                fit: BoxFit.fill,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => const Center(
-                                                      child: Icon(
-                                                        Icons
-                                                            .image_not_supported,
-                                                      ),
+                                            Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.fill,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Center(
+                                                    child: Icon(
+                                                      Icons
+                                                          .image_not_supported,
                                                     ),
-                                                loadingBuilder:
-                                                    (
-                                                      context,
-                                                      child,
-                                                      loadingProgress,
-                                                    ) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-                                                      return const Center(
-                                                        child:
-                                                            CircularProgressIndicator(),
-                                                      );
-                                                    },
-                                              ),
+                                                  ),
+                                              loadingBuilder:
+                                                  (
+                                                    context,
+                                                    child,
+                                                    loadingProgress,
+                                                  ) {
+                                                    if (loadingProgress ==
+                                                        null) {
+                                                      return child;
+                                                    }
+                                                    return const Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    );
+                                                  },
                                             ),
 
                                             // Overlay flouté
@@ -626,11 +699,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         const EdgeInsets.all(
                                                           12,
                                                         ),
-                                                    color: const Color.fromRGBO(
-                                                      255,
-                                                      255,
-                                                      255,
-                                                      0.9,
+                                                    color: const Color.fromARGB(
+                                                      221,
+                                                      202,
+                                                      202,
+                                                      202,
                                                     ),
                                                     child: Column(
                                                       crossAxisAlignment:
@@ -774,37 +847,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         child: Stack(
                                           children: [
                                             // Image produit
-                                            Positioned.fill(
-                                              child: Image.network(
-                                                imageUrl,
-                                                fit: BoxFit.fill,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => const Center(
-                                                      child: Icon(
-                                                        Icons
-                                                            .image_not_supported,
-                                                      ),
+                                            Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.fill,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Center(
+                                                    child: Icon(
+                                                      Icons
+                                                          .image_not_supported,
                                                     ),
-                                                loadingBuilder:
-                                                    (
-                                                      context,
-                                                      child,
-                                                      loadingProgress,
-                                                    ) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-                                                      return const Center(
-                                                        child:
-                                                            CircularProgressIndicator(),
-                                                      );
-                                                    },
-                                              ),
+                                                  ),
+                                              loadingBuilder:
+                                                  (
+                                                    context,
+                                                    child,
+                                                    loadingProgress,
+                                                  ) {
+                                                    if (loadingProgress ==
+                                                        null) {
+                                                      return child;
+                                                    }
+                                                    return const Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    );
+                                                  },
                                             ),
 
                                             // Overlay flouté
@@ -828,11 +899,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         const EdgeInsets.all(
                                                           12,
                                                         ),
-                                                    color: const Color.fromRGBO(
-                                                      255,
-                                                      255,
-                                                      255,
-                                                      0.9,
+                                                    color: const Color.fromARGB(
+                                                      221,
+                                                      202,
+                                                      202,
+                                                      202,
                                                     ),
                                                     child: Column(
                                                       crossAxisAlignment:
@@ -976,37 +1047,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         child: Stack(
                                           children: [
                                             // Image produit
-                                            Positioned.fill(
-                                              child: Image.network(
-                                                imageUrl,
-                                                fit: BoxFit.fill,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => const Center(
-                                                      child: Icon(
-                                                        Icons
-                                                            .image_not_supported,
-                                                      ),
+                                            Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.fill,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Center(
+                                                    child: Icon(
+                                                      Icons
+                                                          .image_not_supported,
                                                     ),
-                                                loadingBuilder:
-                                                    (
-                                                      context,
-                                                      child,
-                                                      loadingProgress,
-                                                    ) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-                                                      return const Center(
-                                                        child:
-                                                            CircularProgressIndicator(),
-                                                      );
-                                                    },
-                                              ),
+                                                  ),
+                                              loadingBuilder:
+                                                  (
+                                                    context,
+                                                    child,
+                                                    loadingProgress,
+                                                  ) {
+                                                    if (loadingProgress ==
+                                                        null) {
+                                                      return child;
+                                                    }
+                                                    return const Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    );
+                                                  },
                                             ),
 
                                             // Overlay flouté
@@ -1030,11 +1099,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         const EdgeInsets.all(
                                                           12,
                                                         ),
-                                                    color: const Color.fromRGBO(
-                                                      255,
-                                                      255,
-                                                      255,
-                                                      0.9,
+                                                    color: const Color.fromARGB(
+                                                      221,
+                                                      202,
+                                                      202,
+                                                      202,
                                                     ),
                                                     child: Column(
                                                       crossAxisAlignment:
@@ -1178,37 +1247,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         child: Stack(
                                           children: [
                                             // Image produit
-                                            Positioned.fill(
-                                              child: Image.network(
-                                                imageUrl,
-                                                fit: BoxFit.fill,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => const Center(
-                                                      child: Icon(
-                                                        Icons
-                                                            .image_not_supported,
-                                                      ),
+                                            Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.fill,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Center(
+                                                    child: Icon(
+                                                      Icons
+                                                          .image_not_supported,
                                                     ),
-                                                loadingBuilder:
-                                                    (
-                                                      context,
-                                                      child,
-                                                      loadingProgress,
-                                                    ) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-                                                      return const Center(
-                                                        child:
-                                                            CircularProgressIndicator(),
-                                                      );
-                                                    },
-                                              ),
+                                                  ),
+                                              loadingBuilder:
+                                                  (
+                                                    context,
+                                                    child,
+                                                    loadingProgress,
+                                                  ) {
+                                                    if (loadingProgress ==
+                                                        null) {
+                                                      return child;
+                                                    }
+                                                    return const Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    );
+                                                  },
                                             ),
 
                                             // Overlay flouté
@@ -1232,11 +1299,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         const EdgeInsets.all(
                                                           12,
                                                         ),
-                                                    color: const Color.fromRGBO(
-                                                      255,
-                                                      255,
-                                                      255,
-                                                      0.5,
+                                                    color: const Color.fromARGB(
+                                                      221,
+                                                      202,
+                                                      202,
+                                                      202,
                                                     ),
                                                     child: Column(
                                                       crossAxisAlignment:
@@ -1375,37 +1442,34 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         child: Stack(
                                           children: [
                                             // Image produit
-                                            Positioned.fill(
-                                              child: Image.network(
-                                                imageUrl,
-                                                fit: BoxFit.fill,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => const Center(
-                                                      child: Icon(
-                                                        Icons
-                                                            .image_not_supported,
-                                                      ),
+                                            Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.fill,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Center(
+                                                    child: Icon(
+                                                      Icons.image_not_supported,
                                                     ),
-                                                loadingBuilder:
-                                                    (
-                                                      context,
-                                                      child,
-                                                      loadingProgress,
-                                                    ) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-                                                      return const Center(
-                                                        child:
-                                                            CircularProgressIndicator(),
-                                                      );
-                                                    },
-                                              ),
+                                                  ),
+                                              loadingBuilder:
+                                                  (
+                                                    context,
+                                                    child,
+                                                    loadingProgress,
+                                                  ) {
+                                                    if (loadingProgress ==
+                                                        null) {
+                                                      return child;
+                                                    }
+                                                    return const Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    );
+                                                  },
                                             ),
 
                                             // Overlay flouté
@@ -1429,11 +1493,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         const EdgeInsets.all(
                                                           12,
                                                         ),
-                                                    color: const Color.fromRGBO(
-                                                      255,
-                                                      255,
-                                                      255,
-                                                      0.5,
+                                                    color: const Color.fromARGB(
+                                                      221,
+                                                      202,
+                                                      202,
+                                                      202,
                                                     ),
                                                     child: Column(
                                                       crossAxisAlignment:

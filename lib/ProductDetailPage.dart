@@ -360,9 +360,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(
-          color: Colors.black, // couleur de l’icône retour
-        ),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             onPressed: _getLocation,

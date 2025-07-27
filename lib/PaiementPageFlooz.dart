@@ -133,7 +133,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
                   'longi': item['longitude'],
                   'lati': item['latitude'],
                   'prixTotal': total,
-                  'UserReseau': 'togocel',
+                  'UsereReseau': 'flooz',
                   'nomberitem': item['quantity'],
                   'productname': item['productname'],
                   'productprice': item['productprice'],
@@ -145,6 +145,19 @@ class _PaiementPage2State extends State<PaiementPage2> {
                   'UserAdresse': item['addressLivraison'],
                   'ref': reference,
                 });
+
+                DocumentReference notifRef = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(uid)
+                    .collection('notifications')
+                    .add({
+                      'imageUrl':
+                          "https://res.cloudinary.com/dccsqxaxu/image/upload/v1753640623/LindaLogo2_jadede.png",
+                      'notifText':
+                          "Votre commande de ${item['quantity']} x ${item['productname']} a été enregistrée avec succès. Merci pour votre achat !",
+                      'type': 'commande', // utile pour filtrer
+                      'date': DateTime.now(),
+                    });
 
                 setState(() => isLoading = false);
 

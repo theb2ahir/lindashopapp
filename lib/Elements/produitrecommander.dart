@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lindashopp/ProductDetailPage.dart';
- // Assurez-vous que ce fichier existe
+// Assurez-vous que ce fichier existe
 
 class ProduitsRecommandes extends StatelessWidget {
   const ProduitsRecommandes({super.key});
 
   Future<List<QueryDocumentSnapshot>> _fetchAllCollections() async {
-    
-    final electronique = await FirebaseFirestore.instance.collection('electronique').get();
-    final promotions = await FirebaseFirestore.instance.collection('promotions').get();
-    final modegosse = await FirebaseFirestore.instance.collection('produit-mode-et-enfant').get();
+    final electronique = await FirebaseFirestore.instance
+        .collection('electronique')
+        .get();
+    final modegosse = await FirebaseFirestore.instance
+        .collection('produit-mode-et-enfant')
+        .get();
     final fring = await FirebaseFirestore.instance.collection('fring').get();
 
     // Combine tous les documents
-    return [
-      ...electronique.docs,
-      ...promotions.docs,
-      ...modegosse.docs,
-      ...fring.docs,
-    ];
+    return [...electronique.docs, ...modegosse.docs, ...fring.docs];
   }
 
   @override
@@ -46,7 +43,7 @@ class ProduitsRecommandes extends StatelessWidget {
             final nom = produit['name'] ?? 'Sans nom';
             final prix = produit['prix']?.toString() ?? '0';
             final imageUrl = produit['imageURL'] ?? '';
-            final pourcentage = produit['pourcentage'] ?? '';
+            final livraison = produit['livraison'] ?? 0;
             final avis = produit['avis'] ?? 0;
 
             return Padding(
@@ -81,25 +78,24 @@ class ProduitsRecommandes extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.local_offer,
-                            color: Colors.redAccent,
+                          Icon(
+                            Icons.local_shipping,
+                            color: livraison ? Colors.green : Colors.redAccent,
                             size: 16,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            "${pourcentage ?? 0}% de réduction",
-                            style: const TextStyle(
-                              color: Colors.redAccent,
-                              fontWeight: FontWeight.w600,
+                            livraison
+                                ? "Livraison gratuite"
+                                : "livraison payante",
+                            style: TextStyle(
+                              color: livraison
+                                  ? Colors.green
+                                  : Colors.redAccent,
                             ),
                           ),
                           const Spacer(),
-                          const Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                            size: 16,
-                          ),
+                          const Icon(Icons.star, color: Colors.amber, size: 16),
                           const SizedBox(width: 2),
                           Text("$avis"),
                         ],

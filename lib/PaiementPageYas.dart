@@ -118,6 +118,7 @@ class _PaiementPageState extends State<PaiementPage> {
                       'productname': item['productname'],
                       'quantity': item['quantity'],
                       'reference': reference,
+                      'date': DateTime.now(),
                       'productprice': item['productprice'],
                       'status': 'en verification',
                     });
@@ -132,7 +133,7 @@ class _PaiementPageState extends State<PaiementPage> {
                   'longi': item['longitude'],
                   'lati': item['latitude'],
                   'prixTotal': total,
-                  'UserReseau': 'togocel',
+                  'UsereReseau': 'Yas',
                   'nomberitem': item['quantity'],
                   'productname': item['productname'],
                   'productprice': item['productprice'],
@@ -144,6 +145,19 @@ class _PaiementPageState extends State<PaiementPage> {
                   'UserAdresse': item['addressLivraison'],
                   'ref': reference,
                 });
+
+                DocumentReference notifRef = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(uid)
+                    .collection('notifications')
+                    .add({
+                      'imageUrl':
+                          "https://res.cloudinary.com/dccsqxaxu/image/upload/v1753640623/LindaLogo2_jadede.png",
+                      'notifText':
+                          "Votre commande de ${item['quantity']} x ${item['productname']} a été enregistrée avec succès. Merci pour votre achat !",
+                      'type': 'commande', // utile pour filtrer
+                      'date': DateTime.now(),
+                    });
 
                 setState(() => isLoading = false);
 

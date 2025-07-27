@@ -47,6 +47,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14.0),
@@ -67,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     value: _animation.value,
                     minHeight: 6,
                     backgroundColor: const Color.fromARGB(255, 194, 52, 52),
-                    color: const Color.fromARGB(255, 4, 1, 68),
+                    color:Colors.white,
                   );
                 },
               ),

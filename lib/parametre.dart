@@ -14,7 +14,6 @@ class Parametre extends StatefulWidget {
 }
 
 class _ParametreState extends State<Parametre> {
-  bool isNotificationEnabled = true;
   String selectedLanguage = "Français";
   Map<String, dynamic>? user;
 
@@ -111,10 +110,12 @@ class _ParametreState extends State<Parametre> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           "Paramètres",
           style: TextStyle(
@@ -161,30 +162,8 @@ class _ParametreState extends State<Parametre> {
                 ),
 
                 const Divider(),
+                const SizedBox(height: 30),
 
-                // Notifications
-                SwitchListTile(
-                  title: const Text("Notifications"),
-                  secondary: const Icon(Icons.notifications),
-                  value: isNotificationEnabled,
-                  onChanged: (bool value) {
-                    setState(() {
-                      isNotificationEnabled = value;
-                    });
-                  },
-                ),
-
-                // Paiement
-                ListTile(
-                  leading: const Icon(Icons.payment),
-                  title: const Text("Méthodes de paiement"),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    // Naviguer vers paiement
-                  },
-                ),
-
-                // Adresse
                 ListTile(
                   leading: const Icon(Icons.location_on),
                   title: const Text("Adresse de livraison"),

@@ -110,8 +110,10 @@ class _BuyAllPageState extends State<BuyAllPage> {
               'imageUrl': item['productImageUrl'],
               'productname': item['productname'],
               'quantity': item['quantity'],
+              'productprice': item['productprice'],
               'reference': referenceController.text.trim(),
               'status': 'en verification',
+              'date': DateTime.now(),
             });
         final userid = uid;
         String acrId = acrRef.id;
@@ -128,12 +130,25 @@ class _BuyAllPageState extends State<BuyAllPage> {
           "longi": longi,
           'transactionId': transactionId,
           'ref': referenceController.text.trim(),
-          "UserReseau": reseauChoisi,
+          "UsereReseau": reseauChoisi,
           "prixTotal": total,
           "acrid": acrId,
           "userid": userid,
           'timestamp': DateTime.now(),
         });
+
+        DocumentReference notifRef = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('notifications')
+            .add({
+              'imageUrl':
+                  "https://res.cloudinary.com/dccsqxaxu/image/upload/v1753640623/LindaLogo2_jadede.png",
+              'notifText':
+                  "Votre commande de ${item['quantity']} x ${item['productname']} a été enregistrée avec succès. Merci pour votre achat !",
+              'type': 'commande', // utile pour filtrer
+              'date': DateTime.now(),
+            });
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -335,7 +350,13 @@ class _BuyAllPageState extends State<BuyAllPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Total", style: TextStyle(fontWeight: FontWeight.bold , fontSize: 23),),
+                    const Text(
+                      "Total",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 23,
+                      ),
+                    ),
                     Text(
                       '$total FCFA',
                       style: const TextStyle(

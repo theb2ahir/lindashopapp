@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:lindashopp/Elements/produitrecommander.dart';
-import 'package:lindashopp/ProductDetailPage.dart';
 
 class AcrListPage extends StatefulWidget {
   const AcrListPage({super.key});
@@ -159,12 +158,14 @@ class _AcrListPageState extends State<AcrListPage> {
                     final quantity = data['quantity']?.toString() ?? '';
                     final ref = data['reference']?.toString() ?? '';
                     final status = data['status']?.toString() ?? '';
-                    final timestamp = data['date'] as Timestamp;
-                    final parsedDate = timestamp.toDate();
+                    final timestamp = data['date'] as Timestamp?;
+                    final parsedDate = timestamp?.toDate();
                     final price = data['productprice']?.toString() ?? '';
-                    final displayDate = DateFormat(
-                      'dd-MM-yy HH:mm',
-                    ).format(parsedDate);
+
+                    // Si parsedDate est non null, on formate ; sinon, on affiche "Date inconnue"
+                    final displayDate = parsedDate != null
+                        ? DateFormat('dd-MM-yy HH:mm').format(parsedDate)
+                        : 'Date inconnue';
 
                     return Card(
                       margin: const EdgeInsets.all(8),
@@ -230,7 +231,7 @@ class _AcrListPageState extends State<AcrListPage> {
                 );
               },
             ),
-            
+
             const SizedBox(height: 20),
 
             Padding(
