@@ -115,8 +115,21 @@ class _PanierPageState extends State<PanierPage> {
                     : int.tryParse(data['quantity'].toString()) ?? 1;
                 final String productName = data['productname'] ?? '';
                 final String imageUrl = data['productImageUrl'] ?? '';
-                final timestamp = data['dateAjout'] as Timestamp;
-                final parsedDate = timestamp.toDate();
+                var dateAjoutValue = data['dateAjout'];
+                DateTime parsedDate;
+
+                if (dateAjoutValue is Timestamp) {
+                  // Cas normal Firestore
+                  parsedDate = dateAjoutValue.toDate();
+                } else if (dateAjoutValue is String) {
+                  // Cas chaîne en "yy-MM-dd HH:mm"
+                  parsedDate = DateFormat(
+                    "yy-MM-dd HH:mm",
+                  ).parse(dateAjoutValue);
+                } else {
+                  throw Exception("Format de dateAjout inconnu");
+                }
+
                 final displayDate = DateFormat(
                   'dd-MM-yy HH:mm',
                 ).format(parsedDate);

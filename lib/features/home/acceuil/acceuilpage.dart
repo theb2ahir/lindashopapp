@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lindashopp/features/home/homepage.dart';
 import 'package:lindashopp/features/panier/panier.dart';
 import 'package:lindashopp/features/profil/profil.dart';
-import 'package:lindashopp/features/produits/suiviscommande/suiviscommande.dart'; // Assure-toi que ce fichier existe
+import 'package:lindashopp/suiviscommande.dart'; // Assure-toi que ce fichier existe
 
 class AcceuilPage extends StatefulWidget {
   const AcceuilPage({super.key});
@@ -16,7 +16,7 @@ class AcceuilPageState extends State<AcceuilPage> {
     MyHomePage(),
     PanierPage(),
     AcrListPage(),
-    Profile()
+    Profile(),
   ];
 
   int myIndex = 0;
@@ -28,15 +28,12 @@ class AcceuilPageState extends State<AcceuilPage> {
       bottomNavigationBar: BottomNavigationBar(
         iconSize: 27,
         selectedIconTheme: const IconThemeData(
-          color: Color.fromARGB(255, 1, 31, 56),
+          color: Color.fromARGB(255, 190, 53, 49),
         ),
-        unselectedIconTheme: const IconThemeData(
-          color: Color.fromARGB(255, 79, 78, 78),
-        ),
+        unselectedIconTheme: const IconThemeData(color: Color(0xFF02204B)),
         showSelectedLabels: true,
-        backgroundColor: const Color(0xFF02204B),
         showUnselectedLabels: true,
-        selectedItemColor: const Color.fromARGB(255, 2, 32, 57),
+        selectedItemColor: const Color.fromARGB(255, 190, 53, 49),
         unselectedItemColor: const Color.fromARGB(255, 11, 10, 10),
         currentIndex: myIndex,
         onTap: (index) {
@@ -57,10 +54,7 @@ class AcceuilPageState extends State<AcceuilPage> {
             icon: Icon(Icons.receipt_long),
             label: 'Commandes',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Compte',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Compte'),
         ],
       ),
     );

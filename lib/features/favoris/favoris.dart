@@ -53,6 +53,7 @@ class _FavorisState extends State<Favoris> {
             itemCount: commandes.length,
             itemBuilder: (context, index) {
               final data = commandes[index].data() as Map<String, dynamic>;
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 15),
                 padding: const EdgeInsets.all(12),
@@ -89,7 +90,7 @@ class _FavorisState extends State<Favoris> {
                             ),
                           ),
                           Text(
-                            'Ajouté le : ${(data['dateAjout'] as Timestamp).toDate().toString().substring(0, 16)}',
+                            'Ajouté le : ${(data['dateAjout']).toString()}',
                             style: const TextStyle(fontSize: 12),
                           ),
                           const SizedBox(height: 12),
@@ -114,9 +115,7 @@ class _FavorisState extends State<Favoris> {
                               context: context,
                               builder: (context) => AlertDialog(
                                 title: const Text("Confirmation"),
-                                content: const Text(
-                                  "Supprimer ce produit ?",
-                                ),
+                                content: const Text("Supprimer ce produit ?"),
                                 actions: [
                                   TextButton(
                                     onPressed: () =>

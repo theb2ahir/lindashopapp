@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously, file_names
-
+import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -104,7 +104,6 @@ class _InscriptionState extends State<Inscription> {
 
   InputDecoration _customDecoration(String label) {
     return InputDecoration(
-      labelText: label,
       labelStyle: const TextStyle(color: Color(0xFF02204B)),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -114,6 +113,7 @@ class _InscriptionState extends State<Inscription> {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Colors.green, width: 2),
       ),
+      labelText: label,
     );
   }
 
@@ -122,8 +122,8 @@ class _InscriptionState extends State<Inscription> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF02204B),
-        title: const Text("Inscription", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        automaticallyImplyLeading: false,
+        title: Text("Inscription", style: GoogleFonts.roboto(fontSize: 28)),
         centerTitle: true,
       ),
       body: Column(
@@ -149,7 +149,7 @@ class _InscriptionState extends State<Inscription> {
               ),
               child: Stepper(
                 type: StepperType.horizontal,
-                elevation: 2,
+                elevation: 8,
                 margin: const EdgeInsets.all(16),
                 currentStep: _stepIndex,
                 onStepContinue: () {
@@ -277,7 +277,6 @@ class _InscriptionState extends State<Inscription> {
             ),
           ),
 
-
           Padding(
             padding: const EdgeInsets.all(19.0),
             child: Center(
@@ -285,16 +284,19 @@ class _InscriptionState extends State<Inscription> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("vous avez deja un compte ?"),
-                  TextButton(onPressed: () {
-                    Navigator.push(context, 
-                    MaterialPageRoute(builder: (_) => Connection())
-                  );
-                  }, child: Text("connectez-vous"))
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => Connection()),
+                      );
+                    },
+                    child: Text("connectez-vous"),
+                  ),
                 ],
               ),
             ),
-          )
-        
+          ),
         ],
       ),
     );

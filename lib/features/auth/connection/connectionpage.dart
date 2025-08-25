@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously
-
+import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/features/auth/inscription/InscriptionPage.dart';
@@ -150,6 +150,11 @@ class _ConnectionState extends State<Connection> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: Text("Connexion", style: GoogleFonts.roboto(fontSize: 28)),
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -240,7 +245,7 @@ class _ConnectionState extends State<Connection> {
                             child: ElevatedButton(
                               style: ButtonStyle(
                                 backgroundColor: WidgetStateProperty.all<Color>(
-                                  Colors.green,
+                                  const Color(0xFF02204B),
                                 ),
                               ),
                               onPressed: () => login(context),

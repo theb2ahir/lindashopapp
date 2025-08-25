@@ -102,35 +102,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           // Fermer le loading dialog
           Navigator.of(context).pop();
 
-          // Afficher un message de succès
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.grey[900],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              duration: const Duration(seconds: 5),
-              content: Row(
-                children: const [
-                  Icon(Icons.check_circle, color: Colors.lightGreenAccent),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Produit ajouté au panier!',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
+          
 
-          // Naviguer vers la page d’accueil
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => AcceuilPage()),
-          );
         } else {
           Navigator.of(context).pop(); // Fermer le dialog
           ScaffoldMessenger.of(context).showSnackBar(

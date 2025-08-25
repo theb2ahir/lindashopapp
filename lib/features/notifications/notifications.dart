@@ -103,13 +103,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                     return ListTile(
                       leading: imageUrl.isNotEmpty
-                          ? CircleAvatar(
-                              backgroundImage: NetworkImage(imageUrl),
-                              radius: 24,
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.network(
+                                imageUrl,
+                                width:70,
+                                height: 70,
+                                fit: BoxFit.contain,
+                              ),
                             )
-                          : const CircleAvatar(
-                              backgroundColor: Colors.grey,
-                              child: Icon(Icons.notifications),
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                color: Colors.grey,
+                                child: const Icon(Icons.notifications),
+                              ),
                             ),
                       title: Text(
                         notifText,

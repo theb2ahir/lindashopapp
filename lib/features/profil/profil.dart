@@ -8,7 +8,7 @@ import 'package:lindashopp/features/profil/editprofil/editprofile.dart';
 import 'package:lindashopp/features/favoris/favoris.dart';
 import 'package:lindashopp/features/inquietudes/inquietude.dart';
 import 'package:lindashopp/features/nonlivre/nonlivre.dart';
-import 'package:lindashopp/features/settings/parametre.dart';
+import 'package:lindashopp/parametre.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {

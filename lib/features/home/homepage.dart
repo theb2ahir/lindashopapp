@@ -1,9 +1,10 @@
 import 'dart:ui';
-
+import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/features/avis/avis.dart';
+import 'package:lindashopp/features/produits/allproduct.dart';
 import 'package:lindashopp/features/produits/details/ProductDetailPage.dart';
 import 'package:lindashopp/features/favoris/favoris.dart';
 import 'package:lindashopp/features/notifications/notifications.dart';
@@ -18,6 +19,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   String promoEleve = "";
+  final List<String> tabTitles = [
+    "Tous",
+    "Électronique",
+    "Construction",
+    "Habillement",
+    "Mode enfants",
+    "Sports & bien-être",
+    "Électro-ménager",
+  ];
   Future<void> fetchPromotionMax() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('promotions')
@@ -53,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     return querySnapshot.docs.length;
   }
+
   Future<int> getNumberOffNotif() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final querySnapshot = await FirebaseFirestore.instance
@@ -71,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     fetchPromotionMax();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
   }
 
   @override
@@ -80,173 +91,172 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 6,
+      length: 7,
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
+          centerTitle: true,
+          title: Text("Lindashopp", style: GoogleFonts.lobster(fontSize: 34)),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.notifications,
-                      color: Color.fromARGB(255, 15, 14, 14),
-                      size: 24,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const NotificationsPage()),
-                      );
-                    },
+            Stack(
+              alignment: Alignment.topRight,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.favorite,
+                    color: Color.fromARGB(255, 255, 18, 1),
+                    size: 24,
                   ),
-                  FutureBuilder<int>(
-                    future: getNumberOffNotif(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting ||
-                          snapshot.hasError ||
-                          !snapshot.hasData ||
-                          snapshot.data == 0) {
-                        return const SizedBox.shrink(); // ne rien afficher
-                      }
-
-                      return Positioned(
-                        top: 4,
-                        right: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: const Color.fromARGB(255, 4, 4, 4)),
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 20,
-                            minHeight: 20,
-                          ),
-                          child: Text(
-                            '${snapshot.data}',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          
-          
-          
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.favorite,
-                      color: Color.fromARGB(255, 255, 18, 1),
-                      size: 24,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const Favoris()),
-                      );
-                    },
-                  ),
-                  FutureBuilder<int>(
-                    future: getNumberOfFavorites(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting ||
-                          snapshot.hasError ||
-                          !snapshot.hasData ||
-                          snapshot.data == 0) {
-                        return const SizedBox.shrink(); // ne rien afficher
-                      }
-
-                      return Positioned(
-                        top: 4,
-                        right: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.red),
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 20,
-                            minHeight: 20,
-                          ),
-                          child: Text(
-                            '${snapshot.data}',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          
-          
-          
-          ],
-
-          title: Column(
-            children: [
-              Container(
-                height: 40,
-                margin: const EdgeInsets.symmetric(horizontal: 1),
-                child: TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      searchQuery = value.toLowerCase();
-                    });
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Favoris()),
+                    );
                   },
-                  style: const TextStyle(fontSize: 14, color: Colors.black),
-                  decoration: InputDecoration(
-                    hintStyle: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    hintText: "Rechercher un produit...",
-                    filled: true,
-                    fillColor: const Color.fromARGB(255, 88, 107, 144),
-                    prefixIcon: const Icon(Icons.search, color: Colors.white),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
                 ),
+                FutureBuilder<int>(
+                  future: getNumberOfFavorites(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting ||
+                        snapshot.hasError ||
+                        !snapshot.hasData ||
+                        snapshot.data == 0) {
+                      return const SizedBox.shrink(); // ne rien afficher
+                    }
+
+                    return Positioned(
+                      top: 4,
+                      right: 4,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.red),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 20,
+                          minHeight: 20,
+                        ),
+                        child: Text(
+                          '${snapshot.data}',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+          leading: Stack(
+            alignment: Alignment.topRight,
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.notifications,
+                  color: Color.fromARGB(255, 15, 14, 14),
+                  size: 24,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsPage(),
+                    ),
+                  );
+                },
+              ),
+              FutureBuilder<int>(
+                future: getNumberOffNotif(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting ||
+                      snapshot.hasError ||
+                      !snapshot.hasData ||
+                      snapshot.data == 0) {
+                    return const SizedBox.shrink(); // ne rien afficher
+                  }
+
+                  return Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color.fromARGB(255, 4, 4, 4),
+                        ),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 20,
+                        minHeight: 20,
+                      ),
+                      child: Text(
+                        '${snapshot.data}',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),
         ),
         body: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Container(
+                    height: 40,
+                    margin: const EdgeInsets.symmetric(horizontal: 1),
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value.toLowerCase();
+                        });
+                      },
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                      decoration: InputDecoration(
+                        hintStyle: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        hintText: "Rechercher un produit...",
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 190, 53, 49),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Colors.white,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Container(
@@ -294,7 +304,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                   TextSpan(
                                     text: promoEleve, // Exemple: "10%"
                                     style: TextStyle(
-                                      color: Colors.redAccent,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        1,
+                                        54,
+                                        10,
+                                      ),
                                       fontWeight: FontWeight.bold,
                                       fontSize: 37,
                                     ),
@@ -322,7 +337,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
+                              backgroundColor: const Color.fromARGB(
+                                255,
+                                8,
+                                95,
+                                37,
+                              ),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 18,
@@ -354,7 +374,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     "Nos produits",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                    style: GoogleFonts.roboto(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -363,15 +386,70 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             TabBar(
               isScrollable: true,
               controller: _tabController,
-              unselectedLabelStyle: const TextStyle(color: Colors.black),
-              labelStyle: const TextStyle(fontSize: 14),
-              tabs: [
-                Tab(text: "Electronique"),
-                Tab(text: "Construction"),
-                Tab(text: "habillement"),
-                Tab(text: "Mode pour enfants"),
-                Tab(text: "Sports et bien être"),
-                Tab(text: "Electro-ménager"),
+              tabs: const [
+                Tab(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.all_inclusive, size: 24, color: Colors.blue),
+                      Text("Tout"),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.devices, size: 24, color: Colors.blue),
+                      Text("Electronique"),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.construction, size: 24, color: Colors.orange),
+                      Text("Construction"),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.checkroom, size: 24, color: Colors.pink),
+                      Text("Habillement"),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.child_care, size: 24, color: Colors.green),
+                      Text("Mode enfants"),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.fitness_center, size: 24, color: Colors.red),
+                      Text("Sports & bien-être"),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.kitchen, size: 24, color: Colors.purple),
+                      Text("Électro-ménager"),
+                    ],
+                  ),
+                ),
               ],
             ),
 
@@ -379,6 +457,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               child: TabBarView(
                 controller: _tabController,
                 children: [
+                  Allproduct(),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -469,8 +548,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                     stackTrace,
                                                   ) => const Center(
                                                     child: Icon(
-                                                      Icons
-                                                          .image_not_supported,
+                                                      Icons.image_not_supported,
                                                     ),
                                                   ),
                                               loadingBuilder:
@@ -505,12 +583,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                   padding: const EdgeInsets.all(
                                                     12,
                                                   ),
-                                                  color: const Color.fromARGB(
-                                                    221,
-                                                    202,
-                                                    202,
-                                                    202,
-                                                  ),
+                                                  color: Colors.white38,
                                                   child: Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
@@ -530,24 +603,58 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                             .ellipsis,
                                                       ),
                                                       const SizedBox(height: 4),
-                                                      Text(
-                                                        '$prix FCFA',
-                                                        style: const TextStyle(
-                                                          color: Color.fromARGB(
-                                                            255,
-                                                            51,
-                                                            110,
-                                                            6,
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            '$prix FCFA',
+                                                            style: const TextStyle(
+                                                              color:
+                                                                  Color.fromARGB(
+                                                                    255,
+                                                                    51,
+                                                                    110,
+                                                                    6,
+                                                                  ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
                                                           ),
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(height: 4),
-                                                      StarRating(
-                                                        rating: avis.toDouble(),
-                                                      ),
-                                                      // Tu peux rendre ça dynamique
+                                                          const SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      "${avis.toDouble()} ", // conversion en string + petit espace
+                                                                  style: const TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                const TextSpan(
+                                                                  text: "⭐",
+                                                                  style: TextStyle(
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ), // Tu peux rendre ça dynamique
                                                     ],
                                                   ),
                                                 ),
@@ -655,8 +762,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                     stackTrace,
                                                   ) => const Center(
                                                     child: Icon(
-                                                      Icons
-                                                          .image_not_supported,
+                                                      Icons.image_not_supported,
                                                     ),
                                                   ),
                                               loadingBuilder:
@@ -686,70 +792,81 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         12,
                                                       ),
                                                     ),
-                                                child: BackdropFilter(
-                                                  filter: ImageFilter.blur(
-                                                    sigmaX: 10,
-                                                    sigmaY: 10,
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.all(
+                                                    12,
                                                   ),
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          12,
+                                                  color: Colors.white38,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        nom,
+                                                        style: const TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.black87,
                                                         ),
-                                                    color: const Color.fromARGB(
-                                                      221,
-                                                      202,
-                                                      202,
-                                                      202,
-                                                    ),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          nom,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Colors
-                                                                    .black87,
-                                                              ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        Text(
-                                                          '$prix FCFA',
-                                                          style: const TextStyle(
-                                                            color:
-                                                                Color.fromARGB(
-                                                                  255,
-                                                                  51,
-                                                                  110,
-                                                                  6,
-                                                                ),
-                                                            fontWeight:
-                                                                FontWeight.w600,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            '$prix FCFA',
+                                                            style: const TextStyle(
+                                                              color:
+                                                                  Color.fromARGB(
+                                                                    255,
+                                                                    51,
+                                                                    110,
+                                                                    6,
+                                                                  ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
                                                           ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        StarRating(
-                                                          rating: avis
-                                                              .toDouble(),
-                                                        ), // Tu peux rendre ça dynamique
-                                                      ],
-                                                    ),
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      "${avis.toDouble()} ", // conversion en string + petit espace
+                                                                  style: const TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                const TextSpan(
+                                                                  text: "⭐",
+                                                                  style: TextStyle(
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                               ),
@@ -855,8 +972,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                     stackTrace,
                                                   ) => const Center(
                                                     child: Icon(
-                                                      Icons
-                                                          .image_not_supported,
+                                                      Icons.image_not_supported,
                                                     ),
                                                   ),
                                               loadingBuilder:
@@ -886,70 +1002,82 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         12,
                                                       ),
                                                     ),
-                                                child: BackdropFilter(
-                                                  filter: ImageFilter.blur(
-                                                    sigmaX: 10,
-                                                    sigmaY: 10,
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.all(
+                                                    12,
                                                   ),
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          12,
+                                                  color: Colors.white38,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        nom,
+                                                        style: const TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.black87,
                                                         ),
-                                                    color: const Color.fromARGB(
-                                                      221,
-                                                      202,
-                                                      202,
-                                                      202,
-                                                    ),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          nom,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Colors
-                                                                    .black87,
-                                                              ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        Text(
-                                                          '$prix FCFA',
-                                                          style: const TextStyle(
-                                                            color:
-                                                                Color.fromARGB(
-                                                                  255,
-                                                                  51,
-                                                                  110,
-                                                                  6,
-                                                                ),
-                                                            fontWeight:
-                                                                FontWeight.w600,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            '$prix FCFA',
+                                                            style: const TextStyle(
+                                                              color:
+                                                                  Color.fromARGB(
+                                                                    255,
+                                                                    51,
+                                                                    110,
+                                                                    6,
+                                                                  ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
                                                           ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        StarRating(
-                                                          rating: avis
-                                                              .toDouble(),
-                                                        ), // Tu peux rendre ça dynamique
-                                                      ],
-                                                    ),
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      "${avis.toDouble()} ", // conversion en string + petit espace
+                                                                  style: const TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                const TextSpan(
+                                                                  text: "⭐",
+                                                                  style: TextStyle(
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      // Tu peux rendre ça dynamique
+                                                    ],
                                                   ),
                                                 ),
                                               ),
@@ -1055,8 +1183,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                     stackTrace,
                                                   ) => const Center(
                                                     child: Icon(
-                                                      Icons
-                                                          .image_not_supported,
+                                                      Icons.image_not_supported,
                                                     ),
                                                   ),
                                               loadingBuilder:
@@ -1086,70 +1213,81 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         12,
                                                       ),
                                                     ),
-                                                child: BackdropFilter(
-                                                  filter: ImageFilter.blur(
-                                                    sigmaX: 10,
-                                                    sigmaY: 10,
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.all(
+                                                    12,
                                                   ),
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          12,
+                                                  color: Colors.white38,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        nom,
+                                                        style: const TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.black87,
                                                         ),
-                                                    color: const Color.fromARGB(
-                                                      221,
-                                                      202,
-                                                      202,
-                                                      202,
-                                                    ),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          nom,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Colors
-                                                                    .black87,
-                                                              ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        Text(
-                                                          '$prix FCFA',
-                                                          style: const TextStyle(
-                                                            color:
-                                                                Color.fromARGB(
-                                                                  255,
-                                                                  51,
-                                                                  110,
-                                                                  6,
-                                                                ),
-                                                            fontWeight:
-                                                                FontWeight.w600,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            '$prix FCFA',
+                                                            style: const TextStyle(
+                                                              color:
+                                                                  Color.fromARGB(
+                                                                    255,
+                                                                    51,
+                                                                    110,
+                                                                    6,
+                                                                  ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
                                                           ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        StarRating(
-                                                          rating: avis
-                                                              .toDouble(),
-                                                        ), // Tu peux rendre ça dynamique
-                                                      ],
-                                                    ),
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      "${avis.toDouble()} ", // conversion en string + petit espace
+                                                                  style: const TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                const TextSpan(
+                                                                  text: "⭐",
+                                                                  style: TextStyle(
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                               ),
@@ -1255,8 +1393,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                     stackTrace,
                                                   ) => const Center(
                                                     child: Icon(
-                                                      Icons
-                                                          .image_not_supported,
+                                                      Icons.image_not_supported,
                                                     ),
                                                   ),
                                               loadingBuilder:
@@ -1286,70 +1423,81 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         12,
                                                       ),
                                                     ),
-                                                child: BackdropFilter(
-                                                  filter: ImageFilter.blur(
-                                                    sigmaX: 10,
-                                                    sigmaY: 10,
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.all(
+                                                    12,
                                                   ),
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          12,
+                                                  color: Colors.white38,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        nom,
+                                                        style: const TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.black87,
                                                         ),
-                                                    color: const Color.fromARGB(
-                                                      221,
-                                                      202,
-                                                      202,
-                                                      202,
-                                                    ),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          nom,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Colors
-                                                                    .black87,
-                                                              ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        Text(
-                                                          '$prix FCFA',
-                                                          style: const TextStyle(
-                                                            color:
-                                                                Color.fromARGB(
-                                                                  255,
-                                                                  51,
-                                                                  110,
-                                                                  6,
-                                                                ),
-                                                            fontWeight:
-                                                                FontWeight.w600,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            '$prix FCFA',
+                                                            style: const TextStyle(
+                                                              color:
+                                                                  Color.fromARGB(
+                                                                    255,
+                                                                    51,
+                                                                    110,
+                                                                    6,
+                                                                  ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
                                                           ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        StarRating(
-                                                          rating: avis
-                                                              .toDouble(),
-                                                        ), // Tu peux rendre ça dynamique
-                                                      ],
-                                                    ),
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      "${avis.toDouble()} ", // conversion en string + petit espace
+                                                                  style: const TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                const TextSpan(
+                                                                  text: "⭐",
+                                                                  style: TextStyle(
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                               ),
@@ -1480,70 +1628,81 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         12,
                                                       ),
                                                     ),
-                                                child: BackdropFilter(
-                                                  filter: ImageFilter.blur(
-                                                    sigmaX: 10,
-                                                    sigmaY: 10,
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.all(
+                                                    12,
                                                   ),
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          12,
+                                                  color: Colors.white38,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        nom,
+                                                        style: const TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.black87,
                                                         ),
-                                                    color: const Color.fromARGB(
-                                                      221,
-                                                      202,
-                                                      202,
-                                                      202,
-                                                    ),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          nom,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Colors
-                                                                    .black87,
-                                                              ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        Text(
-                                                          '$prix FCFA',
-                                                          style: const TextStyle(
-                                                            color:
-                                                                Color.fromARGB(
-                                                                  255,
-                                                                  51,
-                                                                  110,
-                                                                  6,
-                                                                ),
-                                                            fontWeight:
-                                                                FontWeight.w600,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            '$prix FCFA',
+                                                            style: const TextStyle(
+                                                              color:
+                                                                  Color.fromARGB(
+                                                                    255,
+                                                                    51,
+                                                                    110,
+                                                                    6,
+                                                                  ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
                                                           ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        StarRating(
-                                                          rating: avis
-                                                              .toDouble(),
-                                                        ), // Tu peux rendre ça dynamique
-                                                      ],
-                                                    ),
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      "${avis.toDouble()} ", // conversion en string + petit espace
+                                                                  style: const TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                const TextSpan(
+                                                                  text: "⭐",
+                                                                  style: TextStyle(
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                               ),
