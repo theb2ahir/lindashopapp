@@ -104,14 +104,14 @@ class _InscriptionState extends State<Inscription> {
 
   InputDecoration _customDecoration(String label) {
     return InputDecoration(
-      labelStyle: const TextStyle(color: Color(0xFF02204B)),
+      labelStyle: const TextStyle(color: Colors.white),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFF02204B)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.green, width: 2),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 2),
       ),
       labelText: label,
     );
@@ -119,185 +119,281 @@ class _InscriptionState extends State<Inscription> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text("Inscription", style: GoogleFonts.roboto(fontSize: 28)),
-        centerTitle: true,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white,
+            const Color.fromARGB(255, 1, 30, 54),
+            const Color.fromARGB(255, 255, 82, 82),
+          ],
+        ),
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 20),
-          Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                "assets/articlesImages/LindaLogo2.png",
-                height: 220,
-              ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          title: Text(
+            "Inscription",
+            style: GoogleFonts.roboto(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: Theme(
-              data: ThemeData(
-                colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: const Color(0xFF02204B),
-                  onPrimary: Colors.white,
+          centerTitle: true,
+        ),
+        body: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(color: Colors.transparent),
+                height: 390,
+                width: double.infinity,
+                child: Theme(
+                  data: ThemeData(
+                    colorScheme: Theme.of(context).colorScheme.copyWith(
+                      primary: Colors.redAccent,
+                      onPrimary: Colors.white,
+                    ),
+                  ),
+                  child: Stepper(
+                    type: StepperType.horizontal,
+                    elevation: 8,
+                    margin: const EdgeInsets.all(16),
+                    currentStep: _stepIndex,
+                    onStepContinue: () {
+                      if (_stepIndex < 2) {
+                        setState(() => _stepIndex++);
+                      } else {
+                        if (_allFieldsFilled([
+                          nameCtrl,
+                          emailCtrl,
+                          passwordCtrl,
+                          phonectrl,
+                          regionCtrl,
+                          villeCtrl,
+                          quartierCtrl,
+                          precisionCtrl,
+                        ])) {
+                          signup();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: const Color(0xFF02204B),
+                              content: Row(
+                                children: const [
+                                  Icon(Icons.error, color: Colors.red),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Veuillez remplir tous les champs',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    onStepCancel: () {
+                      if (_stepIndex > 0) {
+                        setState(() => _stepIndex--);
+                      }
+                    },
+                    steps: [
+                      Step(
+                        title: const Text("Infos"),
+                        isActive: _stepIndex >= 0,
+                        content: Column(
+                          children: [
+                            TextField(
+                              cursorColor: Colors.white,
+                              style: const TextStyle(color: Colors.white),
+                              controller: nameCtrl,
+                              decoration: _customDecoration('Nom'),
+                            ),
+                            const SizedBox(height: 10),
+                            TextField(
+                              cursorColor: Colors.white,
+                              style: const TextStyle(color: Colors.white),
+
+                              controller: emailCtrl,
+                              decoration: _customDecoration('Email'),
+                            ),
+                            const SizedBox(height: 10),
+                            TextField(
+                              cursorColor: Colors.white,
+                              style: const TextStyle(color: Colors.white),
+
+                              obscureText: _obscurePassword,
+                              controller: passwordCtrl,
+                              decoration:
+                                  _customDecoration(
+                                    'Mot de passe (max 9 caractères)',
+                                  ).copyWith(
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () => setState(
+                                        () => _obscurePassword =
+                                            !_obscurePassword,
+                                      ),
+                                    ),
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Step(
+                        title: const Text("Contact"),
+                        isActive: _stepIndex >= 1,
+                        content: TextField(
+                          cursorColor: Colors.white,
+                          style: const TextStyle(color: Colors.white),
+                          controller: phonectrl,
+                          decoration: _customDecoration('Numéro de téléphone'),
+                        ),
+                      ),
+                      Step(
+                        title: const Text("Adresse"),
+                        isActive: _stepIndex >= 2,
+                        content: Column(
+                          children: [
+                            TextField(
+                              cursorColor: Colors.white,
+                              style: const TextStyle(color: Colors.white),
+
+                              controller: regionCtrl,
+                              decoration: _customDecoration('Région'),
+                            ),
+                            const SizedBox(height: 10),
+                            TextField(
+                              cursorColor: Colors.white,
+                              style: const TextStyle(color: Colors.white),
+
+                              controller: villeCtrl,
+                              decoration: _customDecoration('Ville'),
+                            ),
+                            const SizedBox(height: 10),
+                            TextField(
+                              cursorColor: Colors.white,
+                              style: const TextStyle(color: Colors.white),
+
+                              controller: quartierCtrl,
+                              decoration: _customDecoration('Quartier'),
+                            ),
+                            const SizedBox(height: 10),
+                            TextField(
+                              cursorColor: Colors.white,
+                              style: const TextStyle(color: Colors.white),
+
+                              controller: precisionCtrl,
+                              decoration: _customDecoration(
+                                'Indice pour vous retrouver',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Stepper(
-                type: StepperType.horizontal,
-                elevation: 8,
-                margin: const EdgeInsets.all(16),
-                currentStep: _stepIndex,
-                onStepContinue: () {
-                  if (_stepIndex < 2) {
-                    setState(() => _stepIndex++);
-                  } else {
-                    if (_allFieldsFilled([
-                      nameCtrl,
-                      emailCtrl,
-                      passwordCtrl,
-                      phonectrl,
-                      regionCtrl,
-                      villeCtrl,
-                      quartierCtrl,
-                      precisionCtrl,
-                    ])) {
-                      signup();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: const Color(0xFF02204B),
-                          content: Row(
-                            children: const [
-                              Icon(Icons.error, color: Colors.red),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Veuillez remplir tous les champs',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-                  }
-                },
-                onStepCancel: () {
-                  if (_stepIndex > 0) {
-                    setState(() => _stepIndex--);
-                  }
-                },
-                steps: [
-                  Step(
-                    title: const Text("Infos"),
-                    isActive: _stepIndex >= 0,
-                    content: Column(
-                      children: [
-                        TextField(
-                          controller: nameCtrl,
-                          decoration: _customDecoration('Nom'),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: emailCtrl,
-                          decoration: _customDecoration('Email'),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          obscureText: _obscurePassword,
-                          controller: passwordCtrl,
-                          decoration:
-                              _customDecoration(
-                                'Mot de passe (max 9 caractères)',
-                              ).copyWith(
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: const Color(0xFF02204B),
-                                  ),
-                                  onPressed: () => setState(
-                                    () => _obscurePassword = !_obscurePassword,
-                                  ),
-                                ),
-                              ),
-                        ),
-                      ],
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "📌 Suivez ces étapes pour vous inscrire correctement :",
+                      style: GoogleFonts.roboto(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  Step(
-                    title: const Text("Contact"),
-                    isActive: _stepIndex >= 1,
-                    content: TextField(
-                      controller: phonectrl,
-                      decoration: _customDecoration('Numéro de téléphone'),
-                    ),
-                  ),
-                  Step(
-                    title: const Text("Adresse"),
-                    isActive: _stepIndex >= 2,
-                    content: Column(
-                      children: [
-                        TextField(
-                          controller: regionCtrl,
-                          decoration: _customDecoration('Région'),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: villeCtrl,
-                          decoration: _customDecoration('Ville'),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: quartierCtrl,
-                          decoration: _customDecoration('Quartier'),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: precisionCtrl,
-                          decoration: _customDecoration(
-                            'Indice pour vous retrouver',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
 
-          Padding(
-            padding: const EdgeInsets.all(19.0),
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("vous avez deja un compte ?"),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => Connection()),
-                      );
-                    },
-                    child: Text("connectez-vous"),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    Text(
+                      "1️⃣ Remplissez vos informations personnelles (Nom, Email, Mot de passe).",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "2️⃣ Entrez un numéro de téléphone valide pour être contacté.",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "3️⃣ Complétez votre adresse avec précision (Région, Ville, Quartier).",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "4️⃣ Ajoutez un indice pour mieux vous retrouver.",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "✅ Vérifiez que tous les champs sont remplis avant de valider.",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.all(19.0),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "vous avez deja un compte ?",
+                        style: GoogleFonts.roboto(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => Connection()),
+                          );
+                        },
+                        child: Text(
+                          "connectez-vous",
+                          style: TextStyle(
+                            color: Colors.blueAccent,
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.blueAccent,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

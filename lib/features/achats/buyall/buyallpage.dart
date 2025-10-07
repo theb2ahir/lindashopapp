@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lindashopp/notifucation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BuyAllPage extends StatefulWidget {
@@ -47,6 +48,103 @@ class _BuyAllPageState extends State<BuyAllPage> {
         ),
       );
     }
+  }
+
+  void showCommandeDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 10,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Column(
+              children: [
+                Text(
+                  "Récapitulatif de la commande , veuillez faire une capture d'ecran de l'id de transaction",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: widget.commandes.length,
+                    itemBuilder: (context, index) {
+                      final item = widget.commandes[index];
+                      return Card(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              item['productImageUrl'] ?? '',
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.image),
+                            ),
+                          ),
+                          title: Text(
+                            item['productname'] ?? '',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Quantité : ${item['quantity']}x ${item['productprice']}",
+                              ),
+                              const SizedBox(height: 3),
+                              Text("transation id : $transactionId"),
+                              Text("Réf: ${referenceController.text.trim()}"),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "id de transaction : $transactionId",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Total : $total FCFA",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    minimumSize: Size(double.infinity, 45),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Fermer"),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   String generateTransactionId() {
@@ -149,14 +247,13 @@ class _BuyAllPageState extends State<BuyAllPage> {
               'type': 'commande', // utile pour filtrer
               'date': DateTime.now(),
             });
+        NotificationService.showNotification(
+          title: "Achat réussi 🎉",
+          message:
+              "Merci pour vos achats , vous serez livré dans les plus brefs délais !",
+        );
+        showCommandeDialog();
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Commande enregistrée avec succès !"),
-          backgroundColor: Colors.green,
-        ),
-      );
 
       Navigator.pop(context);
     } catch (e) {
@@ -169,7 +266,12 @@ class _BuyAllPageState extends State<BuyAllPage> {
   @override
   Widget build(BuildContext context) {
     final total = getTotalPrice();
+    int livraisonsPayantes = widget.commandes
+        .where((item) => item['livraison'] != 'true')
+        .length;
 
+    double fraisLivraison = livraisonsPayantes * 2000;
+    double totalGeneral = total + fraisLivraison;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -257,13 +359,29 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                     ],
                                   ),
                                 ),
-                                Text(
-                                  '${(int.tryParse(item['productprice'].toString()) ?? 0) * (int.tryParse(item['quantity'].toString()) ?? 0)} FCFA',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
+                                Column(
+                                  children: [
+                                    Text(
+                                      (item['livraison'] == 'true')
+                                          ? 'Livraison gratuite'
+                                          : 'Livraison payante',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: (item['livraison'] == 'true')
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${(int.tryParse(item['productprice'].toString()) ?? 0) * (int.tryParse(item['quantity'].toString()) ?? 0)} FCFA',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -273,116 +391,180 @@ class _BuyAllPageState extends State<BuyAllPage> {
                     },
                   ),
                 ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Choisissez votre réseau et lancez le code USSD :",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    CheckboxListTile(
-                      title: const Text("Moov"),
-                      value: reseauChoisi == "Moov",
-                      onChanged: (value) {
-                        setState(() {
-                          reseauChoisi = value! ? "Moov" : null;
-                        });
-                      },
-                    ),
-                    CheckboxListTile(
-                      title: const Text("Yas"),
-                      value: reseauChoisi == "Yas",
-                      onChanged: (value) {
-                        setState(() {
-                          reseauChoisi = value! ? "Yas" : null;
-                        });
-                      },
-                    ),
 
-                    // Affichage du code USSD
-                    if (reseauChoisi != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: TextButton(
-                          onPressed: () {
-                            lancerUSSD(ussdCodes[reseauChoisi]!);
-                          },
-                          child: Text(
-                            "Lancer le code USSD",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.teal,
+                const SizedBox(height: 16),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 🧾 Facture style "carte"
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
                             ),
-                          ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Facture",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Total panier"),
+                                Text(
+                                  "${total} FCFA", // ← total panier
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Frais de livraison"),
+                                Text(
+                                  "${fraisLivraison.toStringAsFixed(0)} FCFA",
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "Total",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                Text(
+                                  "${totalGeneral.toStringAsFixed(0)} FCFA",
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                  ],
-                ),
 
-                const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
-                // Référence de paiement
-                Row(
-                  children: [
-                    const Text("Référence fournie par l'opérateur : "),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: referenceController,
-                        decoration: InputDecoration(
-                          labelText: 'reference ......',
-                          border: OutlineInputBorder(
+                      // 🟢 Réseaux (checkboxes)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Choisir le réseau",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          CheckboxListTile(
+                            title: const Text("Moov"),
+                            value: reseauChoisi == "Moov",
+                            onChanged: (value) {
+                              setState(() {
+                                reseauChoisi = value! ? "Moov" : null;
+                              });
+                            },
+                          ),
+                          CheckboxListTile(
+                            title: const Text("Yas"),
+                            value: reseauChoisi == "Yas",
+                            onChanged: (value) {
+                              setState(() {
+                                reseauChoisi = value! ? "Yas" : null;
+                              });
+                            },
+                          ),
+                          if (reseauChoisi != null)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8.0,
+                              ),
+                              child: TextButton(
+                                onPressed: () {
+                                  lancerUSSD(ussdCodes[reseauChoisi]!);
+                                },
+                                child: Text(
+                                  "Lancer le code USSD (${ussdCodes[reseauChoisi]})",
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.teal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // 🧾 Référence opérateur
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Entrer la référence fournie par l'opérateur :"),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: referenceController,
+                            decoration: InputDecoration(
+                              labelText: 'Référence...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // 🔘 Bouton de validation
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
+                        onPressed: () => envoyerInfosAuServeur(context),
+                        icon: const Icon(Icons.check, color: Colors.white),
+                        label: const Text(
+                          "Confirmer la commande",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Total",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 23,
-                      ),
-                    ),
-                    Text(
-                      '$total FCFA',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  onPressed: () => envoyerInfosAuServeur(context),
-                  icon: const Icon(Icons.check, color: Colors.white),
-                  label: const Text(
-                    "Valider le panier",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    ],
                   ),
                 ),
               ],

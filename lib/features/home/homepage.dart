@@ -1,9 +1,7 @@
-import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lindashopp/features/avis/avis.dart';
 import 'package:lindashopp/features/produits/allproduct.dart';
 import 'package:lindashopp/features/produits/details/ProductDetailPage.dart';
 import 'package:lindashopp/features/favoris/favoris.dart';
@@ -99,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
-          title: Text("Lindashopp", style: GoogleFonts.lobster(fontSize: 34)),
+          title: Text("Lindashopp", style: GoogleFonts.roboto(fontSize: 24)),
           actions: [
             Stack(
               alignment: Alignment.topRight,
@@ -234,16 +232,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       },
                       style: const TextStyle(fontSize: 18, color: Colors.white),
                       decoration: InputDecoration(
-                        hintStyle: const TextStyle(
-                          color: Colors.white,
+                        hintStyle: TextStyle(
+                          color: Colors.black,
                           fontWeight: FontWeight.bold,
                         ),
                         hintText: "Rechercher un produit...",
                         filled: true,
-                        fillColor: const Color.fromARGB(255, 190, 53, 49),
+                        fillColor: const Color.fromARGB(131, 190, 54, 49),
                         prefixIcon: const Icon(
                           Icons.search,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                         contentPadding: const EdgeInsets.symmetric(vertical: 0),
                         border: OutlineInputBorder(
@@ -258,9 +256,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
 
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(8.0),
               child: Container(
-                height: 160,
+                height: 100,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
@@ -284,49 +282,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                     Positioned(
                       right: 6,
-                      bottom: 25,
+                      bottom: 16,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            width: 150,
-                            child: Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: 'Jusqu\'à ',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 20,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: promoEleve, // Exemple: "10%"
-                                    style: TextStyle(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        1,
-                                        54,
-                                        10,
-                                      ),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 37,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: ' de réduction',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: () {
                               Navigator.push(
@@ -367,24 +326,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Nos produits",
-                    style: GoogleFonts.roboto(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
+            const SizedBox(height: 12),
             TabBar(
               isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              labelPadding: EdgeInsets.symmetric(horizontal: 20),
               controller: _tabController,
               tabs: const [
                 Tab(
@@ -392,7 +338,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.all_inclusive, size: 24, color: Colors.blue),
-                      Text("Tout"),
+                      Text("La totalité"),
                     ],
                   ),
                 ),
@@ -490,11 +436,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             return GridView.builder(
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2, // ✅ 2 colonnes
-                                    crossAxisSpacing: 10,
-                                    mainAxisSpacing: 10,
-                                    childAspectRatio:
-                                        0.75, // Ajuste la hauteur/largeur des cases
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 2,
+                                    mainAxisSpacing: 2,
+                                    childAspectRatio: 0.9,
                                   ),
 
                               itemCount: produits.length,
@@ -705,11 +650,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               padding: const EdgeInsets.all(10),
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2, // ✅ 2 colonnes
-                                    crossAxisSpacing: 10,
-                                    mainAxisSpacing: 10,
-                                    childAspectRatio:
-                                        0.75, // Ajuste la hauteur/largeur des cases
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 2,
+                                    mainAxisSpacing: 2,
+                                    childAspectRatio: 0.9,
                                   ),
                               itemCount: produits.length,
                               itemBuilder: (context, index) {
@@ -918,8 +862,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
-                                    crossAxisSpacing: 10,
-                                    childAspectRatio: 0.75,
+                                    crossAxisSpacing: 2,
+                                    mainAxisSpacing: 2,
+                                    childAspectRatio: 0.9,
                                   ),
                               itemCount: produits.length,
                               itemBuilder: (context, index) {
@@ -1129,8 +1074,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
-                                    crossAxisSpacing: 10,
-                                    childAspectRatio: 0.75,
+                                    crossAxisSpacing: 2,
+                                    mainAxisSpacing: 2,
+                                    childAspectRatio: 0.9,
                                   ),
                               itemCount: produits.length,
                               itemBuilder: (context, index) {
@@ -1339,8 +1285,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
-                                    crossAxisSpacing: 10,
-                                    childAspectRatio: 0.75,
+                                    crossAxisSpacing: 2,
+                                    mainAxisSpacing: 2,
+                                    childAspectRatio: 0.9,
                                   ),
                               itemCount: produits.length,
                               itemBuilder: (context, index) {
@@ -1544,8 +1491,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
-                                    crossAxisSpacing: 10,
-                                    childAspectRatio: 0.75,
+                                    crossAxisSpacing: 2,
+                                    mainAxisSpacing: 2,
+                                    childAspectRatio: 0.9,
                                   ),
                               itemCount: produits.length,
                               itemBuilder: (context, index) {

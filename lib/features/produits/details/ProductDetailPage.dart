@@ -102,13 +102,26 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           // Fermer le loading dialog
           Navigator.of(context).pop();
 
-          
-
-        } else {
-          Navigator.of(context).pop(); // Fermer le dialog
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Erreur : données utilisateur introuvables"),
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.grey[900],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              duration: const Duration(seconds: 3),
+              content: Row(
+                children: const [
+                  Icon(Icons.check_circle, color: Colors.lightGreenAccent),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Commande ajoutée au panier avec succès!',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }

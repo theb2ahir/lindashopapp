@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lindashopp/features/avis/avis.dart';
 import 'package:lindashopp/features/produits/details/ProductDetailPage.dart';
 // Assurez-vous que ce fichier existe
 
@@ -56,10 +55,10 @@ class Allproduct extends StatelessWidget {
           child: GridView.builder(
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // ✅ 2 colonnes
-              crossAxisSpacing: 5,
-              mainAxisSpacing: 5,
-              childAspectRatio: 0.75, // Ajuste la hauteur/largeur des cases
+              crossAxisCount: 3, // 3 colonnes
+              crossAxisSpacing: 2,
+              mainAxisSpacing: 2,
+              childAspectRatio: 0.8,
             ),
             physics: const NeverScrollableScrollPhysics(),
             itemCount: products.length,
@@ -124,7 +123,7 @@ class Allproduct extends StatelessWidget {
                               child: Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(12),
-                                color:Colors.white38,
+                                color: Colors.white30,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
@@ -132,16 +131,15 @@ class Allproduct extends StatelessWidget {
                                     Text(
                                       nom,
                                       style: const TextStyle(
-                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 4),
-                                    Row(
+                                    Column(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.start,
                                       children: [
                                         Text(
                                           '$prix FCFA',

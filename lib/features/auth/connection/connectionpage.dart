@@ -148,213 +148,234 @@ class _ConnectionState extends State<Connection> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: Text("Connexion", style: GoogleFonts.roboto(fontSize: 28)),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white,
+            const Color.fromARGB(255, 1, 30, 54),
+            const Color.fromARGB(255, 255, 82, 82),
+          ],
+        ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 10),
-                  Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          "assets/articlesImages/LindaLogo2.png",
-                          height: 300,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: emailCtrl,
-                            decoration: InputDecoration(
-                              labelStyle: const TextStyle(
-                                color: Color(0xFF02204B),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF02204B),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Colors.green,
-                                  width: 2,
-                                ),
-                              ),
-                              labelText: 'Email',
-                            ),
-                          ),
-                          const SizedBox(height: 25),
-                          TextField(
-                            controller: passwordCtrl,
-                            decoration: InputDecoration(
-                              labelStyle: const TextStyle(
-                                color: Color(0xFF02204B),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF02204B),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Colors.green,
-                                  width: 2,
-                                ),
-                              ),
-
-                              labelText: 'Mot de passe',
-                              suffixIcon: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                ),
-                              ),
-                            ),
-                            obscureText: _obscurePassword,
-                          ),
-                          const SizedBox(height: 45),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
-                              style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all<Color>(
-                                  const Color(0xFF02204B),
-                                ),
-                              ),
-                              onPressed: () => login(context),
-                              child: Text(
-                                "Se connecter",
-                                style: const TextStyle(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          title: Text(
+            "Connexion",
+            style: GoogleFonts.roboto(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            TextField(
+                              style: const TextStyle(color: Colors.white),
+                              cursorColor: Colors.white,
+                              controller: emailCtrl,
+                              decoration: InputDecoration(
+                                labelStyle: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: Colors.redAccent,
+                                    width: 2,
+                                  ),
+                                ),
+                                labelText: 'Email',
+                              ),
+                            ),
+                            const SizedBox(height: 25),
+                            TextField(
+                              style: const TextStyle(color: Colors.white),
+                              cursorColor: Colors.white,
+                              controller: passwordCtrl,
+                              decoration: InputDecoration(
+                                labelStyle: const TextStyle(
+                                  color:Colors.white,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: Colors.redAccent,
+                                    width: 2,
+                                  ),
+                                ),
+
+                                labelText: 'Mot de passe',
+                                suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    color: Colors.white,
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                ),
+                              ),
+                              obscureText: _obscurePassword,
+                            ),
+                            const SizedBox(height: 45),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      WidgetStateProperty.all<Color>(
+                                        const Color.fromARGB(255, 255, 82, 82),
+                                      ),
+                                ),
+                                onPressed: () => login(context),
+                                child: Text(
+                                  "Se connecter",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
 
-                          const SizedBox(height: 30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  final email = emailCtrl.text.trim();
+                            const SizedBox(height: 30),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    final email = emailCtrl.text.trim();
 
-                                  if (email.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Veuillez entrer votre adresse email.',
+                                    if (email.isEmpty) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Veuillez entrer votre adresse email.',
+                                          ),
                                         ),
+                                      );
+                                      return;
+                                    }
+
+                                    FirebaseAuth.instance
+                                        .sendPasswordResetEmail(email: email)
+                                        .then((_) {
+                                          showDialog(
+                                            context: context,
+                                            builder: (_) => AlertDialog(
+                                              title: const Text('Email envoyé'),
+                                              content: const Text(
+                                                'Un lien de réinitialisation a été envoyé à votre adresse email si vous ne le voyez pas , verifiez vos spams.',
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text('OK'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        })
+                                        .catchError((e) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Erreur : ${e.message ?? e.toString()}',
+                                              ),
+                                            ),
+                                          );
+                                        });
+                                  },
+                                  child: const Text(
+                                    "Mot de passe oublié ?",
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Colors.blueAccent
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("Nouveau sur Linda Shop ?" , style: GoogleFonts.roboto(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                )),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const Inscription(),
                                       ),
                                     );
-                                    return;
-                                  }
-
-                                  FirebaseAuth.instance
-                                      .sendPasswordResetEmail(email: email)
-                                      .then((_) {
-                                        showDialog(
-                                          context: context,
-                                          builder: (_) => AlertDialog(
-                                            title: const Text('Email envoyé'),
-                                            content: const Text(
-                                              'Un lien de réinitialisation a été envoyé à votre adresse email si vous ne le voyez pas , verifiez vos spams.',
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                child: const Text('OK'),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      })
-                                      .catchError((e) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Erreur : ${e.message ?? e.toString()}',
-                                            ),
-                                          ),
-                                        );
-                                      });
-                                },
-                                child: const Text(
-                                  "Mot de passe oublié ?",
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text("Nouveau sur Linda Shop ?"),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const Inscription(),
+                                  },
+                                  child: Text(
+                                    "Inscrivez-vous",
+                                    style: const TextStyle(
+                                      color: Colors.blueAccent,
+                                      fontSize: 16,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Colors.blueAccent,
                                     ),
-                                  );
-                                },
-                                child: Text(
-                                  "Inscrivez-vous",
-                                  style: const TextStyle(
-                                    color: Colors.blueAccent,
-                                    fontSize: 16,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: Colors.blueAccent,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

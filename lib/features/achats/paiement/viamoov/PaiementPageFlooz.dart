@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lindashopp/notifucation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 // ignore_for_file: file_names, unrelated_type_equality_checks, use_build_context_synchronously
 
@@ -160,30 +161,118 @@ class _PaiementPage2State extends State<PaiementPage2> {
                     });
 
                 setState(() => isLoading = false);
-
+                NotificationService.showNotification(
+                  title: "Achat réussi 🎉",
+                  message:
+                      "Merci pour votre achat de ${item['quantity']} x ${item['productname']}",
+                  imageUrl: "${item['productImageUrl']}",
+                );
                 showDialog(
                   context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text("Confirmation"),
-                    content: const Text("Commande enregistrée avec succès !"),
-                    actions: [
-                      TextButton(
-                        onPressed: () async {
-                          Navigator.pop(context); // Fermer la boîte de dialogue
-
-                          Navigator.pop(
-                            context,
-                          ); // Revenir à la page précédente
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Reçu PDF téléchargé."),
+                  builder: (_) => Dialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    elevation: 10,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Confirmation",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          );
-                        },
-                        child: const Text("OK"),
+                            const SizedBox(height: 12),
+                            Text(
+                              "Sauvegarder en faisant une capture d'écran ces informations.",
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundColor: Colors.grey[200],
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(40),
+                                child: Image.network(
+                                  item['productImageUrl'] ?? '',
+                                  height: 80,
+                                  width: 80,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      Icon(Icons.image, size: 40),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Card(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              color: Colors.grey[100],
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Nom du produit : ${item['productname']}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      "Quantité : ${item['quantity']}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      "ID de la Transaction : $transactionId",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      "Prix total : $total FCFA",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      "Référence : $reference",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                minimumSize: Size(double.infinity, 45),
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Fermer"),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 );
               } catch (e) {
