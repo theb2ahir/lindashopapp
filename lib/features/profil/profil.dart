@@ -176,37 +176,48 @@ class _ProfileState extends State<Profile> {
                     );
                     final url = 'https://wa.me/$whatsappNumber?text=$message';
 
-                    if (await canLaunchUrl(Uri.parse(url))) {
+                    try {
                       await launchUrl(
                         Uri.parse(url),
                         mode: LaunchMode.externalApplication,
                       );
-                    } else {
+                    } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Impossible d’ouvrir WhatsApp'),
+                          content: Text(
+                            'Impossible d’ouvrir WhatsApp. Vérifie qu’il est installé.',
+                          ),
                         ),
                       );
                     }
                   },
                 ),
+
                 ListTile(
                   leading: const Icon(Icons.phone, color: Colors.black),
                   title: const Text('Appeler'),
                   trailing: const Icon(Icons.arrow_right),
                   onTap: () async {
-                    const phoneNumber = 'tel:+22892349698';
-                    if (await canLaunchUrl(Uri.parse(phoneNumber))) {
-                      await launchUrl(Uri.parse(phoneNumber));
-                    } else {
+                    const phoneNumber = '+22892349698';
+                    final Uri telUri = Uri.parse('tel:$phoneNumber');
+
+                    try {
+                      await launchUrl(
+                        telUri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Impossible de passer l’appel'),
+                          content: Text(
+                            'Impossible de passer l’appel. Vérifie les permissions.',
+                          ),
                         ),
                       );
                     }
                   },
                 ),
+
                 ListTile(
                   leading: const Icon(
                     Icons.question_answer,

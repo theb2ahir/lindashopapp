@@ -13,7 +13,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _animation;
 
   final Duration splashDuration = const Duration(seconds: 8);
 
@@ -26,7 +25,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       duration: splashDuration,
     );
 
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
 
     _controller.forward();
 
@@ -61,28 +59,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: 60),
-              AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return LinearProgressIndicator(
-                    value: _animation.value,
-                    minHeight: 6,
-                    backgroundColor: const Color.fromARGB(255, 194, 52, 52),
-                    color:Colors.white,
-                  );
-                },
-              ),
+
               const SizedBox(height: 20),
-              const Text(
-                "l'application se charge veuillez patienter",
-                style: TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Pacifico',
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
-              ),
             ],
           ),
         ),

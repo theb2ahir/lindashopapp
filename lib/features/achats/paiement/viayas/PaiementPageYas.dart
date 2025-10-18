@@ -1,9 +1,10 @@
-// ignore_for_file: file_names, unrelated_type_equality_checks, use_build_context_synchronously
+// ignore_for_file: file_names, unrelated_type_equality_checks, use_build_context_synchronously, unused_local_variable
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/notifucation_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -46,15 +47,47 @@ class _PaiementPageState extends State<PaiementPage> {
     return connectivityResult != ConnectivityResult.none;
   }
 
-  void lancerUSSD(String codeUSSD) async {
-    final String encoded = Uri.encodeComponent(codeUSSD);
-    final Uri ussdUri = Uri(scheme: 'tel', path: encoded);
+  bool _permissionChecked = false;
+  Future<void> _checkAndRequestPermission() async {
+    // Vérifie si la permission est déjà accordée
+    if (await Permission.phone.isGranted) {
+      _permissionChecked = true;
+      return;
+    }
 
-    if (await canLaunchUrl(ussdUri)) {
-      await launchUrl(ussdUri);
+    // Vérifie si la permission est refusée définitivement
+    if (await Permission.phone.isPermanentlyDenied) {
+      // Redirige vers les paramètres
+      await openAppSettings();
+      return;
+    }
+
+    // Demande la permission une seule fois
+    final status = await Permission.phone.request();
+    if (status.isGranted) {
+      _permissionChecked = true;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Impossible d’ouvrir le code USSD.")),
+        const SnackBar(content: Text("Permission d'appel refusée")),
+      );
+    }
+  }
+
+  Future<void> lancerUSSD(String codeUSSD) async {
+    // Vérifie et demande la permission une seule fois
+    if (!_permissionChecked) {
+      await _checkAndRequestPermission();
+      if (!_permissionChecked) return; // permission refusée
+    }
+
+    final encoded = Uri.encodeComponent(codeUSSD);
+    final Uri ussdUri = Uri.parse('tel:$encoded');
+
+    try {
+      await launchUrl(ussdUri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Impossible de lancer le code USSD : $e")),
       );
     }
   }
@@ -329,10 +362,22 @@ class _PaiementPageState extends State<PaiementPage> {
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
-                    onPressed: () {
-                      lancerUSSD(
-                        "*145*1*$total*92349698*1#",
-                      ); // USSD personnalisé
+                    onPressed: () async {
+                      final codeUSSD = "*155*1*1*96368151*96368151*$total*1#";
+                      final encoded = Uri.encodeComponent(codeUSSD);
+                      final Uri ussdUri = Uri.parse('tel:$encoded');
+
+                      try {
+                        await lancerUSSD(codeUSSD);
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "Impossible de lancer le code USSD : $e",
+                            ),
+                          ),
+                        );
+                      }
                     },
                     child: const Text("Lancer le code USSD"),
                   ),

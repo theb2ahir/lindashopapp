@@ -36,6 +36,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         .collection('users')
         .doc(uid)
         .get();
+
+    if (!mounted) return; // <-- vérifie que le widget est encore actif
+
     setState(() {
       userData = doc.data()!;
     });

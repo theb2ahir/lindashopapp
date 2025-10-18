@@ -56,9 +56,9 @@ class Allproduct extends StatelessWidget {
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3, // 3 colonnes
-              crossAxisSpacing: 2,
+              crossAxisSpacing: 4,
               mainAxisSpacing: 2,
-              childAspectRatio: 0.8,
+              childAspectRatio: 0.5,
             ),
             physics: const NeverScrollableScrollPhysics(),
             itemCount: products.length,
@@ -85,20 +85,21 @@ class Allproduct extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: const [
                         BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.1),
+                          color: Color.fromRGBO(255, 255, 255, 0.102),
                           blurRadius: 12,
                           offset: Offset(0, 6),
                         ),
                       ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Stack(
-                        children: [
-                          // Image produit
-                          Image.network(
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
                             imageUrl,
-                            fit: BoxFit.fill,
+                            width: double.infinity,
+                            height: 150,
+                            fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
                                 const Center(
                                   child: Icon(Icons.image_not_supported),
@@ -112,77 +113,50 @@ class Allproduct extends StatelessWidget {
                               );
                             },
                           ),
+                        ),
+                        const SizedBox(height: 6),
 
-                          // Overlay flouté
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(12),
-                              ),
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(12),
-                                color: Colors.white30,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              nom,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "$prix fcfa",
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      nom,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
+                                    Icon(
+                                      size: 12,
+                                      Icons.star,
+                                      color: avis > 3
+                                          ? Colors.yellow
+                                          : Colors.red,
                                     ),
-                                    const SizedBox(height: 4),
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          '$prix FCFA',
-                                          style: const TextStyle(
-                                            color: Color.fromARGB(
-                                              255,
-                                              51,
-                                              110,
-                                              6,
-                                            ),
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text.rich(
-                                          TextSpan(
-                                            children: [
-                                              TextSpan(
-                                                text:
-                                                    "${avis.toDouble()} ", // conversion en string + petit espace
-                                                style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              const TextSpan(
-                                                text: "⭐",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ), // Tu peux rendre ça dynamique
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      avis.toStringAsFixed(1),
+                                    ), // ✅ affiche "3.5"2
                                   ],
                                 ),
-                              ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      
+                      
+                      ],
                     ),
                   ),
                 ),

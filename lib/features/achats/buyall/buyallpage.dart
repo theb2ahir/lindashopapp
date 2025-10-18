@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/notifucation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class BuyAllPage extends StatefulWidget {
   final List<Map<String, dynamic>> commandes;
@@ -24,28 +25,56 @@ class _BuyAllPageState extends State<BuyAllPage> {
   void initState() {
     super.initState();
     transactionId = generateTransactionId();
-    total = getTotalPrice(); // ← Initialisation ici
+    total = getTotalPrice();
+    final totalString = total.toInt().toString();
     ussdCodes.addAll({
-      'Moov': "*155*1*1*96368151*96368151*$total*1#",
-      'Yas': "*145*1*$total*92349698*1#",
+      'Moov': "*155*1*1*96368151*96368151*$totalString*1#",
+      'Yas': "*145*1*$totalString*92349698*1#",
     });
   }
 
-  void lancerUSSD(String codeUSSD) async {
-    final String encoded = codeUSSD
-        .replaceAll('*', Uri.encodeComponent('*'))
-        .replaceAll('#', Uri.encodeComponent('#'));
-    final Uri ussdUri = Uri.parse("tel:$encoded");
+  bool _permissionChecked = false;
 
-    if (await canLaunchUrl(ussdUri)) {
-      await launchUrl(ussdUri);
+  Future<void> _checkAndRequestPermission() async {
+    // Vérifie si la permission est déjà accordée
+    if (await Permission.phone.isGranted) {
+      _permissionChecked = true;
+      return;
+    }
+
+    // Vérifie si la permission est refusée définitivement
+    if (await Permission.phone.isPermanentlyDenied) {
+      // Redirige vers les paramètres
+      await openAppSettings();
+      return;
+    }
+
+    // Demande la permission une seule fois
+    final status = await Permission.phone.request();
+    if (status.isGranted) {
+      _permissionChecked = true;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Impossible de lancer le code USSD. Vérifiez les permissions ou testez sur un vrai téléphone.",
-          ),
-        ),
+        const SnackBar(content: Text("Permission d'appel refusée")),
+      );
+    }
+  }
+
+  Future<void> lancerUSSD(String codeUSSD) async {
+    // Vérifie et demande la permission une seule fois
+    if (!_permissionChecked) {
+      await _checkAndRequestPermission();
+      if (!_permissionChecked) return; // permission refusée
+    }
+
+    final encoded = Uri.encodeComponent(codeUSSD);
+    final Uri ussdUri = Uri.parse('tel:$encoded');
+
+    try {
+      await launchUrl(ussdUri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Impossible de lancer le code USSD : $e")),
       );
     }
   }
@@ -510,7 +539,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                   lancerUSSD(ussdCodes[reseauChoisi]!);
                                 },
                                 child: Text(
-                                  "Lancer le code USSD (${ussdCodes[reseauChoisi]})",
+                                  "Lancer le code USSD",
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -528,7 +557,9 @@ class _BuyAllPageState extends State<BuyAllPage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Entrer la référence fournie par l'opérateur :"),
+                          const Text(
+                            "Entrer la référence fournie par l'opérateur :",
+                          ),
                           const SizedBox(height: 8),
                           TextField(
                             controller: referenceController,
