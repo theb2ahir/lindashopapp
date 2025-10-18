@@ -46,6 +46,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         max = pourcentage;
       }
     }
+    if (!mounted) return;
+
     setState(() {
       promoEleve = "${max.toInt()}% ";
     });
@@ -410,7 +412,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   ProductColumn(collectionName: 'produit-mode-et-enfant'),
                   ProductColumn(collectionName: 'produit-sport-et-bien-etre'),
                   ProductColumn(collectionName: 'produit-électro-ménagé'),
-                
                 ],
               ),
             ),

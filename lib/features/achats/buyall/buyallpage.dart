@@ -539,7 +539,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                   lancerUSSD(ussdCodes[reseauChoisi]!);
                                 },
                                 child: Text(
-                                  "Lancer le code USSD",
+                                  "Lancer le code USSD et ensuite entrer la référence fournie par l'opérateur",
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -558,7 +558,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            "Entrer la référence fournie par l'opérateur :",
+                            "Entrer ici la référence fournie par l'opérateur :",
                           ),
                           const SizedBox(height: 8),
                           TextField(
