@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lindashopp/features/profil/editprofil/editprofile.dart';
 import 'package:lindashopp/notifucation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -197,7 +198,12 @@ class _BuyAllPageState extends State<BuyAllPage> {
 
   Future<void> envoyerInfosAuServeur(BuildContext context) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
 
+    final userData = userDoc.data();
     if (uid == null) {
       ScaffoldMessenger.of(
         context,
@@ -213,6 +219,51 @@ class _BuyAllPageState extends State<BuyAllPage> {
         ),
       );
       return;
+    }
+
+    if (userData == null ||
+        userData['phone'] == null ||
+        userData['phone'].toString().isEmpty ||
+        userData['adresse'] == null ||
+        userData['adresse'].toString().isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF02204B),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          duration: Duration(seconds: 3),
+          content: Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditProfile()),
+                  );
+                },
+                icon: const Icon(Icons.edit, color: Colors.white),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditProfile()),
+                  );
+                },
+                child: Text(
+                  "Veuillez compléter votre profil",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+              const SizedBox(width: 9),
+            ],
+          ),
+        ),
+      );
+      return; // Stoppe le paiement
     }
 
     final infouserRef = FirebaseFirestore.instance.collection('infouser');
