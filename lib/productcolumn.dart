@@ -4,7 +4,13 @@ import 'package:lindashopp/features/produits/details/ProductDetailPage.dart';
 
 class ProductColumn extends StatefulWidget {
   final String collectionName;
-  const ProductColumn({super.key, required this.collectionName});
+  final String searchQuery; // 👈 Ajout du paramètre de recherche
+
+  const ProductColumn({
+    super.key,
+    required this.collectionName,
+    required this.searchQuery,
+  });
 
   @override
   State<ProductColumn> createState() => _ProductColumnState();
@@ -13,145 +19,143 @@ class ProductColumn extends StatefulWidget {
 class _ProductColumnState extends State<ProductColumn> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection(widget.collectionName)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Center(child: Text('Erreur de chargement'));
-              }
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection(widget.collectionName)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(child: Text('Erreur de chargement'));
+        }
 
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-              final produits = snapshot.data!.docs;
+        final produits = snapshot.data!.docs;
 
-              return GridView.builder(
-                padding: EdgeInsets.all(10),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 2,
-                  mainAxisSpacing: 2,
-                  childAspectRatio: 0.9,
-                ),
-                itemCount: produits.length,
-                itemBuilder: (context, index) {
-                  final produit =
-                      produits[index].data() as Map<String, dynamic>;
-                  final nom = produit['name'] ?? 'Sans nom';
-                  final prix = produit['prix']?.toString() ?? '0';
-                  final imageUrl = produit['imageURL'] ?? '';
-                  final avis = produit['avis'] ?? 0;
+        // 🔍 Filtrer selon le champ `name`
+        final filteredProduits = produits.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final name = data['name']?.toString().toLowerCase() ?? '';
+          final query = widget.searchQuery.toLowerCase();
+          return name.contains(query);
+        }).toList();
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ProductDetailPage(produit: produit),
-                          ),
-                        );
-                      });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color.fromRGBO(255, 255, 255, 0.102),
-                              blurRadius: 12,
-                              offset: Offset(0, 6),
+        if (filteredProduits.isEmpty) {
+          return const Center(child: Text('Aucun produit trouvé.'));
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(10),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
+            childAspectRatio: 0.8,
+          ),
+          itemCount: filteredProduits.length,
+          itemBuilder: (context, index) {
+            final produit =
+                filteredProduits[index].data() as Map<String, dynamic>;
+            final nom = produit['name'] ?? 'Sans nom';
+            final prix = produit['prix']?.toString() ?? '0';
+            final imageUrl = produit['imageURL'] ?? '';
+            final avis = (produit['avis'] ?? 0).toDouble();
+
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProductDetailPage(produit: produit),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color.fromRGBO(255, 255, 255, 0.102),
+                        blurRadius: 12,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Column(
+                      children: [
+                        // 🖼️ Image du produit
+                        Image.network(
+                          imageUrl,
+                          width: double.infinity,
+                          height: 150,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.image_not_supported),
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 6),
+
+                        // 🧾 Détails du produit
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              nom,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "$prix FCFA",
+                                  style: TextStyle(
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.star,
+                                      color: avis > 3
+                                          ? Colors.yellow
+                                          : Colors.red,
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(avis.toStringAsFixed(1)),
+                                  ],
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Column(
-                            children: [
-                              // Image produit
-                              Image.network(
-                                imageUrl,
-                                width: double.infinity,
-                                height: 150,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Center(
-                                      child: Icon(Icons.image_not_supported),
-                                    ),
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                      if (loadingProgress == null) {
-                                        return child;
-                                      }
-                                      return const Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    },
-                              ),
-
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    nom,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "$prix fcfa",
-                                        style: TextStyle(
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.star,
-                                            color: avis > 3
-                                                ? Colors.yellow
-                                                : Colors.red,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            avis.toStringAsFixed(1),
-                                          ), // ✅ affiche "3.5"2
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-
-                              // Overlay flouté
-                            ],
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
-      ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

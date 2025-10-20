@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -92,7 +92,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
             child: Column(
               children: [
                 Text(
-                  "Récapitulatif de la commande , veuillez faire une capture d'ecran de l'id de transaction",
+                  "Récapitulatif de la commande , veuillez faire une capture d'ecran de ces informations",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
@@ -459,7 +459,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                               children: [
                                 const Text("Total panier"),
                                 Text(
-                                  "${total} FCFA", // ← total panier
+                                  "$total FCFA", // ← total panier
                                 ),
                               ],
                             ),
@@ -539,7 +539,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                   lancerUSSD(ussdCodes[reseauChoisi]!);
                                 },
                                 child: Text(
-                                  "Lancer le code USSD et ensuite entrer la référence fournie par l'opérateur",
+                                  "Clicker sur ce text pour lancer le code USSD et ensuite entrer la référence fournie par l'opérateur",
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,

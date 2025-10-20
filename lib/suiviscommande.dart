@@ -33,7 +33,12 @@ class _AcrListPageState extends State<AcrListPage> {
       return Scaffold(body: Center(child: Text("Utilisateur non connecté")));
     }
     // ✅ Fonction pour supprimer un ACR par son ID
-    Future<void> supprimerAcr(String docId, BuildContext context) async {
+    Future<void> supprimerAcr(
+      String docId,
+      String referencePaiement,
+      String productname,
+      BuildContext context,
+    ) async {
       try {
         await FirebaseFirestore.instance
             .collection('users')
@@ -41,10 +46,30 @@ class _AcrListPageState extends State<AcrListPage> {
             .collection('acr')
             .doc(docId)
             .delete();
+
+        final infouserCollection = FirebaseFirestore.instance.collection(
+          'infouser',
+        );
+
+        final query = await infouserCollection
+            .where('ref', isEqualTo: referencePaiement)
+            .where('productname', isEqualTo: productname)
+            .limit(1)
+            .get();
+
+        if (query.docs.isNotEmpty) {
+          await infouserCollection.doc(query.docs.first.id).delete();
+        }
+
+        // ✅ Vérifie que le widget est encore monté avant d’utiliser le context
+        if (!context.mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('commande supprimé avec succès')),
+          const SnackBar(content: Text('Commande supprimée avec succès ✅')),
         );
       } catch (e) {
+        if (!context.mounted) return;
+
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Erreur de suppression : $e')));
@@ -221,7 +246,7 @@ class _AcrListPageState extends State<AcrListPage> {
                             );
 
                             if (confirm == true) {
-                              supprimerAcr(doc.id, context);
+                              supprimerAcr(doc.id, ref, productName, context);
                             }
                           },
                         ),
@@ -247,7 +272,6 @@ class _AcrListPageState extends State<AcrListPage> {
             ),
             const SizedBox(height: 10),
             ProduitsRecommandes(),
-
           ],
         ),
       ),

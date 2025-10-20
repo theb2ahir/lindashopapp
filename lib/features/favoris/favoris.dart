@@ -3,9 +3,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lindashopp/features/achats/paiement/viamoov/PaiementPageFlooz.dart';
 import 'package:lindashopp/features/achats/paiement/viayas/PaiementPageYas.dart';
 import 'package:lindashopp/features/achats/buyall/buyallpage.dart';
+import 'package:lindashopp/features/profil/editprofil/editprofile.dart';
 
 class Favoris extends StatefulWidget {
   const Favoris({super.key});
@@ -26,6 +28,7 @@ class _FavorisState extends State<Favoris> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        centerTitle: true,
         title: const Text(
           'Mes favoris',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -53,10 +56,26 @@ class _FavorisState extends State<Favoris> {
             itemCount: commandes.length,
             itemBuilder: (context, index) {
               final data = commandes[index].data() as Map<String, dynamic>;
+              var dateAjoutValue = data['dateAjout'];
+              DateTime parsedDate;
+
+              if (dateAjoutValue is Timestamp) {
+                // Cas normal Firestore
+                parsedDate = dateAjoutValue.toDate();
+              } else if (dateAjoutValue is String) {
+                // Cas chaîne en "yy-MM-dd HH:mm"
+                parsedDate = DateFormat("yy-MM-dd HH:mm").parse(dateAjoutValue);
+              } else {
+                throw Exception("Format de dateAjout inconnu");
+              }
+
+              final displayDate = DateFormat(
+                'dd-MM-yy HH:mm',
+              ).format(parsedDate);
 
               return Container(
-                margin: const EdgeInsets.only(bottom: 15),
                 padding: const EdgeInsets.all(12),
+                margin: EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -69,6 +88,7 @@ class _FavorisState extends State<Favoris> {
                   ],
                 ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
@@ -90,59 +110,38 @@ class _FavorisState extends State<Favoris> {
                             ),
                           ),
                           Text(
-                            'Ajouté le : ${(data['dateAjout']).toString()}',
+                            displayDate,
                             style: const TextStyle(fontSize: 12),
                           ),
-                          const SizedBox(height: 12),
                           Text(
                             '${data['quantity']} x ${data['productprice']} FCFA',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontSize: 13,
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text("Confirmation"),
-                                content: const Text("Supprimer ce produit ?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
-                                    child: const Text("Non"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
-                                    child: const Text("Oui"),
-                                  ),
-                                ],
-                              ),
-                            );
-                            if (confirm == true) {
-                              await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(uid)
-                                  .collection('favoris')
-                                  .doc(commandes[index].id)
-                                  .delete();
-                            }
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.payment, color: Colors.green),
-                          onPressed: () {
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert),
+                      onSelected: (value) async {
+                        if (value == 'Acheter') {
+                          final userDoc = await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(uid)
+                              .get();
+
+                          final userData = userDoc.data();
+
+                          // 🔹 Vérifier si le numéro et l'adresse sont présents
+                          if (userData == null ||
+                              userData['phone'] == null ||
+                              userData['phone'].toString().isEmpty ||
+                              userData['adresse'] == null ||
+                              userData['adresse'].toString().isEmpty) {
+                            if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 behavior: SnackBarBehavior.floating,
@@ -153,57 +152,193 @@ class _FavorisState extends State<Favoris> {
                                 duration: Duration(seconds: 3),
                                 content: Row(
                                   children: [
-                                    Icon(Icons.phone, color: Colors.white),
-                                    SizedBox(width: 12),
-                                    Expanded(
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const EditProfile(),
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.edit,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const EditProfile(),
+                                          ),
+                                        );
+                                      },
                                       child: Text(
-                                        'Choisissez un operateur',
+                                        "Veuillez compléter votre profil",
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 16,
                                         ),
                                       ),
                                     ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                PaiementPage2(data: data),
-                                          ),
-                                        );
-                                      },
-                                      child: Text(
-                                        "Flooz",
-                                        style: TextStyle(
-                                          color: Colors.lightGreenAccent,
-                                        ),
-                                      ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                PaiementPage(data: data),
-                                          ),
-                                        );
-                                      },
-                                      child: Text(
-                                        "Yas",
-                                        style: TextStyle(
-                                          color: Colors.yellowAccent,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
+                                    const SizedBox(width: 9),
                                   ],
                                 ),
                               ),
                             );
-                          },
+                            return; // Stoppe le paiement
+                          }
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Color(0xFF02204B),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              duration: Duration(seconds: 3),
+                              content: Row(
+                                children: [
+                                  Icon(Icons.phone, color: Colors.white),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Choisissez un operateur',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      if (!mounted) return;
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              PaiementPage2(data: data),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      "Flooz",
+                                      style: TextStyle(
+                                        color: Colors.lightGreenAccent,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      if (!mounted) return;
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              PaiementPage(data: data),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      "Yas",
+                                      style: TextStyle(
+                                        color: Colors.yellowAccent,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        } else if (value == 'modifier') {
+                          // ✏️ Modifier la quantité
+                          final TextEditingController qtyController =
+                              TextEditingController(
+                                text: data['quantity'].toString(),
+                              );
+
+                          final newQty = await showDialog<int>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text("Modifier la quantité"),
+                              content: TextField(
+                                controller: qtyController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: "Nouvelle quantité",
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Annuler"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    final val = int.tryParse(
+                                      qtyController.text,
+                                    );
+                                    Navigator.pop(context, val);
+                                  },
+                                  child: const Text("Confirmer"),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (newQty != null && newQty > 0) {
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(uid)
+                                .collection('commandes')
+                                .doc(commandes[index].id)
+                                .update({'quantity': newQty});
+                          }
+                        } else if (value == 'supprimer') {
+                          // 🗑️ Supprimer l’article
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text("Confirmation"),
+                              content: const Text("Supprimer cette commande ?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text("Non"),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text("Oui"),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(uid)
+                                .collection('commandes')
+                                .doc(commandes[index].id)
+                                .delete();
+                          }
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'Acheter',
+                          child: Text('Acheter le produit'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'modifier',
+                          child: Text('Modifier quantité'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'supprimer',
+                          child: Text('Supprimer du panier'),
                         ),
                       ],
                     ),

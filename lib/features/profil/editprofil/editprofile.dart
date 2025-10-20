@@ -337,6 +337,7 @@ class _EditProfileState extends State<EditProfile> {
     await FirebaseFirestore.instance.collection('users').doc(uid).update({
       'name': _nameController.text,
       'phone': _phoneNumberController.text,
+      'adresse': _addressController.text,
     });
 
     ScaffoldMessenger.of(
@@ -421,9 +422,8 @@ class _EditProfileState extends State<EditProfile> {
                   ListTile(
                     leading: Icon(Icons.location_on),
                     title: TextFormField(
-                      readOnly: true,
                       controller: _addressController,
-                      decoration: const InputDecoration(labelText: 'Adresse'),
+                      decoration: const InputDecoration(labelText: 'Adresse(region,ville , quartier , precision)'),
                     ),
                   ),
                   const SizedBox(height: 30),

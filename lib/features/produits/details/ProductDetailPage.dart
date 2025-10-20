@@ -522,9 +522,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Informations supplémentaires ➡️",
+                      "Informations supplémentaires ",
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),

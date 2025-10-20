@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/features/home/homepage.dart';
 import 'package:lindashopp/features/panier/panier.dart';
@@ -21,6 +23,28 @@ class AcceuilPageState extends State<AcceuilPage> {
 
   int myIndex = 0;
 
+  Future<int> getNumberOfPanierItems() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('commandes')
+        .get();
+
+    return querySnapshot.docs.length;
+  }
+
+  Future<int> getNumberOfAcr() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('acr')
+        .get();
+
+    return querySnapshot.docs.length;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,19 +65,109 @@ class AcceuilPageState extends State<AcceuilPage> {
             myIndex = index;
           });
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.shop_2_sharp),
             label: 'boutique',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
+            icon: Stack(
+              clipBehavior:
+                  Clip.none, // important pour laisser dépasser le badge
+              children: [
+                const Icon(Icons.shopping_cart),
+
+                // Badge positionné en haut à droite
+                Positioned(
+                  right: -6,
+                  top: -2,
+                  child: FutureBuilder<int>(
+                    future: getNumberOfPanierItems(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting ||
+                          snapshot.hasError ||
+                          !snapshot.hasData ||
+                          snapshot.data == 0) {
+                        return const SizedBox.shrink(); // ne rien afficher si 0
+                      }
+
+                      return Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          '${snapshot.data}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
             label: 'Panier',
           ),
+
           BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
+            icon: Stack(
+              clipBehavior:
+                  Clip.none, // important pour laisser dépasser le badge
+              children: [
+                const Icon(Icons.receipt_long),
+
+                // Badge positionné en haut à droite
+                Positioned(
+                  right: -6,
+                  top: -2,
+                  child: FutureBuilder<int>(
+                    future: getNumberOfAcr(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting ||
+                          snapshot.hasError ||
+                          !snapshot.hasData ||
+                          snapshot.data == 0) {
+                        return const SizedBox.shrink(); // ne rien afficher si 0
+                      }
+
+                      return Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          '${snapshot.data}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
             label: 'Commandes',
           ),
+
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Compte'),
         ],
       ),

@@ -7,6 +7,7 @@ import 'package:lindashopp/features/achats/paiement/viamoov/PaiementPageFlooz.da
 import 'package:lindashopp/features/achats/paiement/viayas/PaiementPageYas.dart';
 import 'package:lindashopp/features/achats/buyall/buyallpage.dart';
 import 'package:intl/intl.dart';
+import 'package:lindashopp/features/profil/editprofil/editprofile.dart';
 
 class PanierPage extends StatefulWidget {
   const PanierPage({super.key});
@@ -37,6 +38,7 @@ class _PanierPageState extends State<PanierPage> {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         automaticallyImplyLeading: false,
         title: Row(
           children: [
@@ -82,6 +84,9 @@ class _PanierPageState extends State<PanierPage> {
                 );
               },
             ),
+          
+          
+          
           ],
         ),
       ),
@@ -135,8 +140,8 @@ class _PanierPageState extends State<PanierPage> {
                 ).format(parsedDate);
 
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 15),
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(9),
+                  margin: EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -179,7 +184,7 @@ class _PanierPageState extends State<PanierPage> {
                               displayDate,
                               style: const TextStyle(fontSize: 12),
                             ),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 6),
                             Text(
                               '$quantity x $price FCFA',
                               style: const TextStyle(
@@ -190,51 +195,24 @@ class _PanierPageState extends State<PanierPage> {
                           ],
                         ),
                       ),
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (value) async {
+                          if (value == 'Acheter') {
+                            final userDoc = await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(uid)
+                                .get();
 
-                      Column(
-                        children: [
-                          // Supprimer
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async {
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text("Confirmation"),
-                                  content: const Text(
-                                    "Supprimer cette commande ?",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, false),
-                                      child: const Text("Non"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, true),
-                                      child: const Text("Oui"),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (confirm == true) {
-                                await FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(uid)
-                                    .collection('commandes')
-                                    .doc(commandes[index].id)
-                                    .delete();
-                              }
-                            },
-                          ),
-                          // Acheter
-                          IconButton(
-                            icon: const Icon(
-                              Icons.payment,
-                              color: Colors.green,
-                            ),
-                            onPressed: () {
+                            final userData = userDoc.data();
+
+                            // 🔹 Vérifier si le numéro et l'adresse sont présents
+                            if (userData == null ||
+                                userData['phone'] == null ||
+                                userData['phone'].toString().isEmpty ||
+                                userData['adresse'] == null ||
+                                userData['adresse'].toString().isEmpty) {
+                              if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   behavior: SnackBarBehavior.floating,
@@ -245,57 +223,198 @@ class _PanierPageState extends State<PanierPage> {
                                   duration: Duration(seconds: 3),
                                   content: Row(
                                     children: [
-                                      Icon(Icons.phone, color: Colors.white),
-                                      SizedBox(width: 12),
-                                      Expanded(
+                                      IconButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const EditProfile(),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(
+                                          Icons.edit,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const EditProfile(),
+                                            ),
+                                          );
+                                        },
                                         child: Text(
-                                          'Choisissez un operateur',
+                                          "Veuillez compléter votre profil",
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 16,
                                           ),
                                         ),
                                       ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  PaiementPage2(data: data),
-                                            ),
-                                          );
-                                        },
-                                        child: Text(
-                                          "Flooz",
-                                          style: TextStyle(
-                                            color: Colors.lightGreenAccent,
-                                          ),
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  PaiementPage(data: data),
-                                            ),
-                                          );
-                                        },
-                                        child: Text(
-                                          "Yas",
-                                          style: TextStyle(
-                                            color: Colors.yellowAccent,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
+                                      const SizedBox(width: 9),
                                     ],
                                   ),
                                 ),
                               );
-                            },
+                              return; // Stoppe le paiement
+                            }
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Color(0xFF02204B),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                duration: Duration(seconds: 3),
+                                content: Row(
+                                  children: [
+                                    Icon(Icons.phone, color: Colors.white),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        'Choisissez un operateur',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        if (!mounted) return;
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                PaiementPage2(data: data),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        "Flooz",
+                                        style: TextStyle(
+                                          color: Colors.lightGreenAccent,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        if (!mounted) return;
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                PaiementPage(data: data),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        "Yas",
+                                        style: TextStyle(
+                                          color: Colors.yellowAccent,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          } else if (value == 'modifier') {
+                            // ✏️ Modifier la quantité
+                            final TextEditingController qtyController =
+                                TextEditingController(
+                                  text: data['quantity'].toString(),
+                                );
+
+                            final newQty = await showDialog<int>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("Modifier la quantité"),
+                                content: TextField(
+                                  controller: qtyController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: "Nouvelle quantité",
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text("Annuler"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      final val = int.tryParse(
+                                        qtyController.text,
+                                      );
+                                      Navigator.pop(context, val);
+                                    },
+                                    child: const Text("Confirmer"),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (newQty != null && newQty > 0) {
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(uid)
+                                  .collection('commandes')
+                                  .doc(commandes[index].id)
+                                  .update({'quantity': newQty});
+                            }
+                          } else if (value == 'supprimer') {
+                            // 🗑️ Supprimer l’article
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("Confirmation"),
+                                content: const Text(
+                                  "Supprimer cette commande ?",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text("Non"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text("Oui"),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) {
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(uid)
+                                  .collection('commandes')
+                                  .doc(commandes[index].id)
+                                  .delete();
+                            }
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'Acheter',
+                            child: Text('Acheter le produit'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'modifier',
+                            child: Text('Modifier quantité'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'supprimer',
+                            child: Text('Supprimer du panier'),
                           ),
                         ],
                       ),

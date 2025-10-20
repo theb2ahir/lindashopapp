@@ -14,21 +14,102 @@ class Inscription extends StatefulWidget {
 }
 
 class _InscriptionState extends State<Inscription> {
-  int _stepIndex = 0;
   bool _obscurePassword = true;
 
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   final nameCtrl = TextEditingController();
-  final phonectrl = TextEditingController();
-  final regionCtrl = TextEditingController();
-  final villeCtrl = TextEditingController();
-  final quartierCtrl = TextEditingController();
-  final precisionCtrl = TextEditingController();
 
   void signup() async {
     final auth = FirebaseAuth.instance;
     final firestore = FirebaseFirestore.instance;
+
+    if (nameCtrl.text.isEmpty || emailCtrl.text.isEmpty || passwordCtrl.text.isEmpty) {
+      return;
+    }
+
+    if (!emailCtrl.text.contains('@gmail.com')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF02204B),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          duration: Duration(seconds: 3),
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.red),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Veuillez utiliser un emailvalide',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      emailCtrl.text = "";
+      passwordCtrl.text = "";
+      return;
+    }
+
+    if (passwordCtrl.text.length <= 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF02204B),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          duration: Duration(seconds: 3),
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.red),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Veuillez entrer un mot de passe plus long',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      passwordCtrl.text = "";
+      return;
+    }
+    if (passwordCtrl.text.length > 9) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF02204B),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          duration: Duration(seconds: 3),
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.red),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Veuillez entrer un mot de passe de 9 caractères maximum',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      passwordCtrl.text = "";
+      return;
+    }
 
     try {
       showDialog(
@@ -45,9 +126,9 @@ class _InscriptionState extends State<Inscription> {
       await firestore.collection('users').doc(result.user!.uid).set({
         'name': nameCtrl.text,
         'email': emailCtrl.text,
-        'phone': phonectrl.text,
-        'adresse':
-            '${regionCtrl.text}, ${villeCtrl.text}, ${quartierCtrl.text}, ${precisionCtrl.text}',
+        'phone': "",
+        'adresse': "",
+        'DateCreation': DateTime.now(),
       });
 
       Navigator.pop(context);
@@ -98,25 +179,6 @@ class _InscriptionState extends State<Inscription> {
     }
   }
 
-  bool _allFieldsFilled(List<TextEditingController> controllers) {
-    return controllers.every((ctrl) => ctrl.text.isNotEmpty);
-  }
-
-  InputDecoration _customDecoration(String label) {
-    return InputDecoration(
-      labelStyle: const TextStyle(color: Colors.black),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF02204B)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 2),
-      ),
-      labelText: label,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,258 +191,169 @@ class _InscriptionState extends State<Inscription> {
           style: GoogleFonts.roboto(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.black
+            color: Colors.black,
           ),
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20),
-            Container(
-              decoration: BoxDecoration(color: Colors.transparent),
-              height: 390,
-              width: double.infinity,
-              child: Theme(
-                data: ThemeData(
-                  colorScheme: Theme.of(context).colorScheme.copyWith(
-                    primary: Colors.redAccent,
-                    onPrimary: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextField(
+                style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                cursorColor: const Color.fromARGB(255, 0, 0, 0),
+                controller: nameCtrl,
+                decoration: InputDecoration(
+                  labelStyle: const TextStyle(
+                    color: Color.fromARGB(255, 0, 0, 0),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Colors.redAccent,
+                      width: 2,
+                    ),
+                  ),
+                  labelText: 'Nom',
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                cursorColor: const Color.fromARGB(255, 0, 0, 0),
+                controller: emailCtrl,
+                decoration: InputDecoration(
+                  labelStyle: const TextStyle(
+                    color: Color.fromARGB(255, 0, 0, 0),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Colors.redAccent,
+                      width: 2,
+                    ),
+                  ),
+                  labelText: 'Email',
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                cursorColor: const Color.fromARGB(255, 0, 0, 0),
+                controller: passwordCtrl,
+                decoration: InputDecoration(
+                  labelStyle: const TextStyle(
+                    color: Color.fromARGB(255, 0, 0, 0),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Colors.redAccent,
+                      width: 2,
+                    ),
+                  ),
+                  labelText: 'Mot de passe',
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                    icon: Icon(
+                      color: const Color.fromARGB(255, 0, 0, 0),
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
                   ),
                 ),
-                child: Stepper(
-                  type: StepperType.horizontal,
-                  elevation: 8,
-                  margin: const EdgeInsets.all(16),
-                  currentStep: _stepIndex,
-                  onStepContinue: () {
-                    if (_stepIndex < 2) {
-                      setState(() => _stepIndex++);
-                    } else {
-                      if (_allFieldsFilled([
-                        nameCtrl,
-                        emailCtrl,
-                        passwordCtrl,
-                        phonectrl,
-                        regionCtrl,
-                        villeCtrl,
-                        quartierCtrl,
-                        precisionCtrl,
-                      ])) {
-                        signup();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: const Color(0xFF02204B),
-                            content: Row(
-                              children: const [
-                                Icon(Icons.error, color: Colors.red),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Veuillez remplir tous les champs',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  onStepCancel: () {
-                    if (_stepIndex > 0) {
-                      setState(() => _stepIndex--);
-                    }
-                  },
-                  steps: [
-                    Step(
-                      title: const Text("Infos"),
-                      isActive: _stepIndex >= 0,
-                      content: Column(
-                        children: [
-                          TextField(
-                            cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                            style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-                            controller: nameCtrl,
-                            decoration: _customDecoration('Nom'),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                            style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-    
-                            controller: emailCtrl,
-                            decoration: _customDecoration('Email'),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                            style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-    
-                            obscureText: _obscurePassword,
-                            controller: passwordCtrl,
-                            decoration:
-                                _customDecoration(
-                                  'Mot de passe (max 9 caractères)',
-                                ).copyWith(
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscurePassword
-                                          ? Icons.visibility_off
-                                          : Icons.visibility,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
-                                    ),
-                                    onPressed: () => setState(
-                                      () => _obscurePassword =
-                                          !_obscurePassword,
-                                    ),
-                                  ),
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Step(
-                      title: const Text("Contact"),
-                      isActive: _stepIndex >= 1,
-                      content: TextField(
-                        cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                        style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-                        controller: phonectrl,
-                        decoration: _customDecoration('Numéro de téléphone'),
-                      ),
-                    ),
-                    Step(
-                      title: const Text("Adresse"),
-                      isActive: _stepIndex >= 2,
-                      content: Column(
-                        children: [
-                          TextField(
-                            cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                            style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-    
-                            controller: regionCtrl,
-                            decoration: _customDecoration('Région'),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            cursorColor: Colors.black,
-                            style: const TextStyle(color: Colors.black),
-    
-                            controller: villeCtrl,
-                            decoration: _customDecoration('Ville'),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            cursorColor: Colors.black,
-                            style: const TextStyle(color: Colors.black),
-    
-                            controller: quartierCtrl,
-                            decoration: _customDecoration('Quartier'),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            cursorColor: Colors.black,
-                            style: const TextStyle(color: Colors.black),
-    
-                            controller: precisionCtrl,
-                            decoration: _customDecoration(
-                              'Indice pour vous retrouver',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                obscureText: _obscurePassword,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Text("* 9 characters maximum", style: TextStyle(fontSize: 13)),
                   ],
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "📌 Suivez ces étapes pour vous inscrire correctement :",
-                    style: GoogleFonts.roboto(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: const Color.fromARGB(255, 0, 0, 0),
+              const SizedBox(height: 45),
+
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all<Color>(
+                      const Color.fromARGB(255, 255, 82, 82),
                     ),
                   ),
-    
-                  const SizedBox(height: 20),
-                  Text(
-                    "1️⃣ Remplissez vos informations personnelles (Nom, Email, Mot de passe).",
-                    style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                  onPressed: () => signup(),
+                  child: Text(
+                    "M'inscrire",
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "2️⃣ Entrez un numéro de téléphone valide pour être contacté.",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "3️⃣ Complétez votre adresse avec précision (Région, Ville, Quartier).",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "4️⃣ Ajoutez un indice pour mieux vous retrouver.",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "✅ Vérifiez que tous les champs sont remplis avant de valider.",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(19.0),
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "vous avez deja un compte ?",
-                      style: GoogleFonts.roboto(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => Connection()),
-                        );
-                      },
-                      child: Text(
-                        "connectez-vous",
-                        style: TextStyle(
-                          color: Colors.blueAccent,
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.all(19.0),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "vous avez deja un compte ?",
+                        style: GoogleFonts.roboto(
                           fontSize: 16,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.blueAccent,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
-                    ),
-                  ],
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => Connection()),
+                          );
+                        },
+                        child: Text(
+                          "connectez-vous",
+                          style: TextStyle(
+                            color: Colors.blueAccent,
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.blueAccent,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

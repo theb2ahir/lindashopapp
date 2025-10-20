@@ -119,7 +119,7 @@ class _ConnectionState extends State<Connection> {
         MaterialPageRoute(builder: (_) => const AcceuilPage()),
       );
     } catch (e) {
-      if (!mounted) return; // ✅ Sécurise l'appel
+      if (!mounted) return;
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -196,6 +196,7 @@ class _ConnectionState extends State<Connection> {
                               labelText: 'Email',
                             ),
                           ),
+          
                           const SizedBox(height: 25),
                           TextField(
                             style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
@@ -265,7 +266,6 @@ class _ConnectionState extends State<Connection> {
                               TextButton(
                                 onPressed: () {
                                   final email = emailCtrl.text.trim();
-    
                                   if (email.isEmpty) {
                                     ScaffoldMessenger.of(
                                       context,
@@ -278,7 +278,7 @@ class _ConnectionState extends State<Connection> {
                                     );
                                     return;
                                   }
-    
+
                                   FirebaseAuth.instance
                                       .sendPasswordResetEmail(email: email)
                                       .then((_) {

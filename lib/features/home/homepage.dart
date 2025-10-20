@@ -26,6 +26,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     "Sports & bien-être",
     "Électro-ménager",
   ];
+
+  
   Future<void> fetchPromotionMax() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('promotions')
@@ -52,7 +54,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       promoEleve = "${max.toInt()}% ";
     });
   }
-
   Future<int> getNumberOfFavorites() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final querySnapshot = await FirebaseFirestore.instance
@@ -219,6 +220,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
         body: Column(
           children: [
+            // 🔍 Barre de recherche
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -229,18 +231,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     child: TextField(
                       onChanged: (value) {
                         setState(() {
-                          searchQuery = value.toLowerCase();
+                          searchQuery = value;
                         });
                       },
-                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
                       decoration: InputDecoration(
-                        hintStyle: TextStyle(
+                        hintStyle: const TextStyle(
                           color: Colors.black,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                         hintText: "Rechercher un produit...",
                         filled: true,
-                        fillColor: const Color.fromARGB(131, 224, 162, 160),
+                        fillColor: const Color.fromARGB(72, 224, 162, 160),
                         prefixIcon: const Icon(
                           Icons.search,
                           color: Colors.black,
@@ -257,6 +262,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ),
 
+            // 🏷️ Bannière promo
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
@@ -268,7 +274,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     BoxShadow(
                       color: const Color.fromARGB(255, 131, 131, 131),
                       blurRadius: 10,
-                      offset: Offset(0, 1),
+                      offset: const Offset(0, 1),
                     ),
                   ],
                 ),
@@ -285,133 +291,115 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     Positioned(
                       right: 6,
                       bottom: 16,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const PromoPage(),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(
-                                255,
-                                8,
-                                95,
-                                37,
-                              ),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 10,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PromoPage(),
                             ),
-                            child: const Text(
-                              "Voir les promotions",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            31,
+                            145,
+                            207,
                           ),
-                        ],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          "Voir les promotions",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
+
             const SizedBox(height: 12),
+
+            // 🧭 Onglets
             TabBar(
               isScrollable: true,
               tabAlignment: TabAlignment.start,
-              labelPadding: EdgeInsets.symmetric(horizontal: 20),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 20),
               controller: _tabController,
               tabs: const [
                 Tab(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.all_inclusive, size: 24, color: Colors.blue),
-                      Text("La totalité"),
-                    ],
-                  ),
+                  icon: Icon(Icons.all_inclusive, color: Colors.blue),
+                  text: "Tous",
                 ),
                 Tab(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.devices, size: 24, color: Colors.blue),
-                      Text("Electronique"),
-                    ],
-                  ),
+                  icon: Icon(Icons.devices, color: Colors.blue),
+                  text: "Electronique",
                 ),
                 Tab(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.construction, size: 24, color: Colors.orange),
-                      Text("Construction"),
-                    ],
-                  ),
+                  icon: Icon(Icons.construction, color: Colors.orange),
+                  text: "Construction",
                 ),
                 Tab(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.checkroom, size: 24, color: Colors.pink),
-                      Text("Habillement"),
-                    ],
-                  ),
+                  icon: Icon(Icons.checkroom, color: Colors.pink),
+                  text: "Habillement",
                 ),
                 Tab(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.child_care, size: 24, color: Colors.green),
-                      Text("Mode enfants"),
-                    ],
-                  ),
+                  icon: Icon(Icons.child_care, color: Colors.green),
+                  text: "Mode enfants",
                 ),
                 Tab(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.fitness_center, size: 24, color: Colors.red),
-                      Text("Sports & bien-être"),
-                    ],
-                  ),
+                  icon: Icon(Icons.fitness_center, color: Colors.red),
+                  text: "Sports & bien-être",
                 ),
                 Tab(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.kitchen, size: 24, color: Colors.purple),
-                      Text("Électro-ménager"),
-                    ],
-                  ),
+                  icon: Icon(Icons.kitchen, color: Colors.purple),
+                  text: "Électro-ménager",
                 ),
               ],
             ),
 
+            // ✅ Le point clé : donner une hauteur au contenu des onglets
             Expanded(
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  Allproduct(),
-                  ProductColumn(collectionName: 'electronique'),
-                  ProductColumn(collectionName: 'construction'),
-                  ProductColumn(collectionName: 'fring'),
-                  ProductColumn(collectionName: 'produit-mode-et-enfant'),
-                  ProductColumn(collectionName: 'produit-sport-et-bien-etre'),
-                  ProductColumn(collectionName: 'produit-électro-ménagé'),
+                  Allproduct(searchQuery: searchQuery),
+                  ProductColumn(
+                    collectionName: 'electronique',
+                    searchQuery: searchQuery,
+                  ),
+                  ProductColumn(
+                    collectionName: 'construction',
+                    searchQuery: searchQuery,
+                  ),
+                  ProductColumn(
+                    collectionName: 'fring',
+                    searchQuery: searchQuery,
+                  ),
+                  ProductColumn(
+                    collectionName: 'produit-mode-et-enfant',
+                    searchQuery: searchQuery,
+                  ),
+                  ProductColumn(
+                    collectionName: 'produit-sport-et-bien-etre',
+                    searchQuery: searchQuery,
+                  ),
+                  ProductColumn(
+                    collectionName: 'produit-électro-ménagé',
+                    searchQuery: searchQuery,
+                  ),
                 ],
               ),
             ),
