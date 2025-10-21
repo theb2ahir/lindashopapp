@@ -142,6 +142,12 @@ class _PaiementPageState extends State<PaiementPage> {
               setState(() => isLoading = true);
 
               try {
+                                final userDoc = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(uid)
+                    .get();
+
+                final userData = userDoc.data();
                 // Ajouter à 'acr' et récupérer l'ID du document
                 DocumentReference acrRef = await FirebaseFirestore.instance
                     .collection('users')
@@ -173,10 +179,10 @@ class _PaiementPageState extends State<PaiementPage> {
                   'productprice': item['productprice'],
                   'livraison': item['livraison'],
                   'timestamp': DateTime.now(),
-                  'usernamemiff': item['username'],
-                  'userephone': item['phone'],
-                  'useremail': item['email'],
-                  'UserAdresse': item['addressLivraison'],
+                  'usernamemiff': userData?['name'],
+                  'userephone': userData?['phone'],
+                  'useremail': userData?['email'],
+                  'UserAdresse': userData?['adresse'],
                   'ref': reference,
                 });
 

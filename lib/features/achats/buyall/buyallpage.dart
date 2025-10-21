@@ -198,12 +198,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
 
   Future<void> envoyerInfosAuServeur(BuildContext context) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .get();
 
-    final userData = userDoc.data();
     if (uid == null) {
       ScaffoldMessenger.of(
         context,
@@ -220,6 +215,13 @@ class _BuyAllPageState extends State<BuyAllPage> {
       );
       return;
     }
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    final userData = userDoc.data();
 
     if (userData == null ||
         userData['phone'] == null ||
@@ -270,14 +272,15 @@ class _BuyAllPageState extends State<BuyAllPage> {
 
     try {
       for (var item in widget.commandes) {
-        final userAdresse = item['addressLivraison'];
+
+        final userAdresse = userData['adresse'];
+        final userephone = userData['phone'];
+        final useremail = userData['email'];
+        final usernamemiff = userData['name'];
         final productprice = item['productprice'];
         final nomberitem = item['quantity'];
         final livraison = item['livraison'];
         final productname = item['productname'];
-        final useremail = item['email'];
-        final userephone = item['phone'];
-        final usernamemiff = item['username'];
         final lati = item['latitude'];
         final longi = item['longitude'];
         DocumentReference acrRef = await FirebaseFirestore.instance

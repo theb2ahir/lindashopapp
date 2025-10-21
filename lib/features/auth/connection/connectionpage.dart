@@ -114,9 +114,9 @@ class _ConnectionState extends State<Connection> {
           ),
         ),
       );
-      Navigator.pushReplacement(
-        context,
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const AcceuilPage()),
+        (Route<dynamic> route) => false,
       );
     } catch (e) {
       if (!mounted) return;
@@ -153,13 +153,15 @@ class _ConnectionState extends State<Connection> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
-        centerTitle:true,
-        title: Text( "Connexion",
-        style: GoogleFonts.roboto(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        )),
+        centerTitle: true,
+        title: Text(
+          "Connexion",
+          style: GoogleFonts.roboto(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -173,7 +175,9 @@ class _ConnectionState extends State<Connection> {
                       child: Column(
                         children: [
                           TextField(
-                            style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
                             cursorColor: const Color.fromARGB(255, 0, 0, 0),
                             controller: emailCtrl,
                             decoration: InputDecoration(
@@ -196,15 +200,17 @@ class _ConnectionState extends State<Connection> {
                               labelText: 'Email',
                             ),
                           ),
-          
+
                           const SizedBox(height: 25),
                           TextField(
-                            style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
                             cursorColor: const Color.fromARGB(255, 0, 0, 0),
                             controller: passwordCtrl,
                             decoration: InputDecoration(
                               labelStyle: const TextStyle(
-                                color:Color.fromARGB(255, 0, 0, 0),
+                                color: Color.fromARGB(255, 0, 0, 0),
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -219,7 +225,7 @@ class _ConnectionState extends State<Connection> {
                                   width: 2,
                                 ),
                               ),
-    
+
                               labelText: 'Mot de passe',
                               suffixIcon: IconButton(
                                 onPressed: () {
@@ -243,10 +249,9 @@ class _ConnectionState extends State<Connection> {
                             height: 50,
                             child: ElevatedButton(
                               style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStateProperty.all<Color>(
-                                      const Color.fromARGB(255, 255, 82, 82),
-                                    ),
+                                backgroundColor: WidgetStateProperty.all<Color>(
+                                  const Color.fromARGB(255, 255, 82, 82),
+                                ),
                               ),
                               onPressed: () => login(context),
                               child: Text(
@@ -258,7 +263,7 @@ class _ConnectionState extends State<Connection> {
                               ),
                             ),
                           ),
-    
+
                           const SizedBox(height: 30),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -267,9 +272,7 @@ class _ConnectionState extends State<Connection> {
                                 onPressed: () {
                                   final email = emailCtrl.text.trim();
                                   if (email.isEmpty) {
-                                    ScaffoldMessenger.of(
-                                      context,
-                                    ).showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
                                           'Veuillez entrer votre adresse email.',
@@ -317,23 +320,26 @@ class _ConnectionState extends State<Connection> {
                                     color: Colors.blue,
                                     fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline,
-                                    decorationColor: Colors.blueAccent
+                                    decorationColor: Colors.blueAccent,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-    
+
                           const SizedBox(height: 10),
-    
+
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text("Nouveau sur Linda Shop ?" , style: GoogleFonts.roboto(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              )),
+                              Text(
+                                "Nouveau sur Linda Shop ?",
+                                style: GoogleFonts.roboto(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.push(

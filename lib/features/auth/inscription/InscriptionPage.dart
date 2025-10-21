@@ -24,7 +24,9 @@ class _InscriptionState extends State<Inscription> {
     final auth = FirebaseAuth.instance;
     final firestore = FirebaseFirestore.instance;
 
-    if (nameCtrl.text.isEmpty || emailCtrl.text.isEmpty || passwordCtrl.text.isEmpty) {
+    if (nameCtrl.text.isEmpty ||
+        emailCtrl.text.isEmpty ||
+        passwordCtrl.text.isEmpty) {
       return;
     }
 
@@ -152,9 +154,9 @@ class _InscriptionState extends State<Inscription> {
       );
 
       Future.delayed(const Duration(seconds: 2), () {
-        Navigator.push(
-          context,
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const AcceuilPage()),
+          (Route<dynamic> route) => false,
         );
       });
     } catch (e) {
@@ -294,7 +296,10 @@ class _InscriptionState extends State<Inscription> {
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
-                    Text("* 9 characters maximum", style: TextStyle(fontSize: 13)),
+                    Text(
+                      "* 9 characters maximum",
+                      style: TextStyle(fontSize: 13),
+                    ),
                   ],
                 ),
               ),

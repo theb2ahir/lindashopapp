@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/features/auth/connection/connectionpage.dart';
+import 'package:lindashopp/supportclient.dart';
 
 class Parametre extends StatefulWidget {
   const Parametre({super.key});
@@ -155,6 +156,16 @@ class _ParametreState extends State<Parametre> {
                       context: context,
                       applicationName: "Linda-Shop",
                       applicationLegalese: "© 2025 Linda-Shop Inc.",
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.question_mark_sharp),
+                  title: const Text("Support client Linda shop"), 
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context)=> SupportClient()),
                     );
                   },
                 ),

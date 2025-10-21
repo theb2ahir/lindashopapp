@@ -40,54 +40,12 @@ class _PanierPageState extends State<PanierPage> {
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            const Text(
-              'Mon Panier',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(width: 10),
-            FutureBuilder<int>(
-              future: getNumberOfCommandes(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SizedBox.shrink(); // rien pendant le chargement
-                }
-                if (snapshot.hasError ||
-                    !snapshot.hasData ||
-                    snapshot.data == 0) {
-                  return const SizedBox.shrink(); // pas de badge si erreur ou 0 favoris
-                }
-                return Positioned(
-                  right: 1,
-                  top: 1,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: const BoxDecoration(shape: BoxShape.circle),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '${snapshot.data}',
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                );
-              },
-            ),
-          
-          
-          
-          ],
+        title: const Text(
+          'Mon Panier',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SafeArea(
@@ -418,6 +376,8 @@ class _PanierPageState extends State<PanierPage> {
                           ),
                         ],
                       ),
+                    
+                    
                     ],
                   ),
                 );
