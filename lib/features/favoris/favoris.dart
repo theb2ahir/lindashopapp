@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lindashopp/features/achats/paiement/viamoov/PaiementPageFlooz.dart';
 import 'package:lindashopp/features/achats/paiement/viayas/PaiementPageYas.dart';
@@ -22,16 +23,23 @@ class _FavorisState extends State<Favoris> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
-      return Scaffold(body: Center(child: Text("Utilisateur non connecté")));
+      return Scaffold(body: Center(child: Text("Utilisateur non connecté", style:  GoogleFonts.poppins(
+        fontSize: 16,
+        color: Colors.black,
+      ),)));
     }
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const Text(
+        title:  Text(
           'Mes favoris',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style:  GoogleFonts.poppins(
+            fontSize: 23,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -46,7 +54,10 @@ class _FavorisState extends State<Favoris> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Aucun article dans le panier'));
+            return  Center(child: Text('Aucun article dans le panier', style:  GoogleFonts.poppins(
+              fontSize: 16,
+              color: Colors.black,
+            ),));
           }
 
           final commandes = snapshot.data!.docs;
@@ -115,9 +126,10 @@ class _FavorisState extends State<Favoris> {
                           ),
                           Text(
                             '${data['quantity']} x ${data['productprice']} FCFA',
-                            style: const TextStyle(
+                            style:  GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: Colors.black,
                               fontWeight: FontWeight.bold,
-                              fontSize: 13,
                             ),
                           ),
                         ],
@@ -142,7 +154,7 @@ class _FavorisState extends State<Favoris> {
                               userData['adresse'] == null ||
                               userData['adresse'].toString().isEmpty) {
                             if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            final snack =  ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 behavior: SnackBarBehavior.floating,
                                 backgroundColor: Color(0xFF02204B),
@@ -150,44 +162,20 @@ class _FavorisState extends State<Favoris> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 duration: Duration(seconds: 3),
-                                content: Row(
-                                  children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => const EditProfile(),
-                                          ),
-                                        );
-                                      },
-                                      icon: const Icon(
-                                        Icons.edit,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => const EditProfile(),
-                                          ),
-                                        );
-                                      },
-                                      child: Text(
-                                        "Veuillez compléter votre profil",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 9),
-                                  ],
-                                ),
+                                content: Text("Veuillez renseigné votre numero de telephone et votre adresse", style:  GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),)
                               ),
                             );
+                            snack.closed.then((_) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => EditProfile(),
+                                ),
+                              );
+                            });
                             return; // Stoppe le paiement
                           }
                           if (!mounted) return;
@@ -351,6 +339,36 @@ class _FavorisState extends State<Favoris> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .get();
+
+          final userData = userDoc.data();
+
+          // 🔹 Vérifier si le numéro et l'adresse sont présents
+          if (userData == null ||
+              userData['phone'] == null ||
+              userData['phone'].toString().isEmpty ||
+              userData['adresse'] == null ||
+              userData['adresse'].toString().isEmpty) {
+            if (!mounted) return;
+            final Snack = ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Color(0xFF02204B),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  duration: Duration(seconds: 2),
+                  content: Text("Veuillez renseigné votre numero de telephone et votre adresse", style:  GoogleFonts.poppins(fontSize: 15, color: Colors.white),)
+              ),
+            );
+            Snack.closed.then((_){
+              Navigator.push(context, MaterialPageRoute(builder: (_) => EditProfile()));
+            });
+            return; // Stoppe le paiement
+          }
           final snapshot = await FirebaseFirestore.instance
               .collection('users')
               .doc(uid)

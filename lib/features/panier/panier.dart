@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/achats/paiement/viamoov/PaiementPageFlooz.dart';
 import 'package:lindashopp/features/achats/paiement/viayas/PaiementPageYas.dart';
 import 'package:lindashopp/features/achats/buyall/buyallpage.dart';
@@ -33,18 +34,30 @@ class _PanierPageState extends State<PanierPage> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
-      return Scaffold(body: Center(child: Text("Utilisateur non connecté")));
+      return Scaffold(
+        body: Center(
+          child: Text(
+            "Utilisateur non connecté",
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: const Text(
+        title: Text(
           'Mon Panier',
-          style: TextStyle(
-            color: Colors.black,
+          style: GoogleFonts.poppins(
+            fontSize: 25,
             fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
       ),
@@ -61,7 +74,12 @@ class _PanierPageState extends State<PanierPage> {
             }
 
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text('Aucun article dans le panier'));
+              return Center(
+                child: Text(
+                  'Aucun article dans le panier',
+                  style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
+                ),
+              );
             }
 
             final commandes = snapshot.data!.docs;
@@ -133,14 +151,11 @@ class _PanierPageState extends State<PanierPage> {
                           children: [
                             Text(
                               productName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                              style: GoogleFonts.poppins(
                                 fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
-                            ),
-                            Text(
-                              displayDate,
-                              style: const TextStyle(fontSize: 12),
                             ),
                             const SizedBox(height: 6),
                             Text(
@@ -149,6 +164,11 @@ class _PanierPageState extends State<PanierPage> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
                               ),
+                            ),
+                            const SizedBox(height: 9),
+                            Text(
+                              displayDate,
+                              style: GoogleFonts.poppins(fontSize: 12),
                             ),
                           ],
                         ),
@@ -171,54 +191,20 @@ class _PanierPageState extends State<PanierPage> {
                                 userData['adresse'] == null ||
                                 userData['adresse'].toString().isEmpty) {
                               if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              final Snack = ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   behavior: SnackBarBehavior.floating,
                                   backgroundColor: Color(0xFF02204B),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
-                                  duration: Duration(seconds: 3),
-                                  content: Row(
-                                    children: [
-                                      IconButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const EditProfile(),
-                                            ),
-                                          );
-                                        },
-                                        icon: const Icon(
-                                          Icons.edit,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const EditProfile(),
-                                            ),
-                                          );
-                                        },
-                                        child: Text(
-                                          "Veuillez compléter votre profil",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 9),
-                                    ],
-                                  ),
+                                  duration: Duration(seconds: 2),
+                                  content: Text("Veuillez renseigné votre numero de telephone et votre adresse", style:  GoogleFonts.poppins(fontSize: 15, color: Colors.white),)
                                 ),
                               );
+                              Snack.closed.then((_){
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => EditProfile()));
+                              });
                               return; // Stoppe le paiement
                             }
                             if (!mounted) return;
@@ -376,8 +362,6 @@ class _PanierPageState extends State<PanierPage> {
                           ),
                         ],
                       ),
-                    
-                    
                     ],
                   ),
                 );
@@ -388,20 +372,53 @@ class _PanierPageState extends State<PanierPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final snapshot = await FirebaseFirestore.instance
+          final userDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(uid)
-              .collection('commandes')
               .get();
 
-          final List<Map<String, dynamic>> commandes = snapshot.docs
-              .map((doc) => doc.data())
-              .toList();
+          final userData = userDoc.data();
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => BuyAllPage(commandes: commandes)),
-          );
+          // 🔹 Vérifier si le numéro et l'adresse sont présents
+          if (userData == null ||
+              userData['phone'] == null ||
+              userData['phone'].toString().isEmpty ||
+              userData['adresse'] == null ||
+              userData['adresse'].toString().isEmpty) {
+            if (!mounted) return;
+            final Snack = ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Color(0xFF02204B),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                duration: Duration(seconds: 2),
+                content: Text("Veuillez renseigné votre numero de telephone et votre adresse", style:  GoogleFonts.poppins(fontSize: 15, color: Colors.white),)
+              )
+            );
+            Snack.closed.then((_){
+              Navigator.push(context, MaterialPageRoute(builder: (_) => EditProfile()));
+            });
+            return; // Stoppe le paiement
+          } else {
+            final snapshot = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(uid)
+                .collection('commandes')
+                .get();
+
+            final List<Map<String, dynamic>> commandes = snapshot.docs
+                .map((doc) => doc.data())
+                .toList();
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BuyAllPage(commandes: commandes),
+              ),
+            );
+          }
         },
         child: const Icon(Icons.add_shopping_cart),
       ),

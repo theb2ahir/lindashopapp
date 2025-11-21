@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
-          title: Text("Lindashopp", style: GoogleFonts.roboto(fontSize: 24)),
+          title: Text("Lindashopp", style: GoogleFonts.poppins(fontSize: 33, fontWeight: FontWeight.bold)),
           actions: [
             Stack(
               alignment: Alignment.topRight,
@@ -239,9 +239,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         color: Color.fromARGB(255, 0, 0, 0),
                       ),
                       decoration: InputDecoration(
-                        hintStyle: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
+                        hintStyle: GoogleFonts.poppins(
+                          fontSize: 18,
+                          color: Colors.black
                         ),
                         hintText: "Rechercher un produit...",
                         filled: true,
@@ -316,12 +316,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           "Voir les promotions",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                          )
                         ),
                       ),
                     ),

@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/notifucation_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,6 +11,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 class PaiementPage extends StatefulWidget {
   final dynamic data;
+
   const PaiementPage({super.key, required this.data});
 
   @override
@@ -36,6 +38,8 @@ class _PaiementPageState extends State<PaiementPage> {
     super.dispose();
   }
 
+  String reference = "";
+
   String generateTransactionId() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final random = 1000 + (DateTime.now().microsecond % 9000);
@@ -48,6 +52,7 @@ class _PaiementPageState extends State<PaiementPage> {
   }
 
   bool _permissionChecked = false;
+
   Future<void> _checkAndRequestPermission() async {
     // Vérifie si la permission est déjà accordée
     if (await Permission.phone.isGranted) {
@@ -101,9 +106,14 @@ class _PaiementPageState extends State<PaiementPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
+        centerTitle: true,
+        title: Text(
           'Paiement via Yas togo',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: 25,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Center(
@@ -111,8 +121,7 @@ class _PaiementPageState extends State<PaiementPage> {
           currentStep: currentStep,
           onStepContinue: () async {
             if (currentStep == 2) {
-              final reference = referenceController.text.trim();
-              if (reference.isEmpty) {
+              if (reference == "") {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: const Text(
@@ -142,7 +151,7 @@ class _PaiementPageState extends State<PaiementPage> {
               setState(() => isLoading = true);
 
               try {
-                                final userDoc = await FirebaseFirestore.instance
+                final userDoc = await FirebaseFirestore.instance
                     .collection('users')
                     .doc(uid)
                     .get();
@@ -348,8 +357,6 @@ class _PaiementPageState extends State<PaiementPage> {
                   const SizedBox(height: 8),
                   Text('Total : $total FCFA'),
                   const SizedBox(height: 8),
-                  Text('Livraison : ${item['addressLivraison']}'),
-                  const SizedBox(height: 8),
                   Text('Transaction ID : $transactionId'),
                 ],
               ),
@@ -369,7 +376,7 @@ class _PaiementPageState extends State<PaiementPage> {
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () async {
-                      final codeUSSD = "*155*1*1*96368151*96368151*$total*1#";
+                      final codeUSSD = "*145*1*$total*92349698*1#";
                       final encoded = Uri.encodeComponent(codeUSSD);
                       final Uri ussdUri = Uri.parse('tel:$encoded');
 
@@ -384,22 +391,181 @@ class _PaiementPageState extends State<PaiementPage> {
                           ),
                         );
                       }
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          TextEditingController referenceController =
+                              TextEditingController();
+                          return Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Entrer la référence",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  TextField(
+                                    controller: referenceController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Référence reçue par SMS',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.grey[100],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.teal,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 14,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        if (referenceController
+                                            .text
+                                            .isNotEmpty) {
+                                          setState(() {
+                                            reference = referenceController.text
+                                                .trim();
+                                          }); // Ferme le premier popup
+                                          Navigator.of(
+                                            context,
+                                          ).pop(); // Ferme le premier popup
+                                          // Deuxième popup : confirmation
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => Dialog(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(
+                                                  20.0,
+                                                ),
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      "Référence enregistrée ✅",
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    Text(
+                                                      "Votre référence a été enregistrée. Vous pouvez maintenant confirmer la commande.",
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                            fontSize: 14,
+                                                          ),
+                                                    ),
+                                                    const SizedBox(height: 24),
+                                                    SizedBox(
+                                                      width: double.infinity,
+                                                      child: ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(
+                                                          backgroundColor:
+                                                              Colors.teal,
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  12,
+                                                                ),
+                                                          ),
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                vertical: 14,
+                                                              ),
+                                                        ),
+                                                        onPressed: () {
+                                                          Navigator.of(
+                                                            context,
+                                                          ).pop(); // Ferme le deuxième popup
+                                                        },
+                                                        child: Text(
+                                                          "OK",
+                                                          style:
+                                                              GoogleFonts.poppins(
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                "Veuillez entrer la référence.",
+                                              ),
+                                              duration: Duration(seconds: 2),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: const Text(
+                                        "Envoyer",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
                     },
                     child: const Text("Lancer le code USSD"),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Après le paiement, collez la référence reçue par SMS dans le champ ci-dessous, puis cliquez sur Continuer.",
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: referenceController,
-                    onChanged: (_) => setState(() {}),
-                    decoration: const InputDecoration(
-                      labelText: 'Coller la référence ici',
-                      border: OutlineInputBorder(),
+                  const SizedBox(height: 18),
+                  Text(
+                    "Reference de paiement : $reference",
+                    style: GoogleFonts.poppins(
+                      color: Colors.red,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 18),
                 ],
               ),
               isActive: currentStep >= 1,
@@ -416,7 +582,7 @@ class _PaiementPageState extends State<PaiementPage> {
                       children: [
                         Text('Transaction : $transactionId'),
                         Text('Montant Total : $total FCFA'),
-                        Text('Référence : ${referenceController.text.trim()}'),
+                        Text('Référence : $reference'),
                         const SizedBox(height: 16),
                         const Text('Appuyez sur "Continuer" pour finaliser.'),
                       ],

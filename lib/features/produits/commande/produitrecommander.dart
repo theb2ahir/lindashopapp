@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/produits/details/ProductDetailPage.dart';
 // Assurez-vous que ce fichier existe
 
@@ -25,7 +26,11 @@ class ProduitsRecommandes extends StatelessWidget {
       future: _fetchAllCollections(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(child: Text('Erreur de chargement'));
+          return Center(child: Text('Erreur de chargement', style:  GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          )));
         }
 
         if (!snapshot.hasData) {
@@ -66,15 +71,20 @@ class ProduitsRecommandes extends StatelessWidget {
                   ),
                   title: Text(
                     nom,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.poppins(
                       fontSize: 16,
-                    ),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    )
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("$prix FCFA"),
+                      Text("$prix F", style:  GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700],
+                      )),
                       const SizedBox(height: 4),
                       Row(
                         children: [
@@ -88,11 +98,13 @@ class ProduitsRecommandes extends StatelessWidget {
                             livraison
                                 ? "Livraison gratuite"
                                 : "livraison payante",
-                            style: TextStyle(
+                            style:  GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
                               color: livraison
                                   ? Colors.green
                                   : Colors.redAccent,
-                            ),
+                            )
                           ),
                           const Spacer(),
                           const Icon(Icons.star, color: Colors.amber, size: 16),

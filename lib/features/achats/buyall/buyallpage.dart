@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/profil/editprofil/editprofile.dart';
 import 'package:lindashopp/notifucation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,6 +22,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
   late String transactionId;
   final TextEditingController referenceController = TextEditingController();
   int total = 0;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
   }
 
   bool _permissionChecked = false;
+  String reference = "";
 
   Future<void> _checkAndRequestPermission() async {
     // Vérifie si la permission est déjà accordée
@@ -132,7 +135,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                               ),
                               const SizedBox(height: 3),
                               Text("transation id : $transactionId"),
-                              Text("Réf: ${referenceController.text.trim()}"),
+                              Text("Réf: ${reference}"),
                             ],
                           ),
                         ),
@@ -197,16 +200,21 @@ class _BuyAllPageState extends State<BuyAllPage> {
   final Map<String, String> ussdCodes = {};
 
   Future<void> envoyerInfosAuServeur(BuildContext context) async {
+    if (isLoading) return; // évite double clic
+
+    setState(() => isLoading = true);
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
+      setState(() => isLoading = false);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Utilisateur non connecté")));
       return;
     }
 
-    if (reseauChoisi == null || referenceController.text.trim().isEmpty) {
+    if (reseauChoisi == null || reference == "") {
+      setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Veuillez choisir un réseau et entrer la référence."),
@@ -228,6 +236,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
         userData['phone'].toString().isEmpty ||
         userData['adresse'] == null ||
         userData['adresse'].toString().isEmpty) {
+      setState(() => isLoading = false);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -272,7 +281,6 @@ class _BuyAllPageState extends State<BuyAllPage> {
 
     try {
       for (var item in widget.commandes) {
-
         final userAdresse = userData['adresse'];
         final userephone = userData['phone'];
         final useremail = userData['email'];
@@ -292,7 +300,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
               'productname': item['productname'],
               'quantity': item['quantity'],
               'productprice': item['productprice'],
-              'reference': referenceController.text.trim(),
+              'reference': reference,
               'status': 'en verification',
               'date': DateTime.now(),
             });
@@ -310,9 +318,9 @@ class _BuyAllPageState extends State<BuyAllPage> {
           "lati": lati,
           "longi": longi,
           'transactionId': transactionId,
-          'ref': referenceController.text.trim(),
+          'ref': reference,
           "UsereReseau": reseauChoisi,
-          "prixTotal": total,
+          "prixTotal": nomberitem * int.tryParse(productprice),
           "acrid": acrId,
           "userid": userid,
           'timestamp': DateTime.now(),
@@ -330,11 +338,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
               'type': 'commande', // utile pour filtrer
               'date': DateTime.now(),
             });
-        NotificationService.showNotification(
-          title: "Achat réussi 🎉",
-          message:
-              "Merci pour vos achats , vous serez livré dans les plus brefs délais !",
-        );
+
         showCommandeDialog();
       }
 
@@ -344,6 +348,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
         SnackBar(content: Text("Erreur : $e"), backgroundColor: Colors.red),
       );
     }
+    setState(() => isLoading = false);
   }
 
   @override
@@ -360,7 +365,8 @@ class _BuyAllPageState extends State<BuyAllPage> {
         automaticallyImplyLeading: false,
         title: Text(
           "Valider mon panier",
-          style: const TextStyle(
+          style: GoogleFonts.poppins(
+            fontSize: 25,
             color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
@@ -426,17 +432,17 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                     children: [
                                       Text(
                                         item['productname'] ?? '',
-                                        style: const TextStyle(
+                                        style: GoogleFonts.poppins(
                                           fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         '${item['quantity']} x ${item['productprice']} FCFA',
-                                        style: const TextStyle(
+                                        style: GoogleFonts.poppins(
                                           fontSize: 14,
-                                          color: Colors.grey,
+                                          color: Colors.grey[600],
                                         ),
                                       ),
                                     ],
@@ -458,8 +464,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                     ),
                                     Text(
                                       '${(int.tryParse(item['productprice'].toString()) ?? 0) * (int.tryParse(item['quantity'].toString()) ?? 0)} FCFA',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                      style: GoogleFonts.poppins(
                                         fontSize: 16,
                                         color: Colors.black,
                                       ),
@@ -500,20 +505,31 @@ class _BuyAllPageState extends State<BuyAllPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               "Facture",
-                              style: TextStyle(
+                              style: GoogleFonts.poppins(
+                                fontSize: 19,
+                                color: Colors.black,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
                               ),
                             ),
                             const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text("Total panier"),
                                 Text(
-                                  "$total FCFA", // ← total panier
+                                  "Total panier",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  "$total FCFA",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ), // ← total panier
                                 ),
                               ],
                             ),
@@ -521,9 +537,39 @@ class _BuyAllPageState extends State<BuyAllPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text("Frais de livraison"),
+                                Text(
+                                  "Frais de livraison",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
                                 Text(
                                   "${fraisLivraison.toStringAsFixed(0)} FCFA",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 9),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Reference de paiement",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  reference,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
                                 ),
                               ],
                             ),
@@ -531,19 +577,20 @@ class _BuyAllPageState extends State<BuyAllPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
+                                Text(
                                   "Total",
-                                  style: TextStyle(
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 19,
+                                    color: Colors.black,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 18,
                                   ),
                                 ),
                                 Text(
                                   "${totalGeneral.toStringAsFixed(0)} FCFA",
-                                  style: const TextStyle(
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
                                     color: Colors.red,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 18,
                                   ),
                                 ),
                               ],
@@ -552,82 +599,252 @@ class _BuyAllPageState extends State<BuyAllPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
 
                       // 🟢 Réseaux (checkboxes)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Choisir le réseau",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          CheckboxListTile(
-                            title: const Text("Moov"),
-                            value: reseauChoisi == "Moov",
-                            onChanged: (value) {
-                              setState(() {
-                                reseauChoisi = value! ? "Moov" : null;
-                              });
-                            },
-                          ),
-                          CheckboxListTile(
-                            title: const Text("Yas"),
-                            value: reseauChoisi == "Yas",
-                            onChanged: (value) {
-                              setState(() {
-                                reseauChoisi = value! ? "Yas" : null;
-                              });
-                            },
-                          ),
-                          if (reseauChoisi != null)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8.0,
-                              ),
-                              child: TextButton(
-                                onPressed: () {
-                                  lancerUSSD(ussdCodes[reseauChoisi]!);
-                                },
-                                child: Text(
-                                  "Clicker sur ce text pour lancer le code USSD et ensuite entrer la référence fournie par l'opérateur",
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.teal,
-                                  ),
+                      SizedBox(
+                        // Largeur fixe du Row
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // Écart entre les boutons
+                          children: [
+                            // Bouton Moov
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: reseauChoisi == "Moov"
+                                      ? Colors.teal
+                                      : Colors.grey[300],
+                                  foregroundColor: reseauChoisi == "Moov"
+                                      ? Colors.white
+                                      : Colors.black,
                                 ),
+                                onPressed: () {
+                                  setState(() {
+                                    reseauChoisi = "Moov";
+                                  });
+                                },
+                                child: const Text("Moov"),
                               ),
                             ),
-                        ],
+                            const SizedBox(width: 16),
+                            // Espace entre les boutons
+                            // Bouton Yas
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: reseauChoisi == "Yas"
+                                      ? Colors.teal
+                                      : Colors.grey[300],
+                                  foregroundColor: reseauChoisi == "Yas"
+                                      ? Colors.white
+                                      : Colors.black,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    reseauChoisi = "Yas";
+                                  });
+                                },
+                                child: const Text("Yas"),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-
                       const SizedBox(height: 16),
+                      if (reseauChoisi != null)
+                        TextButton(
+                          onPressed: () {
+                            lancerUSSD(ussdCodes[reseauChoisi]!);
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              // L'utilisateur doit envoyer la référence
+                              builder: (context) {
+                                TextEditingController referenceController =
+                                    TextEditingController();
+                                return Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "Entrer la référence",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        TextField(
+                                          controller: referenceController,
+                                          decoration: InputDecoration(
+                                            labelText:
+                                                'Référence fournie par l’opérateur',
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.grey[100],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 24),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.teal,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 14,
+                                                  ),
+                                            ),
+                                            onPressed: () {
+                                              if (referenceController
+                                                  .text
+                                                  .isNotEmpty) {
+                                                Navigator.of(context).pop();
+                                                setState(() {
+                                                  reference =
+                                                      referenceController.text
+                                                          .trim();
+                                                }); // Ferme le premier popup
 
-                      // 🧾 Référence opérateur
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Entrer ici la référence fournie par l'opérateur :",
-                          ),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: referenceController,
-                            decoration: InputDecoration(
-                              labelText: 'Référence...',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                                                // Deuxième popup : confirmation
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) => Dialog(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
+                                                          ),
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            20.0,
+                                                          ),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Text(
+                                                            "Référence enregistrée ✅",
+                                                            style:
+                                                                GoogleFonts.poppins(
+                                                                  fontSize: 18,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 16,
+                                                          ),
+                                                          Text(
+                                                            "Votre référence a été enregistrée. Vous pouvez maintenant confirmer la commande.",
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style:
+                                                                GoogleFonts.poppins(
+                                                                  fontSize: 14,
+                                                                ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 24,
+                                                          ),
+                                                          SizedBox(
+                                                            width:
+                                                                double.infinity,
+                                                            child: ElevatedButton(
+                                                              style: ElevatedButton.styleFrom(
+                                                                backgroundColor:
+                                                                    Colors.teal,
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        12,
+                                                                      ),
+                                                                ),
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          14,
+                                                                    ),
+                                                              ),
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                  context,
+                                                                ).pop(); // Ferme le dialogue
+                                                              },
+                                                              child: Text(
+                                                                "OK",
+                                                                style: GoogleFonts.poppins(
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              } else {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      "Veuillez entrer la référence.",
+                                                    ),
+                                                    duration: Duration(
+                                                      seconds: 2,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            child: const Text(
+                                              "Envoyer",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          child: Text(
+                            "💸 Cliquez ici pour initier le payement 📲",
+                            style: GoogleFonts.poppins(
+                              color: Colors.teal,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                        ],
-                      ),
+                        ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 25),
 
                       // 🔘 Bouton de validation
                       ElevatedButton.icon(

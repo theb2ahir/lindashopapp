@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/produits/details/ProductDetailPage.dart';
 
 class ProductColumn extends StatefulWidget {
@@ -114,8 +115,10 @@ class _ProductColumnState extends State<ProductColumn> {
                           children: [
                             Text(
                               nom,
-                              style: const TextStyle(
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -124,11 +127,12 @@ class _ProductColumnState extends State<ProductColumn> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "$prix FCFA",
-                                  style: TextStyle(
-                                    color: Colors.grey[700],
+                                  "$prix F",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                  ),
+                                    color: Colors.grey[700],
+                                  )
                                 ),
                                 Row(
                                   children: [

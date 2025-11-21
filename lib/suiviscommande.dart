@@ -3,6 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lindashopp/features/produits/commande/produitrecommander.dart';
 
@@ -30,7 +31,11 @@ class _AcrListPageState extends State<AcrListPage> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
-      return Scaffold(body: Center(child: Text("Utilisateur non connecté")));
+      return Scaffold(body: Center(child: Text("Utilisateur non connecté", style:  GoogleFonts.poppins(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),)));
     }
     // ✅ Fonction pour supprimer un ACR par son ID
     Future<void> supprimerAcr(
@@ -80,12 +85,13 @@ class _AcrListPageState extends State<AcrListPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'achats',
-          style: TextStyle(
-            color: Colors.black,
+          style:  GoogleFonts.poppins(
+            fontSize: 25,
             fontWeight: FontWeight.bold,
-          ),
+            color: Colors.black,
+          )
         ),
       ),
       body: SingleChildScrollView(
@@ -99,7 +105,11 @@ class _AcrListPageState extends State<AcrListPage> {
                 children: [
                   Text(
                     "Vos  achats",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    style:  GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    )
                   ),
                 ],
               ),
@@ -123,9 +133,13 @@ class _AcrListPageState extends State<AcrListPage> {
                 final docs = snapshot.data!.docs;
 
                 if (docs.isEmpty) {
-                  return const Padding(
+                  return Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: Text('Aucun achat trouvé.'),
+                    child: Text('Aucun achat trouvé.', style:  GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.black,
+                    )
+                    ),
                   );
                 }
 
@@ -223,7 +237,11 @@ class _AcrListPageState extends State<AcrListPage> {
                 children: [
                   Text(
                     "Produits qui pourraient vous intéresser",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    style:  GoogleFonts.poppins(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    )
                   ),
                 ],
               ),

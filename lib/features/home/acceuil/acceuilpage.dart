@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/home/homepage.dart';
 import 'package:lindashopp/features/panier/panier.dart';
 import 'package:lindashopp/features/profil/profil.dart';
@@ -53,10 +54,19 @@ class AcceuilPageState extends State<AcceuilPage> {
         iconSize: 27,
         selectedIconTheme: const IconThemeData(
           color: Color.fromARGB(255, 190, 53, 49),
+          size: 30
         ),
-        unselectedIconTheme: const IconThemeData(color: Color(0xFF02204B)),
+        unselectedIconTheme: const IconThemeData(color: Color(0xFF02204B), size: 27),
         showSelectedLabels: true,
         showUnselectedLabels: true,
+        selectedLabelStyle: GoogleFonts.poppins(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+        unselectedLabelStyle: GoogleFonts.poppins(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
         selectedItemColor: const Color.fromARGB(255, 190, 53, 49),
         unselectedItemColor: const Color.fromARGB(255, 11, 10, 10),
         currentIndex: myIndex,

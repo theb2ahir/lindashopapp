@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/avis/avis.dart';
 import 'package:lindashopp/features/home/acceuil/acceuilpage.dart';
 import 'package:geolocator/geolocator.dart';
@@ -20,6 +21,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   int quantity = 1;
 
   void increment() => setState(() => quantity++);
+
   void decrement() {
     if (quantity > 1) setState(() => quantity--);
   }
@@ -361,6 +363,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: SafeArea(
+          bottom: true,
           child: Column(
             children: [
               Padding(
@@ -371,7 +374,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     imageUrl.isNotEmpty
                         ? Center(
                             child: ClipRRect(
-                              borderRadius: BorderRadiusGeometry.circular(23),
+                              borderRadius: BorderRadius.circular(23),
                               child: Image.network(imageUrl, height: 350),
                             ),
                           )
@@ -414,11 +417,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       ),
                                     ),
                                   ),
-                                  const TextSpan(
+                                  TextSpan(
                                     text: " avis",
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 14,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      color: Colors.grey[600],
                                     ),
                                   ),
                                 ],
@@ -440,10 +443,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               livraison
                                   ? "Livraison gratuite"
                                   : "Livraison payante",
-                              style: TextStyle(
-                                fontSize: 15,
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                                 color: livraison ? Colors.green : Colors.red,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
@@ -458,10 +461,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       children: [
                         Text(
                           '$prix fcfa',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            color: Colors.green,
+                          style: GoogleFonts.poppins(
+                            fontSize: 23,
                             fontWeight: FontWeight.bold,
+                            color: Colors.green,
                           ),
                         ),
 
@@ -482,10 +485,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       children: [
                         Text(
                           "Description",
-                          style: const TextStyle(
-                            fontSize: 21,
-                            color: Colors.black,
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
                         ),
                       ],
@@ -503,7 +506,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               child: Text(
                                 description ?? '',
                                 textAlign: TextAlign.start,
-                                style: const TextStyle(
+                                style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
@@ -512,145 +515,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Informations supplémentaires ",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(20),
-                            ),
-                          ),
-                          builder: (context) => DraggableScrollableSheet(
-                            expand: false,
-                            initialChildSize: 0.6,
-                            minChildSize: 0.4,
-                            maxChildSize: 0.95,
-                            builder: (context, scrollController) {
-                              return Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(20),
-                                  ),
-                                ),
-                                child: ListView(
-                                  controller: scrollController,
-                                  children: [
-                                    Center(
-                                      child: Container(
-                                        width: 50,
-                                        height: 5,
-                                        margin: const EdgeInsets.only(
-                                          bottom: 16,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[400],
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    // 📌 Caractéristiques Techniques
-                                    const Text(
-                                      "Caractéristiques Techniques",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    ...caracteristiqueTechnique.map(
-                                      (e) => ListTile(
-                                        contentPadding: EdgeInsets.zero,
-                                        leading: const Icon(
-                                          Icons.check_circle_outline,
-                                          color: Colors.blue,
-                                        ),
-                                        title: Text(
-                                          e.toString(),
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                      ),
-                                    ),
-                                    const Divider(height: 30, thickness: 1.5),
-
-                                    // 📌 Avantages et Utilisation
-                                    const Text(
-                                      "Avantages & Utilisation",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    ...avantageEtUtilsation.map(
-                                      (e) => ListTile(
-                                        contentPadding: EdgeInsets.zero,
-                                        leading: const Icon(
-                                          Icons.check_circle_outline,
-                                          color: Colors.green,
-                                        ),
-                                        title: Text(
-                                          e.toString(),
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                      ),
-                                    ),
-                                    const Divider(height: 30, thickness: 1.5),
-
-                                    // 📌 Contenu du Package
-                                    const Text(
-                                      "Contenu du Package",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    ...contenuDuPackage.map(
-                                      (e) => ListTile(
-                                        contentPadding: EdgeInsets.zero,
-                                        leading: const Icon(
-                                          Icons.inbox_outlined,
-                                          color: Colors.deepPurple,
-                                        ),
-                                        title: Text(
-                                          e.toString(),
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 20),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.info, color: Colors.blue),
                     ),
                   ],
                 ),
@@ -700,7 +564,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ),
                         const SizedBox(width: 10),
                         SizedBox(
-                          width: 130,
                           child: Row(
                             children: [
                               IconButton(
@@ -713,7 +576,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   size: 23,
                                 ),
                               ),
-                              const SizedBox(width: 15),
                               IconButton(
                                 onPressed: () {
                                   _ajouterAuPanier();
@@ -722,6 +584,154 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   Icons.add_shopping_cart,
                                   color: const Color.fromARGB(255, 50, 193, 55),
                                   size: 30,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20),
+                                      ),
+                                    ),
+                                    builder: (context) => DraggableScrollableSheet(
+                                      expand: false,
+                                      initialChildSize: 0.6,
+                                      minChildSize: 0.4,
+                                      maxChildSize: 0.95,
+                                      builder: (context, scrollController) {
+                                        return Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(20),
+                                            ),
+                                          ),
+                                          child: ListView(
+                                            controller: scrollController,
+                                            children: [
+                                              Center(
+                                                child: Container(
+                                                  width: 50,
+                                                  height: 5,
+                                                  margin: const EdgeInsets.only(
+                                                    bottom: 16,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey[400],
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                  ),
+                                                ),
+                                              ),
+
+                                              // 📌 Caractéristiques Techniques
+                                              Text(
+                                                "Caractéristiques Techniques",
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 10),
+                                              ...caracteristiqueTechnique.map(
+                                                (e) => ListTile(
+                                                  contentPadding:
+                                                      EdgeInsets.zero,
+                                                  leading: const Icon(
+                                                    Icons.check_circle_outline,
+                                                    color: Colors.blue,
+                                                  ),
+                                                  title: Text(
+                                                    e.toString(),
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const Divider(
+                                                height: 30,
+                                                thickness: 1.5,
+                                              ),
+
+                                              // 📌 Avantages et Utilisation
+                                              Text(
+                                                "Avantages & Utilisation",
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 20,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 10),
+                                              ...avantageEtUtilsation.map(
+                                                (e) => ListTile(
+                                                  contentPadding:
+                                                      EdgeInsets.zero,
+                                                  leading: const Icon(
+                                                    Icons.check_circle_outline,
+                                                    color: Colors.green,
+                                                  ),
+                                                  title: Text(
+                                                    e.toString(),
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const Divider(
+                                                height: 30,
+                                                thickness: 1.5,
+                                              ),
+
+                                              // 📌 Contenu du Package
+                                              Text(
+                                                "Contenu du Package",
+                                                style:  GoogleFonts.poppins(
+                                                  fontSize: 20,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 10),
+                                              ...contenuDuPackage.map(
+                                                (e) => ListTile(
+                                                  contentPadding:
+                                                      EdgeInsets.zero,
+                                                  leading: const Icon(
+                                                    Icons.inbox_outlined,
+                                                    color: Colors.deepPurple,
+                                                  ),
+                                                  title: Text(
+                                                    e.toString(),
+                                                    style:  GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 20),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(
+                                  Icons.info,
+                                  color: Colors.blue,
                                 ),
                               ),
                             ],

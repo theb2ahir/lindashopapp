@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/core/widgets/customtextfields.dart';
 
@@ -13,12 +14,43 @@ class Inquietude extends StatefulWidget {
 class _InquietudeState extends State<Inquietude> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController prenomController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController refController = TextEditingController();
-  final TextEditingController transactionIdController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
+
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _prefillUserInfo();
+  }
+
+  /// 🔹 Préremplit les champs avec les infos de l'utilisateur connecté
+  Future<void> _prefillUserInfo() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      final userDoc =
+      await _firestore.collection('users').doc(user.uid).get();
+
+      if (userDoc.exists) {
+        final data = userDoc.data()!;
+        setState(() {
+          nameController.text = data['name'] ?? '';
+          emailController.text = data['email'] ?? user.email ?? '';
+        });
+      } else {
+        // Si pas de document, on met au moins l'email du compte Firebase
+        emailController.text = user.email ?? '';
+      }
+    } catch (e) {
+      debugPrint('Erreur lors du préremplissage : $e');
+    }
+  }
+
 
   Future<void> submitToFirestore() async {
     try {
@@ -67,22 +99,23 @@ class _InquietudeState extends State<Inquietude> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         iconTheme: const IconThemeData(
           color: Colors.white, // couleur de l’icône retour
         ),
+        centerTitle: true,
         title: const Text(
           "Formulaire - Inquiétudes",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color(0xFF02204B),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Form(
-            key: _formKey,
+        child: Form(
+          key: _formKey,
+          child: Center(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CustomTextField(controller: nameController, label: "Nom"),
                 const SizedBox(height: 15),
@@ -130,7 +163,7 @@ class _InquietudeState extends State<Inquietude> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.greenAccent.shade400,
+                    backgroundColor: Colors.blue,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
                       vertical: 15,
@@ -142,7 +175,7 @@ class _InquietudeState extends State<Inquietude> {
                   child: const Text(
                     "Envoyer",
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),

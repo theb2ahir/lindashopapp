@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/notifucation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 // ignore_for_file: file_names, unrelated_type_equality_checks, use_build_context_synchronously
@@ -37,6 +38,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
     super.dispose();
   }
 
+  String reference = "";
   String generateTransactionId() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final random = 1000 + (DateTime.now().microsecond % 9000);
@@ -102,9 +104,13 @@ class _PaiementPage2State extends State<PaiementPage2> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
+        title: Text(
           'Paiement via Flooz',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: 25,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -113,8 +119,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
           currentStep: currentStep,
           onStepContinue: () async {
             if (currentStep == 2) {
-              final reference = referenceController.text.trim();
-              if (reference.isEmpty) {
+              if (reference == "") {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: const Text(
@@ -444,7 +449,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
                 'Paiement',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
               ),
-              content: Column(
+              content:  Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
@@ -467,26 +472,138 @@ class _PaiementPage2State extends State<PaiementPage2> {
                             ),
                           ),
                         );
-                      }
-                    },
+                      };
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            TextEditingController referenceController = TextEditingController();
+                            return Dialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "Entrer la référence",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    TextField(
+                                      controller: referenceController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Référence reçue par SMS',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.grey[100],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.teal,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
+                                        ),
+                                        onPressed: () {
+                                          if (referenceController.text.isNotEmpty) {
+                                            setState(() {
+                                              reference = referenceController.text.trim();
+                                            }); // Ferme le premier popup
+                                            Navigator.of(context).pop(); // Ferme le premier popup
+                                            // Deuxième popup : confirmation
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => Dialog(
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(20.0),
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        "Référence enregistrée ✅",
+                                                        style: GoogleFonts.poppins(
+                                                          fontSize: 18,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 16),
+                                                      Text(
+                                                        "Votre référence a été enregistrée. Vous pouvez maintenant confirmer la commande.",
+                                                        textAlign: TextAlign.center,
+                                                        style: GoogleFonts.poppins(fontSize: 14),
+                                                      ),
+                                                      const SizedBox(height: 24),
+                                                      SizedBox(
+                                                        width: double.infinity,
+                                                        child: ElevatedButton(
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor: Colors.teal,
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(12),
+                                                            ),
+                                                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                                          ),
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop(); // Ferme le deuxième popup
+                                                          },
+                                                          child: Text(
+                                                            "OK",
+                                                            style: GoogleFonts.poppins(color: Colors.white),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text("Veuillez entrer la référence."),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: const Text(
+                                          "Envoyer",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
 
-                    child: const Text("Lancer le code USSD"),
+                    },
+                    child:  Text("Lancer le code USSD", style: GoogleFonts.poppins(fontSize: 16),),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Après le paiement, collez la référence reçue par SMS dans le champ ci-dessous, puis cliquez sur Continuer.",
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: referenceController,
-                    onChanged: (_) => setState(() {}),
-                    decoration: const InputDecoration(
-                      labelText: 'Coller la référence ici',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                  const SizedBox(height: 18,),
+                  Text("Reference de paiement : $reference", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),),
+                  const SizedBox(height: 18),
                 ],
               ),
+
               isActive: currentStep >= 1,
             ),
             Step(
@@ -535,10 +652,11 @@ class _PaiementPage2State extends State<PaiementPage2> {
                                 fontSize: 16,
                               ),
                             ),
-                            Text(referenceController.text.trim()),
+                            Text(reference),
                           ],
                         ),
-                        const Text('Appuyez sur "Continuer" pour finaliser.'),
+                        const SizedBox(height: 12),
+                        Text('Appuyez sur "Continuer" pour finaliser.', style: GoogleFonts.poppins(fontSize: 16),),
                       ],
                     ),
               isActive: currentStep >= 2,

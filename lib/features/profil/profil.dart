@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/auth/connection/connectionpage.dart';
 import 'package:lindashopp/features/profil/editprofil/editprofile.dart';
 import 'package:lindashopp/features/favoris/favoris.dart';
@@ -37,11 +38,11 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
+        title: Text(
           "Mon Profil",
-          style: TextStyle(
+          style: GoogleFonts.poppins(
+            fontSize: 19,
             color: Colors.black,
-            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -90,9 +91,9 @@ class _ProfileState extends State<Profile> {
                         child: Center(
                           child: Text(
                             name.substring(0, 2).toUpperCase(),
-                            style: const TextStyle(
+                            style: GoogleFonts.poppins(
+                              fontSize: 69,
                               color: Colors.white,
-                              fontSize: 60,
                             ),
                           ),
                         ),
@@ -101,17 +102,17 @@ class _ProfileState extends State<Profile> {
                     const SizedBox(height: 15),
                     Text(
                       name,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.poppins(
+                        fontSize: 23,
+                        color: Colors.black,
                       ),
                     ),
                     const SizedBox(height: 11),
                     Text(
                       email,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.black,
                       ),
                     ),
                     const SizedBox(height: 19),
@@ -127,9 +128,9 @@ class _ProfileState extends State<Profile> {
                       },
                       child: Text(
                         "Editer le profil",
-                        style: const TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -146,7 +147,13 @@ class _ProfileState extends State<Profile> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.favorite, color: Colors.red),
-                  title: const Text('Mes favoris'),
+                  title: Text(
+                    'Mes favoris',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
                   trailing: const Icon(Icons.arrow_right),
                   onTap: () => Navigator.push(
                     context,
@@ -158,7 +165,13 @@ class _ProfileState extends State<Profile> {
                     Icons.cancel_schedule_send,
                     color: Colors.black,
                   ),
-                  title: const Text('Non livré ?'),
+                  title: Text(
+                    'Non livré ?',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
                   trailing: const Icon(Icons.arrow_right),
                   onTap: () => Navigator.push(
                     context,
@@ -167,7 +180,13 @@ class _ProfileState extends State<Profile> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.handshake, color: Colors.black),
-                  title: const Text('Partenariat'),
+                  title: Text(
+                    'Partenariat',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
                   trailing: const Icon(Icons.arrow_right),
                   onTap: () async {
                     const whatsappNumber = '+22892349698';
@@ -195,7 +214,13 @@ class _ProfileState extends State<Profile> {
 
                 ListTile(
                   leading: const Icon(Icons.phone, color: Colors.black),
-                  title: const Text('Appeler'),
+                  title: Text(
+                    'Appeler',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
                   trailing: const Icon(Icons.arrow_right),
                   onTap: () async {
                     const phoneNumber = '+22892349698';
@@ -223,7 +248,13 @@ class _ProfileState extends State<Profile> {
                     Icons.question_answer,
                     color: Colors.green,
                   ),
-                  title: const Text('Des inquiétudes ?'),
+                  title: Text(
+                    'Des inquiétudes ?',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
                   trailing: const Icon(Icons.arrow_right),
                   onTap: () => Navigator.push(
                     context,
@@ -233,9 +264,9 @@ class _ProfileState extends State<Profile> {
 
                 ListTile(
                   leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
+                  title: Text(
                     "Déconnexion",
-                    style: TextStyle(color: Colors.red),
+                    style: GoogleFonts.poppins(fontSize: 16, color: Colors.red),
                   ),
                   trailing: IconButton(
                     onPressed: () async {

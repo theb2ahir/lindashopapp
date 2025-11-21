@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/produits/details/ProductDetailPage.dart';
 
 class Allproduct extends StatefulWidget {
@@ -118,19 +119,23 @@ class _AllproductState extends State<Allproduct> {
                     Text(
                       nom,
                       textAlign: TextAlign.start,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                     const SizedBox(height: 5),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "$prix FCFA",
-                          style: TextStyle(
-                            color: Colors.grey[700],
-                            fontSize: 13,
+                          "$prix F",
+                          style:GoogleFonts.poppins(
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
-                          ),
+                            color: Colors.grey[700],
+                          )
                         ),
                         Row(
                           children: [

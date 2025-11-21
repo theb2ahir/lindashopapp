@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -333,6 +334,9 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> saveChanges() async {
+    setState(() {
+      isLoading = true;
+    });
     final uid = FirebaseAuth.instance.currentUser!.uid;
     await FirebaseFirestore.instance.collection('users').doc(uid).update({
       'name': _nameController.text,
@@ -340,6 +344,9 @@ class _EditProfileState extends State<EditProfile> {
       'adresse': _addressController.text,
     });
 
+    setState(() {
+      isLoading = false;
+    });
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text("Modifications enregistrées")));
@@ -350,7 +357,14 @@ class _EditProfileState extends State<EditProfile> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text("Éditer mon profil" , style: TextStyle(fontWeight: FontWeight.bold),),
+        title: Text(
+          "Éditer mon profil",
+          style: GoogleFonts.poppins(
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -370,9 +384,10 @@ class _EditProfileState extends State<EditProfile> {
                         child: Center(
                           child: Text(
                             user!['name'].substring(0, 2).toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: GoogleFonts.poppins(
                               fontSize: 60,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -388,7 +403,14 @@ class _EditProfileState extends State<EditProfile> {
                     leading: Icon(Icons.person),
                     title: TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(labelText: 'Nom'),
+                      decoration: InputDecoration(
+                        labelText: 'Nom',
+                        labelStyle: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -397,7 +419,14 @@ class _EditProfileState extends State<EditProfile> {
                     title: TextFormField(
                       readOnly: true,
                       controller: _emailController,
-                      decoration: const InputDecoration(labelText: 'Email'),
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        labelStyle: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -405,8 +434,13 @@ class _EditProfileState extends State<EditProfile> {
                     leading: Icon(Icons.phone),
                     title: TextFormField(
                       controller: _phoneNumberController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Numéro de téléphone',
+                        labelStyle: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),
@@ -423,13 +457,59 @@ class _EditProfileState extends State<EditProfile> {
                     leading: Icon(Icons.location_on),
                     title: TextFormField(
                       controller: _addressController,
-                      decoration: const InputDecoration(labelText: 'Adresse(region,ville , quartier , precision)'),
+                      decoration: InputDecoration(
+                        labelText:
+                            'Adresse(region,ville , quartier , precision)',
+                        labelStyle: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: saveChanges,
-                    child: const Text("Sauvegarder"),
+                  Padding(
+                    padding: const EdgeInsets.all(28.0),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: const Color(0xFF02204B),
+                      ),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                        ),
+                        onPressed: isLoading ? null : saveChanges,
+                        // désactive le bouton pendant le chargement
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Sauvegarder",
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            if (isLoading)
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
