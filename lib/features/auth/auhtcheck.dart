@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:lindashopp/features/home/acceuil/acceuilpage.dart';
-import 'package:lindashopp/features/auth/connection/connectionpage.dart';
+import 'package:lindashopp/features/pages/acceuilpage.dart';
+import 'package:lindashopp/features/auth/connectionpage.dart';
 
 
 class Auhtcheck extends StatelessWidget {
