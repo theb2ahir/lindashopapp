@@ -1,12 +1,9 @@
 // ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:lindashopp/features/pages/utils/notifucation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -26,6 +23,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
   late String transactionId;
   final TextEditingController referenceController = TextEditingController();
   int total = 0;
+  int totalGeneral = 0;
   bool isLoading = false;
 
   @override
@@ -164,7 +162,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Total : $total FCFA",
+                  "Total : $totalGeneral FCFA",
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -331,7 +329,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
           'transactionId': transactionId,
           'ref': reference,
           "UsereReseau": reseauChoisi,
-          "prixTotal": nomberitem * int.tryParse(productprice),
+          "prixTotal": totalGeneral,
           "acrid": acrId,
           "userid": userid,
           'timestamp': DateTime.now(),
@@ -355,7 +353,15 @@ class _BuyAllPageState extends State<BuyAllPage> {
           body:
               "Vos commandes ont été enregistrées avec succès, nous allons verifier votre paiement et modifier le statut en consequence , rendez-vous sur la page commande",
         );
+        final total = getTotalPrice();
+        int livraisonsPayantes = widget.commandes
+            .where((item) => item['livraison'] != 'true')
+            .length;
 
+        int fraisLivraison = livraisonsPayantes * 2000;
+        setState(() {
+          totalGeneral = total.toInt() + fraisLivraison;
+        });
         showCommandeDialog();
       }
 
