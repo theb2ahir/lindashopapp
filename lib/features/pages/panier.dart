@@ -191,19 +191,31 @@ class _PanierPageState extends State<PanierPage> {
                                 userData['adresse'] == null ||
                                 userData['adresse'].toString().isEmpty) {
                               if (!mounted) return;
-                              final Snack = ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: Color(0xFF02204B),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                              final snack = ScaffoldMessenger.of(context)
+                                  .showSnackBar(
+                                    SnackBar(
+                                      behavior: SnackBarBehavior.floating,
+                                      backgroundColor: Color(0xFF02204B),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      duration: Duration(seconds: 2),
+                                      content: Text(
+                                        "Veuillez renseigné votre numero de telephone et votre adresse",
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 15,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                              snack.closed.then((_) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => EditProfile(),
                                   ),
-                                  duration: Duration(seconds: 2),
-                                  content: Text("Veuillez renseigné votre numero de telephone et votre adresse", style:  GoogleFonts.poppins(fontSize: 15, color: Colors.white),)
-                                ),
-                              );
-                              Snack.closed.then((_){
-                                Navigator.push(context, MaterialPageRoute(builder: (_) => EditProfile()));
+                                );
                               });
                               return; // Stoppe le paiement
                             }
@@ -386,7 +398,7 @@ class _PanierPageState extends State<PanierPage> {
               userData['adresse'] == null ||
               userData['adresse'].toString().isEmpty) {
             if (!mounted) return;
-            final Snack = ScaffoldMessenger.of(context).showSnackBar(
+            final snack = ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 behavior: SnackBarBehavior.floating,
                 backgroundColor: Color(0xFF02204B),
@@ -394,11 +406,17 @@ class _PanierPageState extends State<PanierPage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 duration: Duration(seconds: 2),
-                content: Text("Veuillez renseigné votre numero de telephone et votre adresse", style:  GoogleFonts.poppins(fontSize: 15, color: Colors.white),)
-              )
+                content: Text(
+                  "Veuillez renseigné votre numero de telephone et votre adresse",
+                  style: GoogleFonts.poppins(fontSize: 15, color: Colors.white),
+                ),
+              ),
             );
-            Snack.closed.then((_){
-              Navigator.push(context, MaterialPageRoute(builder: (_) => EditProfile()));
+            snack.closed.then((_) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => EditProfile()),
+              );
             });
             return; // Stoppe le paiement
           } else {

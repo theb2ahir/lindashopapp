@@ -477,7 +477,6 @@ class _PaiementPage2State extends State<PaiementPage2> {
                           ),
                         );
                       }
-                      ;
                       showDialog(
                         context: context,
                         barrierDismissible: false,

@@ -1,9 +1,12 @@
 // ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:lindashopp/features/pages/utils/notifucation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -29,11 +32,17 @@ class _BuyAllPageState extends State<BuyAllPage> {
   void initState() {
     super.initState();
     transactionId = generateTransactionId();
-    total = getTotalPrice();
-    final totalString = total.toInt().toString();
+    final total = getTotalPrice();
+    int livraisonsPayantes = widget.commandes
+        .where((item) => item['livraison'] != 'true')
+        .length;
+
+    double fraisLivraison = livraisonsPayantes * 2000;
+    double totalGeneral = total + fraisLivraison;
+    final totalGeneralString = totalGeneral.toInt().toString();
     ussdCodes.addAll({
-      'Moov': "*155*1*1*96368151*96368151*$totalString*1#",
-      'Yas': "*145*1*$totalString*92349698*1#",
+      'Moov': "*155*1*1*96368151*96368151*$totalGeneralString*1#",
+      'Yas': "*145*1*$totalGeneralString*92349698*1#",
     });
   }
 
@@ -136,7 +145,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                               ),
                               const SizedBox(height: 3),
                               Text("transation id : $transactionId"),
-                              Text("Réf: ${reference}"),
+                              Text("Réf: $reference"),
                             ],
                           ),
                         ),
@@ -760,7 +769,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                             height: 16,
                                                           ),
                                                           Text(
-                                                            "Votre référence a été enregistrée. Vous pouvez maintenant confirmer la commande.",
+                                                            "Votre référence a été enregistrée ,rendez-vous sur la page commande pour suivre votre commande.",
                                                             textAlign: TextAlign
                                                                 .center,
                                                             style:
@@ -793,7 +802,8 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                               onPressed: () {
                                                                 Navigator.of(
                                                                   context,
-                                                                ).pop(); // Ferme le dialogue
+                                                                ).pop();
+                                                                // Ferme le dialogue
                                                               },
                                                               child: Text(
                                                                 "OK",

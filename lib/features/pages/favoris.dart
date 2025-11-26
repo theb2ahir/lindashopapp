@@ -24,19 +24,23 @@ class _FavorisState extends State<Favoris> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
-      return Scaffold(body: Center(child: Text("Utilisateur non connecté", style:  GoogleFonts.poppins(
-        fontSize: 16,
-        color: Colors.black,
-      ),)));
+      return Scaffold(
+        body: Center(
+          child: Text(
+            "Utilisateur non connecté",
+            style: GoogleFonts.poppins(fontSize: 16, color: Colors.black),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title:  Text(
+        title: Text(
           'Mes favoris',
-          style:  GoogleFonts.poppins(
+          style: GoogleFonts.poppins(
             fontSize: 23,
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -55,10 +59,12 @@ class _FavorisState extends State<Favoris> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return  Center(child: Text('Aucun article dans le panier', style:  GoogleFonts.poppins(
-              fontSize: 16,
-              color: Colors.black,
-            ),));
+            return Center(
+              child: Text(
+                'Aucun article dans le panier',
+                style: GoogleFonts.poppins(fontSize: 16, color: Colors.black),
+              ),
+            );
           }
 
           final commandes = snapshot.data!.docs;
@@ -127,7 +133,7 @@ class _FavorisState extends State<Favoris> {
                           ),
                           Text(
                             '${data['quantity']} x ${data['productprice']} FCFA',
-                            style:  GoogleFonts.poppins(
+                            style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
@@ -155,20 +161,24 @@ class _FavorisState extends State<Favoris> {
                               userData['adresse'] == null ||
                               userData['adresse'].toString().isEmpty) {
                             if (!mounted) return;
-                            final snack =  ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                behavior: SnackBarBehavior.floating,
-                                backgroundColor: Color(0xFF02204B),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                duration: Duration(seconds: 3),
-                                content: Text("Veuillez renseigné votre numero de telephone et votre adresse", style:  GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),)
-                              ),
-                            );
+                            final snack = ScaffoldMessenger.of(context)
+                                .showSnackBar(
+                                  SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    backgroundColor: Color(0xFF02204B),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    duration: Duration(seconds: 3),
+                                    content: Text(
+                                      "Veuillez renseigné votre numero de telephone et votre adresse",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                );
                             snack.closed.then((_) {
                               Navigator.push(
                                 context,
@@ -354,19 +364,25 @@ class _FavorisState extends State<Favoris> {
               userData['adresse'] == null ||
               userData['adresse'].toString().isEmpty) {
             if (!mounted) return;
-            final Snack = ScaffoldMessenger.of(context).showSnackBar(
+            final snack = ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: Color(0xFF02204B),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  duration: Duration(seconds: 2),
-                  content: Text("Veuillez renseigné votre numero de telephone et votre adresse", style:  GoogleFonts.poppins(fontSize: 15, color: Colors.white),)
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Color(0xFF02204B),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                duration: Duration(seconds: 2),
+                content: Text(
+                  "Veuillez renseigné votre numero de telephone et votre adresse",
+                  style: GoogleFonts.poppins(fontSize: 15, color: Colors.white),
+                ),
               ),
             );
-            Snack.closed.then((_){
-              Navigator.push(context, MaterialPageRoute(builder: (_) => EditProfile()));
+            snack.closed.then((_) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => EditProfile()),
+              );
             });
             return; // Stoppe le paiement
           }
