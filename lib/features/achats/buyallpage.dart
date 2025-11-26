@@ -36,8 +36,12 @@ class _BuyAllPageState extends State<BuyAllPage> {
         .length;
 
     double fraisLivraison = livraisonsPayantes * 2000;
-    double totalGeneral = total + fraisLivraison;
-    final totalGeneralString = totalGeneral.toInt().toString();
+    double totalGenerale = total + fraisLivraison;
+    final totalGeneralString = totalGenerale.toInt().toString();
+    setState(() {
+      totalGeneral = totalGenerale.toInt();
+    });
+
     ussdCodes.addAll({
       'Moov': "*155*1*1*96368151*96368151*$totalGeneralString*1#",
       'Yas': "*145*1*$totalGeneralString*92349698*1#",
@@ -353,15 +357,6 @@ class _BuyAllPageState extends State<BuyAllPage> {
           body:
               "Vos commandes ont été enregistrées avec succès, nous allons verifier votre paiement et modifier le statut en consequence , rendez-vous sur la page commande",
         );
-        final total = getTotalPrice();
-        int livraisonsPayantes = widget.commandes
-            .where((item) => item['livraison'] != 'true')
-            .length;
-
-        int fraisLivraison = livraisonsPayantes * 2000;
-        setState(() {
-          totalGeneral = total.toInt() + fraisLivraison;
-        });
         showCommandeDialog();
       }
 
