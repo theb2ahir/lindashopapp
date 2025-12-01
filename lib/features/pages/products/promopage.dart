@@ -68,8 +68,9 @@ class _PromoPageState extends State<PromoPage> {
 
                       final double total = avis
                           .map((e) {
-                            if (e is num)
+                            if (e is num) {
                               return e.toDouble(); // OK si c’est un nombre
+                            }
                             return double.tryParse(e.toString()) ??
                                 0.0; // Convertit la string "5" → 5.0
                           })

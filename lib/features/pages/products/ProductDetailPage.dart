@@ -433,7 +433,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   WidgetSpan(
                                     alignment: PlaceholderAlignment.middle,
                                     child: Text(
-                                      avis.toString(),
+                                      avis.toString().substring(0, 3),
                                       style: TextStyle(
                                         color: Colors.red,
                                         fontSize: 14,
