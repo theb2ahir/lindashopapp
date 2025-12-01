@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/pages/products/ProductDetailPage.dart';
 
 class PromoPage extends StatefulWidget {
@@ -17,7 +18,10 @@ class _PromoPageState extends State<PromoPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
-        title: Text('Promotions', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title: Text(
+          'Promotions',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
       ),
       body: Column(
         children: [
@@ -35,6 +39,18 @@ class _PromoPageState extends State<PromoPage> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
+                if (snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'Aucune promotion trouvée.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: Colors.black,
+                      ),
+                    ),
+                  );
+                }
+
                 final produits = snapshot.data!.docs;
 
                 return ListView.builder(
@@ -47,7 +63,22 @@ class _PromoPageState extends State<PromoPage> {
                     final prix = produit['prix']?.toString() ?? '0';
                     final imageUrl = produit['imageURL'] ?? '';
                     final pourcentage = produit['pourcentage'] ?? '';
-                    final avis = produit['avis'] ?? 0;
+                    double getMoyenneAvis(List avis) {
+                      if (avis.isEmpty) return 0;
+
+                      final double total = avis
+                          .map((e) {
+                            if (e is num)
+                              return e.toDouble(); // OK si c’est un nombre
+                            return double.tryParse(e.toString()) ??
+                                0.0; // Convertit la string "5" → 5.0
+                          })
+                          .reduce((a, b) => a + b);
+
+                      return total / avis.length;
+                    }
+
+                    final moyenne = getMoyenneAvis(produit['avis'] ?? []);
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
@@ -55,7 +86,7 @@ class _PromoPageState extends State<PromoPage> {
                         vertical: 4,
                       ),
                       child: Container(
-                        decoration:   BoxDecoration(
+                        decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
@@ -123,7 +154,7 @@ class _PromoPageState extends State<PromoPage> {
                                     ),
                                     const SizedBox(width: 2),
                                     Text(
-                                      "$avis",
+                                      "$moyenne",
                                       style: const TextStyle(fontSize: 14),
                                     ),
                                   ],
@@ -134,8 +165,13 @@ class _PromoPageState extends State<PromoPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      ProductDetailPage(produit: produit),
+                                  builder: (_) => ProductDetailPage(
+                                    produit: produit,
+                                    produitId:
+                                        produits[index].id, // 👈 ID du document
+                                    collectionName:
+                                        produits[index].reference.parent.id,
+                                  ),
                                 ),
                               );
                             },

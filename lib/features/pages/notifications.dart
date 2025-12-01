@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -52,9 +53,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
         backgroundColor: Colors.white,
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: const Text(
+        title: Text(
           "Notifications",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
       ),
       body: uid == null
@@ -72,7 +77,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
 
                 if (snapshot.hasError) {
-                  return const Center(child: Text("Erreur de chargement"));
+                  return Center(
+                    child: Text(
+                      "Erreur de chargement",
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: Colors.black,
+                      ),
+                    ),
+                  );
                 }
 
                 final notifications = snapshot.data?.docs ?? [];
@@ -83,8 +96,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
 
                 if (notifications.isEmpty) {
-                  return const Center(
-                    child: Text("Aucune notification pour le moment."),
+                  return Center(
+                    child: Text(
+                      "Aucune notification pour le moment.",
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: Colors.black,
+                      ),
+                    ),
                   );
                 }
 
@@ -107,7 +126,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               borderRadius: BorderRadius.circular(10),
                               child: Image.network(
                                 imageUrl,
-                                width:70,
+                                width: 70,
                                 height: 70,
                                 fit: BoxFit.contain,
                               ),

@@ -26,11 +26,16 @@ class ProduitsRecommandes extends StatelessWidget {
       future: _fetchAllCollections(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(child: Text('Erreur de chargement', style:  GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          )));
+          return Center(
+            child: Text(
+              'Erreur de chargement',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          );
         }
 
         if (!snapshot.hasData) {
@@ -75,16 +80,19 @@ class ProduitsRecommandes extends StatelessWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
-                    )
+                    ),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("$prix F", style:  GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      )),
+                      Text(
+                        "$prix F",
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[700],
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
@@ -98,13 +106,13 @@ class ProduitsRecommandes extends StatelessWidget {
                             livraison
                                 ? "Livraison gratuite"
                                 : "livraison payante",
-                            style:  GoogleFonts.poppins(
+                            style: GoogleFonts.poppins(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: livraison
                                   ? Colors.green
                                   : Colors.redAccent,
-                            )
+                            ),
                           ),
                           const Spacer(),
                           const Icon(Icons.star, color: Colors.amber, size: 16),
@@ -118,7 +126,11 @@ class ProduitsRecommandes extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ProductDetailPage(produit: produit),
+                        builder: (_) => ProductDetailPage(
+                          produit: produit,
+                          produitId: products[index].id, // 👈 ID du document
+                          collectionName: products[index].reference.parent.id,
+                        ),
                       ),
                     );
                   },

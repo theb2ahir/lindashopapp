@@ -36,8 +36,9 @@ class _AllproductState extends State<Allproduct> {
     List<QueryDocumentSnapshot> allDocs = [];
 
     for (var collectionName in collections) {
-      final snapshot =
-          await FirebaseFirestore.instance.collection(collectionName).get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection(collectionName)
+          .get();
       allDocs.addAll(snapshot.docs);
     }
     if (!mounted) return;
@@ -78,14 +79,35 @@ class _AllproductState extends State<Allproduct> {
           final nom = produit['name'] ?? 'Sans nom';
           final prix = produit['prix']?.toString() ?? '0';
           final imageUrl = produit['imageURL'] ?? '';
-          final avis = (produit['avis'] ?? 0).toDouble();
+          double getMoyenneAvis(List avis) {
+            if (avis.isEmpty) return 0;
+
+            final double total = avis
+                .map((e) {
+                  if (e is num) return e.toDouble(); // OK si c’est un nombre
+                  return double.tryParse(e.toString()) ??
+                      0.0; // Convertit la string "5" → 5.0
+                })
+                .reduce((a, b) => a + b);
+
+            return total / avis.length;
+          }
+
+          final moyenne = getMoyenneAvis(produit['avis'] ?? []);
 
           return GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ProductDetailPage(produit: produit),
+                  builder: (_) => ProductDetailPage(
+                    produit: produit,
+                    produitId: filteredProducts[index].id, // 👈 ID du document
+                    collectionName: filteredProducts[index]
+                        .reference
+                        .parent
+                        .id, // 👈 Nom de la collection
+                  ),
                 ),
               );
             },
@@ -112,7 +134,9 @@ class _AllproductState extends State<Allproduct> {
                         height: 150,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) =>
-                            const Center(child: Icon(Icons.image_not_supported)),
+                            const Center(
+                              child: Icon(Icons.image_not_supported),
+                            ),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -131,22 +155,21 @@ class _AllproductState extends State<Allproduct> {
                       children: [
                         Text(
                           "$prix F",
-                          style:GoogleFonts.poppins(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: Colors.grey[700],
-                          )
+                          ),
                         ),
                         Row(
                           children: [
                             Icon(
                               Icons.star,
                               size: 12,
-                              color:
-                                  avis > 3 ? Colors.yellow : Colors.red,
+                              color: moyenne > 3 ? Colors.yellow : Colors.red,
                             ),
                             const SizedBox(width: 4),
-                            Text(avis.toStringAsFixed(1)),
+                            Text(moyenne.toStringAsFixed(1)),
                           ],
                         ),
                       ],

@@ -10,8 +10,15 @@ import 'package:geolocator/geolocator.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Map<String, dynamic> produit;
+  final String produitId;
+  final String collectionName;
 
-  const ProductDetailPage({super.key, required this.produit});
+  const ProductDetailPage({
+    super.key,
+    required this.produit,
+    required this.produitId,
+    required this.collectionName,
+  });
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -337,13 +344,29 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final produitId = widget.produitId;
+    final collectionName = widget.collectionName;
     final nom = widget.produit['name'] ?? 'Sans nom';
     final prix = widget.produit['prix']?.toString() ?? '0';
     final livraison = widget.produit['livraison'] ?? 'non spécifiée';
     final description = widget.produit['description'] ?? 'indisponible';
     final imageUrl = widget.produit['imageURL'] ?? '';
     final pourcentage = widget.produit['pourcentage'] ?? '';
-    final avis = widget.produit['avis'] ?? '';
+    double getMoyenneAvis(List avis) {
+      if (avis.isEmpty) return 0;
+
+      final double total = avis
+          .map((e) {
+            if (e is num) return e.toDouble(); // OK si c’est un nombre
+            return double.tryParse(e.toString()) ??
+                0.0; // Convertit la string "5" → 5.0
+          })
+          .reduce((a, b) => a + b);
+
+      return total / avis.length;
+    }
+
+    final avis = getMoyenneAvis(widget.produit['avis'] ?? []);
 
     final List<dynamic> caracteristiqueTechnique = widget.produit['ct'] ?? [];
     final List<dynamic> avantageEtUtilsation = widget.produit['au'] ?? [];
@@ -427,7 +450,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ],
                               ),
                             ),
-
                             const SizedBox(height: 14),
                           ],
                         ),
@@ -590,6 +612,154 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 onPressed: () {
                                   showModalBottomSheet(
                                     context: context,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20),
+                                      ),
+                                    ),
+                                    builder: (context) {
+                                      int selectedStars = 0;
+
+                                      return StatefulBuilder(
+                                        builder: (context, setState) {
+                                          return Padding(
+                                            padding: const EdgeInsets.all(20),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  "Donnez une note",
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+
+                                                const SizedBox(height: 15),
+
+                                                // ⭐ lignes d'étoiles
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: List.generate(5, (
+                                                    index,
+                                                  ) {
+                                                    return IconButton(
+                                                      icon: Icon(
+                                                        index < selectedStars
+                                                            ? Icons.star
+                                                            : Icons.star_border,
+                                                        size: 32,
+                                                        color: Colors.amber,
+                                                      ),
+                                                      onPressed: () {
+                                                        setState(
+                                                          () => selectedStars =
+                                                              index + 1,
+                                                        );
+                                                      },
+                                                    );
+                                                  }),
+                                                ),
+
+                                                const SizedBox(height: 20),
+
+                                                ElevatedButton(
+                                                  onPressed: selectedStars == 0
+                                                      ? null
+                                                      : () async {
+                                                          final docref =
+                                                              FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                    collectionName,
+                                                                  )
+                                                                  .doc(
+                                                                    produitId,
+                                                                  );
+                                                          final doc =
+                                                              await docref
+                                                                  .get();
+                                                          List<dynamic> avis =
+                                                              doc.data()?['avis'] ??
+                                                              [];
+                                                          avis.add(
+                                                            selectedStars,
+                                                          );
+
+                                                          await docref.update({
+                                                            'avis': avis,
+                                                          });
+
+                                                          ScaffoldMessenger.of(
+                                                            context,
+                                                          ).showSnackBar(
+                                                            SnackBar(
+                                                              behavior:
+                                                                  SnackBarBehavior
+                                                                      .floating,
+                                                              backgroundColor:
+                                                                  Colors
+                                                                      .grey[900],
+                                                              shape: RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      16,
+                                                                    ),
+                                                              ),
+                                                              duration:
+                                                                  const Duration(
+                                                                    seconds: 3,
+                                                                  ),
+                                                              content: Row(
+                                                                children: const [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .check_circle,
+                                                                    color: Colors
+                                                                        .lightGreenAccent,
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: 12,
+                                                                  ),
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                      'Merci pour votre avis !',
+                                                                      style: TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                            16,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+
+                                                          Navigator.pop(
+                                                            context,
+                                                          );
+                                                        },
+                                                  child: Text(
+                                                    "Envoyer mon avis",
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: Icon(Icons.comment, color: Colors.purple),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
                                     isScrollControlled: true,
                                     shape: const RoundedRectangleBorder(
                                       borderRadius: BorderRadius.vertical(
@@ -697,7 +867,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                               // 📌 Contenu du Package
                                               Text(
                                                 "Contenu du Package",
-                                                style:  GoogleFonts.poppins(
+                                                style: GoogleFonts.poppins(
                                                   fontSize: 20,
                                                   color: Colors.black,
                                                   fontWeight: FontWeight.bold,
@@ -714,7 +884,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                   ),
                                                   title: Text(
                                                     e.toString(),
-                                                    style:  GoogleFonts.poppins(
+                                                    style: GoogleFonts.poppins(
                                                       fontSize: 16,
                                                       color: Colors.black,
                                                     ),
