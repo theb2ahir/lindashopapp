@@ -54,7 +54,21 @@ class ProduitsRecommandes extends StatelessWidget {
             final prix = produit['prix']?.toString() ?? '0';
             final imageUrl = produit['imageURL'] ?? '';
             final livraison = produit['livraison'] ?? 0;
-            final avis = produit['avis'] ?? 0;
+            double getMoyenneAvis(List avis) {
+              if (avis.isEmpty) return 0;
+
+              final double total = avis
+                  .map((e) {
+                    if (e is num) return e.toDouble(); // OK si c’est un nombre
+                    return double.tryParse(e.toString()) ??
+                        0.0; // Convertit la string "5" → 5.0
+                  })
+                  .reduce((a, b) => a + b);
+
+              return total / avis.length;
+            }
+
+            final moyenne = getMoyenneAvis(produit['avis'] ?? []);
 
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -117,7 +131,7 @@ class ProduitsRecommandes extends StatelessWidget {
                           const Spacer(),
                           const Icon(Icons.star, color: Colors.amber, size: 16),
                           const SizedBox(width: 2),
-                          Text("$avis"),
+                          Text(moyenne.toStringAsFixed(1)),
                         ],
                       ),
                     ],
