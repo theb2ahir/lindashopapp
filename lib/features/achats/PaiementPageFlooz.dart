@@ -102,9 +102,11 @@ class _PaiementPage2State extends State<PaiementPage2> {
   @override
   Widget build(BuildContext context) {
     final item = widget.data;
+    final livraison = item['livraison'];
     final int prixUnitaire = int.tryParse(item['productprice'].toString()) ?? 0;
     final int quantite = int.tryParse(item['quantity'].toString()) ?? 0;
-    final int total = prixUnitaire * quantite;
+    final apayer = prixUnitaire * quantite;
+    final int total = apayer + (livraison != 'true' ? 2000 : 0);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -394,6 +396,22 @@ class _PaiementPage2State extends State<PaiementPage2> {
                       Text(' ${item['quantity']}'),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Frais de livraison :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' ${livraison != "true" ? 2000 : 0}  FCFA'),
+                    ],
+                  ),
+
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

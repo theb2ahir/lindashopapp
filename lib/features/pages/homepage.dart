@@ -27,7 +27,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     "Électro-ménager",
   ];
 
-  
   Future<void> fetchPromotionMax() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('promotions')
@@ -54,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       promoEleve = "${max.toInt()}% ";
     });
   }
+
   Future<int> getNumberOfFavorites() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final querySnapshot = await FirebaseFirestore.instance
@@ -100,7 +100,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
-          title: Text("Lindashopp", style: GoogleFonts.poppins(fontSize: 33, fontWeight: FontWeight.bold)),
+          title: Row(
+            children: [
+              Text(
+                "Lindashopp",
+                style: GoogleFonts.poppins(
+                  fontSize: 33,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
           actions: [
             Stack(
               alignment: Alignment.topRight,
@@ -241,7 +251,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       decoration: InputDecoration(
                         hintStyle: GoogleFonts.poppins(
                           fontSize: 18,
-                          color: Colors.black
+                          color: Colors.black,
                         ),
                         hintText: "Rechercher un produit...",
                         filled: true,
@@ -318,9 +328,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ),
                         child: Text(
                           "Voir les promotions",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                          )
+                          style: GoogleFonts.poppins(fontSize: 16),
                         ),
                       ),
                     ),

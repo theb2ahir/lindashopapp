@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lindashopp/features/pages/acceuilpage.dart';
 import 'package:lindashopp/features/auth/connectionpage.dart';
+import 'package:lindashopp/features/pages/guide.dart';
 
 class Inscription extends StatefulWidget {
   const Inscription({super.key});
@@ -130,7 +130,7 @@ class _InscriptionState extends State<Inscription> {
         'email': emailCtrl.text,
         'phone': "",
         'adresse': "",
-        'role' : "users",
+        'role': "users",
         'DateCreation': DateTime.now(),
       });
 
@@ -155,9 +155,9 @@ class _InscriptionState extends State<Inscription> {
       );
 
       Future.delayed(const Duration(seconds: 2), () {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const AcceuilPage()),
-          (Route<dynamic> route) => false,
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const UserGuideLottie()),
         );
       });
     } catch (e) {

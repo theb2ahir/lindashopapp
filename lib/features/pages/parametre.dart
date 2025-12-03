@@ -130,7 +130,6 @@ class _ParametreState extends State<Parametre> {
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               children: [
-
                 ListTile(
                   leading: const Icon(Icons.location_on),
                   title: const Text("Adresse de livraison"),
@@ -155,17 +154,41 @@ class _ParametreState extends State<Parametre> {
                     showAboutDialog(
                       context: context,
                       applicationName: "Linda-Shop",
+                      applicationIcon: ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: Image.asset(
+                          "assets/articlesImages/LindaLogo2.png",
+                          width: 100,
+                          height: 100,
+                        ),
+                      ),
                       applicationLegalese: "© 2025 Linda-Shop Inc.",
+                      children: [
+                        const SizedBox(height: 16),
+                        const Text(
+                          "Linda-Shop est une application de e-commerce moderne conçue pour offrir une expérience d’achat simple, rapide et sécurisée.\n\n"
+                          "Fonctionnalités principales :\n"
+                          "• Achat rapide et intuitif\n"
+                          "• Suivi des commandes en temps réel\n"
+                          "• Livraison gratuite ou payante selon les produits\n"
+                          "• Nous vous livrons jusqu'à votre porte\n"
+                          "• Paiements sécurisés\n"
+                          "• Produits vérifiés et de qualité\n"
+                          "• Promotions et recommandations personnalisées\n\n"
+                          "Assistance :Nous avons un chat app directement sur l'application (support client), vous pouvez aussi nous contacter par appel directe ou whatsapp en allant sur Mon Compte \n"
+                          "© 2025 Linda-Shop Inc.",
+                        ),
+                      ],
                     );
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.question_mark_sharp),
-                  title: const Text("Support client Linda shop"), 
+                  title: const Text("Support client Linda shop"),
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context)=> SupportClient()),
+                      MaterialPageRoute(builder: (context) => SupportClient()),
                     );
                   },
                 ),

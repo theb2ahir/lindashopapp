@@ -100,9 +100,11 @@ class _PaiementPageState extends State<PaiementPage> {
   @override
   Widget build(BuildContext context) {
     final item = widget.data;
+    final livraison = item['livraison'];
     final int prixUnitaire = int.tryParse(item['productprice'].toString()) ?? 0;
     final int quantite = int.tryParse(item['quantity'].toString()) ?? 0;
-    final int total = prixUnitaire * quantite;
+    final apayer = prixUnitaire * quantite;
+    final int total = apayer + (livraison != 'true' ? 2000 : 0);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -297,6 +299,7 @@ class _PaiementPageState extends State<PaiementPage> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
+                                    const SizedBox(height: 4),
                                     SizedBox(height: 4),
                                     Text(
                                       "Référence : $reference",
@@ -349,15 +352,116 @@ class _PaiementPageState extends State<PaiementPage> {
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Nom du produit : ${item['productname']}'),
-                  const SizedBox(height: 8),
-                  Text('Prix unitaire : $prixUnitaire FCFA'),
-                  const SizedBox(height: 8),
-                  Text('Quantité : ${item['quantity']}'),
-                  const SizedBox(height: 8),
-                  Text('Total : $total FCFA'),
-                  const SizedBox(height: 8),
-                  Text('Transaction ID : $transactionId'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Nom du produit :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' ${item['productname']}'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Prix unitaire :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' $prixUnitaire FCFA'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Quantité :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' ${item['quantity']}'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Frais de livraison :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' ${livraison != "true" ? 2000 : 0}  FCFA'),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Total :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' $total FCFA'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "adresse :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(
+                        item['addressLivraison'] != null &&
+                                item['addressLivraison'].length >= 20
+                            ? item['addressLivraison'].substring(0, 15) + " ..."
+                            : item['addressLivraison'] ?? '',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Transaction ID :",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Text(' $transactionId'),
+                    ],
+                  ),
                 ],
               ),
               isActive: currentStep >= 0,

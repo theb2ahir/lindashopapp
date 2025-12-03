@@ -29,6 +29,56 @@ class _PanierPageState extends State<PanierPage> {
     return querySnapshot.docs.length;
   }
 
+  Future<void> clearCart(BuildContext context) async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final commandesRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('commandes');
+
+    try {
+      final snapshot = await commandesRef.get();
+
+      for (final doc in snapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Panier vidé avec succès !")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur lors de la suppression : $e")),
+      );
+    }
+  }
+
+  Future<void> confirmAndClear(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Vider le panier ?"),
+        content: const Text(
+          "Toutes vos commandes seront supprimées définitivement.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Annuler"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Confirmer", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await clearCart(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -60,6 +110,14 @@ class _PanierPageState extends State<PanierPage> {
             color: Colors.black,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              confirmAndClear(context);
+            },
+            icon: Icon(Icons.delete, color: Colors.red),
+          ),
+        ],
       ),
       body: SafeArea(
         child: StreamBuilder<QuerySnapshot>(

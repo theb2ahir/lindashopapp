@@ -31,13 +31,17 @@ class _BuyAllPageState extends State<BuyAllPage> {
     super.initState();
     transactionId = generateTransactionId();
     final total = getTotalPrice();
-    int livraisonsPayantes = widget.commandes
-        .where((item) => item['livraison'] != 'true')
-        .length;
 
-    double fraisLivraison = livraisonsPayantes * 2000;
+    bool aLivraisonPayante = widget.commandes.any(
+      (item) => item['livraison'] != 'true',
+    );
+
+    double fraisLivraison = aLivraisonPayante ? 2000 : 0;
+
     double totalGenerale = total + fraisLivraison;
+
     final totalGeneralString = totalGenerale.toInt().toString();
+
     setState(() {
       totalGeneral = totalGenerale.toInt();
     });
@@ -372,11 +376,12 @@ class _BuyAllPageState extends State<BuyAllPage> {
   @override
   Widget build(BuildContext context) {
     final total = getTotalPrice();
-    int livraisonsPayantes = widget.commandes
-        .where((item) => item['livraison'] != 'true')
-        .length;
 
-    double fraisLivraison = livraisonsPayantes * 2000;
+    bool aLivraisonPayante = widget.commandes.any(
+      (item) => item['livraison'] != 'true',
+    );
+
+    double fraisLivraison = aLivraisonPayante ? 2000 : 0;
     double totalGeneral = total + fraisLivraison;
     return Scaffold(
       appBar: AppBar(
