@@ -1,11 +1,14 @@
 // ignore_for_file: unused_local_variable
 
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/pages/utils/notifucation_service.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // ignore_for_file: file_names, unrelated_type_equality_checks, use_build_context_synchronously
@@ -242,10 +245,12 @@ class _PaiementPage2State extends State<PaiementPage2> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              "Sauvegarder en faisant une capture d'écran ces informations.",
+                              "Faite une capture d'écran de ce Qr code , le livreur en aura besoin pour valider votre commande",
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 16),
+
+                            /// ⭐ IMAGE DU PRODUIT
                             CircleAvatar(
                               radius: 40,
                               backgroundColor: Colors.grey[200],
@@ -261,57 +266,25 @@ class _PaiementPage2State extends State<PaiementPage2> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            Card(
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              color: Colors.grey[100],
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Nom du produit : ${item['productname']}",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      "Quantité : ${item['quantity']}",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      "ID de la Transaction : $transactionId",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      "Prix total : $total FCFA",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      "Référence : $reference",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+
+                            const SizedBox(height: 20),
+
+                            /// ⭐ QR CODE CONTENANT LES DONNÉES
+                            QrImageView(
+                              data: jsonEncode({
+                                "productname": item['productname'],
+                                "quantity": item['quantity'],
+                                "total": total,
+                                "transactionId": transactionId,
+                                "reference": reference,
+                              }),
+                              version: QrVersions.auto,
+                              size: 220,
+                              backgroundColor: Colors.white,
                             ),
-                            const SizedBox(height: 16),
+
+                            const SizedBox(height: 20),
+
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(

@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/pages/utils/notifucation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:convert';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../pages/profil/editprofile.dart';
 
@@ -100,90 +102,66 @@ class _BuyAllPageState extends State<BuyAllPage> {
   }
 
   void showCommandeDialog() {
+    // Préparation des données de la commande en JSON
+    final Map<String, dynamic> qrData = {
+      "transactionId": transactionId,
+      "reference": reference,
+      "total": totalGeneral,
+      "commandes": widget.commandes.map((item) {
+        return {
+          "productname": item['productname'],
+          "quantity": item['quantity'],
+          "price": item['productprice'],
+        };
+      }).toList(),
+    };
+
+    final String qrJson = jsonEncode(qrData);
+
     showDialog(
       context: context,
       builder: (_) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 10,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: SizedBox(
             height: MediaQuery.of(context).size.height * 0.6,
             child: Column(
               children: [
-                Text(
-                  "Récapitulatif de la commande , veuillez faire une capture d'ecran de ces informations",
+                const Text(
+                  "Faites une capture d'écran de ce Qr code , le livreur en aura besoin pour valider votre commande",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: widget.commandes.length,
-                    itemBuilder: (context, index) {
-                      final item = widget.commandes[index];
-                      return Card(
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        child: ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              item['productImageUrl'] ?? '',
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.image),
-                            ),
-                          ),
-                          title: Text(
-                            item['productname'] ?? '',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Quantité : ${item['quantity']}x ${item['productprice']}",
-                              ),
-                              const SizedBox(height: 3),
-                              Text("transation id : $transactionId"),
-                              Text("Réf: $reference"),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                const SizedBox(height: 20),
+
+                /// 🔥 QR CODE ICI
+                QrImageView(
+                  data: qrJson,
+                  version: QrVersions.auto,
+                  size: 250,
+                  backgroundColor: Colors.white,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  "id de transaction : $transactionId",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 8),
+
+                const SizedBox(height: 20),
+
                 Text(
                   "Total : $totalGeneral FCFA",
                   style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                     color: Colors.red,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 7),
+
+                const Spacer(),
+
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    minimumSize: Size(double.infinity, 45),
+                    minimumSize: const Size(double.infinity, 45),
                   ),
                   onPressed: () => Navigator.pop(context),
                   child: const Text("Fermer"),
