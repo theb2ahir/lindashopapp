@@ -99,9 +99,11 @@ class _ProductColumnState extends State<ProductColumn> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
-                        color: Color.fromRGBO(255, 255, 255, 0.102),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.transparent
+                            : Color.fromRGBO(255, 255, 255, 0.102),
                         blurRadius: 12,
                         offset: Offset(0, 6),
                       ),
@@ -137,7 +139,6 @@ class _ProductColumnState extends State<ProductColumn> {
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -150,7 +151,11 @@ class _ProductColumnState extends State<ProductColumn> {
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.grey[700],
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : Colors.grey[700],
                                   ),
                                 ),
                                 Row(

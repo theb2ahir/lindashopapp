@@ -3,6 +3,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:lindashopp/core/widgets/customtextfields.dart';
 
 class NonLivre extends StatefulWidget {
@@ -14,6 +16,11 @@ class NonLivre extends StatefulWidget {
 
 class _NonLivreState extends State<NonLivre> {
   final _formKey = GlobalKey<FormState>();
+  //  creer un list de commande non livrer
+
+  List<String> nonLivrerList = [];
+  bool cocher = false;
+  final uid = FirebaseAuth.instance.currentUser?.uid;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -39,8 +46,7 @@ class _NonLivreState extends State<NonLivre> {
     if (user == null) return;
 
     try {
-      final userDoc =
-      await _firestore.collection('users').doc(user.uid).get();
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
 
       if (userDoc.exists) {
         final data = userDoc.data()!;
@@ -68,10 +74,8 @@ class _NonLivreState extends State<NonLivre> {
         'NlivrePrenom': nameController.text.trim(),
         'NlivreEmail': emailController.text.trim(),
         'NlivrePhone': phoneController.text.trim(),
-        'NlivreRef': refController.text.trim(),
         'userId': _auth.currentUser?.uid,
-        'NlivreTransactionId': transactionIdController.text.trim(),
-        'NlivreMessage': messageController.text.trim(),
+        'NlivreQrJson': nonLivrerList,
         'NlivreStamp': FieldValue.serverTimestamp(),
       });
 
@@ -105,8 +109,10 @@ class _NonLivreState extends State<NonLivre> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.redAccent.shade400,
-          content: Text('Erreur : $e',
-              style: const TextStyle(color: Colors.white)),
+          content: Text(
+            'Erreur : $e',
+            style: const TextStyle(color: Colors.white),
+          ),
         ),
       );
     } finally {
@@ -117,15 +123,13 @@ class _NonLivreState extends State<NonLivre> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text(
           "Commande non livrée",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
@@ -137,12 +141,14 @@ class _NonLivreState extends State<NonLivre> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: const Padding(
-                padding: EdgeInsets.all(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
                 child: Text(
-                  "📝 Les informations demandées figurent sur votre reçu de paiement.\n"
-                      "Veuillez remplir le formulaire avec soin pour faciliter le traitement.",
-                  style: TextStyle(fontSize: 15.5, color: Colors.black87),
+                  "📝 Formulaire de commande non livrer , vérifier vos informations ( nom , tel et email ) et cocher les commandes qui ne vous ont pas encore été livrées",
+                  style: GoogleFonts.poppins(
+                    fontSize: 15.5,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
             ),
@@ -151,8 +157,10 @@ class _NonLivreState extends State<NonLivre> {
               key: _formKey,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color.fromARGB(59, 200, 199, 199)
+                      : Colors.white,
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
@@ -161,50 +169,239 @@ class _NonLivreState extends State<NonLivre> {
                     ),
                   ],
                 ),
-                padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 25,
+                ),
                 child: Column(
                   children: [
                     CustomTextField(controller: nameController, label: "Nom"),
                     const SizedBox(height: 15),
                     CustomTextField(
-                        controller: phoneController, label: "Téléphone"),
-                    const SizedBox(height: 15),
-                    CustomTextField(controller: emailController, label: "Email"),
-                    const SizedBox(height: 15),
-                    CustomTextField(
-                        controller: refController, label: "Référence"),
-                    const SizedBox(height: 15),
-                    CustomTextField(
-                        controller: transactionIdController,
-                        label: "Transaction ID"),
-                    const SizedBox(height: 15),
-                    CustomTextField(
-                      controller: messageController,
-                      label:
-                      "Décrivez votre commande (ex: support PC, 1 pièce)",
-                      maxLines: 4,
+                      controller: phoneController,
+                      label: "Téléphone",
                     ),
+                    const SizedBox(height: 15),
+                    CustomTextField(
+                      controller: emailController,
+                      label: "Email",
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    //liste des commandes, pour pouvoir les cocher en cas de non livraison
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(uid)
+                          .collection('acr')
+                          .orderBy('date', descending: true)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const Center(
+                            child: Text('Erreur de chargement'),
+                          );
+                        }
+
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        final docs = snapshot.data!.docs;
+
+                        if (docs.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              'Aucune commande trouvée',
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            height: 260,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              itemCount: docs.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: 12),
+                              itemBuilder: (context, index) {
+                                final data =
+                                    docs[index].data() as Map<String, dynamic>;
+                                final imageUrl = data['imageUrl'] ?? '';
+                                final qr = data['Qrjson'] ?? '';
+                                final name = data['productname'] ?? '';
+                                final quantity = data['quantity'] ?? '';
+                                final price = data['productprice'] ?? '';
+                                final timestamp = data['date'] as Timestamp?;
+                                final date = timestamp?.toDate();
+
+                                final isChecked = nonLivrerList.contains(qr);
+
+                                return Container(
+                                  width: 180,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.black.withValues(
+                                                alpha: 0.05,
+                                              )
+                                            : Colors.white,
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // IMAGE
+                                      ClipRRect(
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                              top: Radius.circular(16),
+                                            ),
+                                        child: imageUrl.isNotEmpty
+                                            ? Image.network(
+                                                imageUrl,
+                                                height: 120,
+                                                width: double.infinity,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Container(
+                                                height: 120,
+                                                color: Colors.grey.shade200,
+                                                child: const Icon(
+                                                  Icons.image,
+                                                  size: 40,
+                                                ),
+                                              ),
+                                      ),
+
+                                      Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // NOM + CHECK
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    name,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  padding: EdgeInsets.zero,
+                                                  constraints:
+                                                      const BoxConstraints(),
+                                                  icon: Icon(
+                                                    isChecked
+                                                        ? Icons.check_box
+                                                        : Icons
+                                                              .check_box_outline_blank,
+                                                    color: isChecked
+                                                        ? Colors.green
+                                                        : Colors.grey,
+                                                  ),
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      if (isChecked) {
+                                                        nonLivrerList.remove(
+                                                          qr,
+                                                        );
+                                                      } else {
+                                                        nonLivrerList.add(qr);
+                                                      }
+                                                    });
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+
+                                            const SizedBox(height: 6),
+
+                                            Text(
+                                              '$quantity × $price FCFA',
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 4),
+
+                                            Text(
+                                              date != null
+                                                  ? DateFormat(
+                                                      'dd/MM/yy HH:mm',
+                                                    ).format(date)
+                                                  : 'Date inconnue',
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 11,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
                     const SizedBox(height: 30),
+
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: isLoading
                             ? null
                             : () {
-                          if (_formKey.currentState!.validate()) {
-                            submitToFirestore();
-                          }
-                        },
+                                if (_formKey.currentState!.validate()) {
+                                  submitToFirestore();
+                                }
+                              },
                         icon: isLoading
                             ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
                             : const Icon(Icons.send),
                         label: Text(
                           isLoading ? "Envoi en cours..." : "Envoyer",

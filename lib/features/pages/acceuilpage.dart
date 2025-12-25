@@ -54,9 +54,14 @@ class AcceuilPageState extends State<AcceuilPage> {
         iconSize: 27,
         selectedIconTheme: const IconThemeData(
           color: Color.fromARGB(255, 190, 53, 49),
-          size: 30
+          size: 30,
         ),
-        unselectedIconTheme: const IconThemeData(color: Color(0xFF02204B), size: 27),
+        unselectedIconTheme: IconThemeData(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : const Color(0xFF02204B),
+          size: 27,
+        ),
         showSelectedLabels: true,
         showUnselectedLabels: true,
         selectedLabelStyle: GoogleFonts.poppins(
@@ -68,7 +73,9 @@ class AcceuilPageState extends State<AcceuilPage> {
           fontWeight: FontWeight.bold,
         ),
         selectedItemColor: const Color.fromARGB(255, 190, 53, 49),
-        unselectedItemColor: const Color.fromARGB(255, 11, 10, 10),
+        unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : const Color.fromARGB(255, 11, 10, 10),
         currentIndex: myIndex,
         onTap: (index) {
           setState(() {

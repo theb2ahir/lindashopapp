@@ -359,11 +359,7 @@ class _EditProfileState extends State<EditProfile> {
         automaticallyImplyLeading: false,
         title: Text(
           "Éditer mon profil",
-          style: GoogleFonts.poppins(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold),
         ),
       ),
       body: isLoading
@@ -408,7 +404,6 @@ class _EditProfileState extends State<EditProfile> {
                         labelStyle: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -424,7 +419,6 @@ class _EditProfileState extends State<EditProfile> {
                         labelStyle: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -439,7 +433,6 @@ class _EditProfileState extends State<EditProfile> {
                         labelStyle: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -463,7 +456,6 @@ class _EditProfileState extends State<EditProfile> {
                         labelStyle: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
                         ),
                       ),
                     ),

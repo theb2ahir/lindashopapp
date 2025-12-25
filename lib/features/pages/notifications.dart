@@ -48,18 +48,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: Text(
           "Notifications",
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
       body: uid == null
@@ -99,10 +93,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   return Center(
                     child: Text(
                       "Aucune notification pour le moment.",
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        color: Colors.black,
-                      ),
+                      style: GoogleFonts.poppins(fontSize: 15),
                     ),
                   );
                 }

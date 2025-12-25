@@ -510,7 +510,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
                           ),
                         ),
                       ],
@@ -528,10 +527,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               child: Text(
                                 description ?? '',
                                 textAlign: TextAlign.start,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
+                                style: GoogleFonts.poppins(fontSize: 16),
                               ),
                             ),
                           ),
@@ -553,7 +549,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
-                            border: Border.all(),
+                            border: Border.all(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
                           ),
                           height: 50,
 
@@ -570,7 +572,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: Colors.black12),
+                                  border: Border.all(
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
                                 ),
                                 child: Text(
                                   "$quantity",
@@ -775,7 +783,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                         return Container(
                                           padding: const EdgeInsets.all(16),
                                           decoration: const BoxDecoration(
-                                            color: Colors.white,
                                             borderRadius: BorderRadius.vertical(
                                               top: Radius.circular(20),
                                             ),
@@ -806,7 +813,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 20,
                                                   fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
                                                 ),
                                               ),
                                               const SizedBox(height: 10),
@@ -822,7 +828,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                     e.toString(),
                                                     style: GoogleFonts.poppins(
                                                       fontSize: 16,
-                                                      color: Colors.black,
                                                     ),
                                                   ),
                                                 ),
@@ -837,7 +842,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                 "Avantages & Utilisation",
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 20,
-                                                  color: Colors.black,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -854,7 +858,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                     e.toString(),
                                                     style: GoogleFonts.poppins(
                                                       fontSize: 16,
-                                                      color: Colors.black,
                                                     ),
                                                   ),
                                                 ),
@@ -869,7 +872,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                 "Contenu du Package",
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 20,
-                                                  color: Colors.black,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -886,7 +888,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                     e.toString(),
                                                     style: GoogleFonts.poppins(
                                                       fontSize: 16,
-                                                      color: Colors.black,
                                                     ),
                                                   ),
                                                 ),

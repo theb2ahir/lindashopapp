@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:introduction_screen/introduction_screen.dart';
@@ -23,7 +25,7 @@ class UserGuideLottie extends StatelessWidget {
         height: 260,
         width: 260,
         decoration: BoxDecoration(
-          color: bgColor.withOpacity(0.15),
+          color: bgColor.withValues(alpha: 0.15),
           shape: BoxShape.circle,
         ),
         child: Padding(
@@ -321,7 +323,7 @@ class UserGuideLottie extends StatelessWidget {
 
       dotsDecorator: DotsDecorator(
         activeColor: AppColors.darkBlue,
-        color: AppColors.darkBlue.withOpacity(.3),
+        color: AppColors.darkBlue.withValues(alpha: 0.3),
         activeSize: const Size(20, 10),
         activeShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25),

@@ -100,16 +100,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
-          title: Row(
-            children: [
-              Text(
-                "Lindashopp",
-                style: GoogleFonts.poppins(
-                  fontSize: 33,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          title: Text(
+            "Lindashop",
+            style: GoogleFonts.poppins(
+              fontSize: 33,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           actions: [
             Stack(
@@ -172,11 +168,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             alignment: Alignment.topRight,
             children: [
               IconButton(
-                icon: const Icon(
-                  Icons.notifications,
-                  color: Color.fromARGB(255, 15, 14, 14),
-                  size: 24,
-                ),
+                icon: const Icon(Icons.notifications, size: 24),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -244,22 +236,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           searchQuery = value;
                         });
                       },
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
+                      style: const TextStyle(fontSize: 18),
                       decoration: InputDecoration(
-                        hintStyle: GoogleFonts.poppins(
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
+                        hintStyle: GoogleFonts.poppins(fontSize: 18),
                         hintText: "Rechercher un produit...",
                         filled: true,
                         fillColor: const Color.fromARGB(72, 224, 162, 160),
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: Colors.black,
-                        ),
+                        prefixIcon: const Icon(Icons.search),
                         contentPadding: const EdgeInsets.symmetric(vertical: 0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -342,6 +325,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             // 🧭 Onglets
             TabBar(
               isScrollable: true,
+              dividerColor: Colors.transparent,
               tabAlignment: TabAlignment.start,
               labelPadding: const EdgeInsets.symmetric(horizontal: 20),
               controller: _tabController,

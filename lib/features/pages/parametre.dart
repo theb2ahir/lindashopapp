@@ -3,8 +3,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/auth/connectionpage.dart';
 import 'package:lindashopp/features/pages/supportclient.dart';
+import 'package:lindashopp/theme/themecontroller.dart';
 
 class Parametre extends StatefulWidget {
   const Parametre({super.key});
@@ -14,7 +16,7 @@ class Parametre extends StatefulWidget {
 }
 
 class _ParametreState extends State<Parametre> {
-  String selectedLanguage = "Français";
+  String selectedTheme = "";
   Map<String, dynamic>? user;
 
   TextEditingController regionCtrl = TextEditingController();
@@ -117,14 +119,9 @@ class _ParametreState extends State<Parametre> {
         automaticallyImplyLeading: false,
         title: const Text(
           "Paramètres",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        foregroundColor: Colors.black,
       ),
       body: user == null
           ? const Center(child: CircularProgressIndicator())
@@ -139,11 +136,23 @@ class _ParametreState extends State<Parametre> {
 
                 // Langue
                 ListTile(
-                  leading: const Icon(Icons.language),
-                  title: const Text("Langue"),
-                  subtitle: Text(selectedLanguage),
+                  leading: Icon(
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Icons.dark_mode
+                        : Icons.light_mode,
+                  ),
+                  title: Text("Thème"),
+                  subtitle: Text(
+                    "choisir le thème",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                    ),
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: _showLanguageDialog,
+                  onTap: _showThemeDialog,
                 ),
 
                 // À propos
@@ -234,38 +243,56 @@ class _ParametreState extends State<Parametre> {
     );
   }
 
-  void _showLanguageDialog() {
+  void _showThemeDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
-          title: const Text("Choisir une langue"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RadioListTile(
-                title: const Text("Français"),
-                value: "Français",
-                groupValue: selectedLanguage,
-                onChanged: (value) {
-                  setState(() {
-                    selectedLanguage = value!;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-              RadioListTile(
-                title: const Text("Anglais"),
-                value: "Anglais",
-                groupValue: selectedLanguage,
-                onChanged: (value) {
-                  setState(() {
-                    selectedLanguage = value!;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
+          title: const Text("Choisir le thème"),
+          content: ValueListenableBuilder<ThemeMode>(
+            valueListenable: ThemeController.themeModeNotifier,
+            builder: (_, currentMode, __) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<ThemeMode>(
+                    title: const Text("☀️ Mode clair"),
+                    value: ThemeMode.light,
+                    groupValue: currentMode,
+                    onChanged: (value) {
+                      ThemeController.saveTheme(value!);
+                      setState(() {
+                        selectedTheme = "Mode clair";
+                      });
+                      setState(() {});
+                      Navigator.pop(context);
+                    },
+                  ),
+                  RadioListTile<ThemeMode>(
+                    title: const Text("🌙 Mode sombre"),
+                    value: ThemeMode.dark,
+                    groupValue: currentMode,
+                    onChanged: (value) {
+                      ThemeController.saveTheme(value!);
+                      setState(() {
+                        selectedTheme = "Mode sombre";
+                      });
+                      setState(() {});
+                      Navigator.pop(context);
+                    },
+                  ),
+                  RadioListTile<ThemeMode>(
+                    title: const Text("⚙️ Mode système"),
+                    value: ThemeMode.system,
+                    groupValue: currentMode,
+                    onChanged: (value) {
+                      ThemeController.saveTheme(value!);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              );
+            },
           ),
         );
       },

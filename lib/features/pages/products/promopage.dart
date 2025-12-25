@@ -14,13 +14,11 @@ class _PromoPageState extends State<PromoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         title: Text(
           'Promotions',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
       body: Column(
@@ -43,10 +41,7 @@ class _PromoPageState extends State<PromoPage> {
                   return Center(
                     child: Text(
                       'Aucune promotion trouvée.',
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        color: Colors.black,
-                      ),
+                      style: GoogleFonts.poppins(fontSize: 15),
                     ),
                   );
                 }
@@ -89,13 +84,6 @@ class _PromoPageState extends State<PromoPage> {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color.fromARGB(31, 80, 80, 80),
-                              blurRadius: 6,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
                         ),
                         child: Card(
                           elevation: 3,
@@ -126,9 +114,13 @@ class _PromoPageState extends State<PromoPage> {
                                 const SizedBox(height: 4),
                                 Text(
                                   "$prix FCFA",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.grey,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black,
                                   ),
                                 ),
                                 const SizedBox(height: 4),

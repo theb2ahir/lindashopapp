@@ -231,11 +231,11 @@ class _SupportClientState extends State<SupportClient> {
               children: [
                 Text(
                   userEmail ?? "Utilisateur",
-                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.black),
+                  style: GoogleFonts.poppins(fontSize: 16),
                 ),
                 Text(
                   "Support client",
-                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                  style: GoogleFonts.poppins(fontSize: 13),
                 ),
               ],
             ),
@@ -316,7 +316,6 @@ class _SupportClientState extends State<SupportClient> {
               margin: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: Colors.grey[200],
               ),
               child: _buildMessageList(),
             ),
@@ -339,10 +338,12 @@ class _SupportClientState extends State<SupportClient> {
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: _sendMessage,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.send,
                     size: 30,
-                    color: Color(0xFF02204B),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Color(0xFF02204B),
                   ),
                 ),
               ],

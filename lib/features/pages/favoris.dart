@@ -28,7 +28,7 @@ class _FavorisState extends State<Favoris> {
         body: Center(
           child: Text(
             "Utilisateur non connecté",
-            style: GoogleFonts.poppins(fontSize: 16, color: Colors.black),
+            style: GoogleFonts.poppins(fontSize: 16),
           ),
         ),
       );
@@ -40,11 +40,7 @@ class _FavorisState extends State<Favoris> {
         centerTitle: true,
         title: Text(
           'Mes favoris',
-          style: GoogleFonts.poppins(
-            fontSize: 23,
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.poppins(fontSize: 23, fontWeight: FontWeight.bold),
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -61,8 +57,8 @@ class _FavorisState extends State<Favoris> {
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
               child: Text(
-                'Aucun article dans le panier',
-                style: GoogleFonts.poppins(fontSize: 16, color: Colors.black),
+                'Aucun article dans les favoris',
+                style: GoogleFonts.poppins(fontSize: 16),
               ),
             );
           }
@@ -95,11 +91,12 @@ class _FavorisState extends State<Favoris> {
                 padding: const EdgeInsets.all(12),
                 margin: EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black12,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black12
+                          : Colors.white,
                       blurRadius: 6,
                       offset: Offset(0, 3),
                     ),
@@ -135,7 +132,6 @@ class _FavorisState extends State<Favoris> {
                             '${data['quantity']} x ${data['productprice']} FCFA',
                             style: GoogleFonts.poppins(
                               fontSize: 14,
-                              color: Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

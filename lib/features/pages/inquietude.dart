@@ -17,7 +17,6 @@ class _InquietudeState extends State<Inquietude> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
 
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -33,8 +32,7 @@ class _InquietudeState extends State<Inquietude> {
     if (user == null) return;
 
     try {
-      final userDoc =
-      await _firestore.collection('users').doc(user.uid).get();
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
 
       if (userDoc.exists) {
         final data = userDoc.data()!;
@@ -50,7 +48,6 @@ class _InquietudeState extends State<Inquietude> {
       debugPrint('Erreur lors du préremplissage : $e');
     }
   }
-
 
   Future<void> submitToFirestore() async {
     try {
@@ -68,9 +65,7 @@ class _InquietudeState extends State<Inquietude> {
       emailController.clear();
       messageController.clear();
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.grey[900],
@@ -92,7 +87,6 @@ class _InquietudeState extends State<Inquietude> {
           ),
         ),
       );
-      
     }
   }
 
@@ -101,13 +95,10 @@ class _InquietudeState extends State<Inquietude> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        iconTheme: const IconThemeData(
-          color: Colors.white, // couleur de l’icône retour
-        ),
         centerTitle: true,
         title: const Text(
           "Formulaire - Inquiétudes",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: Padding(

@@ -149,223 +149,194 @@ class _ConnectionState extends State<Connection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
         centerTitle: true,
         title: Text(
           "Connexion",
-          style: GoogleFonts.roboto(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          style: GoogleFonts.roboto(fontSize: 28, fontWeight: FontWeight.bold),
         ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          TextField(
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 0, 0, 0),
-                            ),
-                            cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                            controller: emailCtrl,
-                            decoration: InputDecoration(
-                              labelStyle: const TextStyle(
-                                color: Color.fromARGB(255, 0, 0, 0),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Colors.redAccent,
-                                  width: 2,
-                                ),
-                              ),
-                              labelText: 'Email',
-                            ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Card(
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // TITRE
+                        Text(
+                          "Bienvenue 👋",
+                          style: GoogleFonts.roboto(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
                           ),
-
-                          const SizedBox(height: 25),
-                          TextField(
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 0, 0, 0),
-                            ),
-                            cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                            controller: passwordCtrl,
-                            decoration: InputDecoration(
-                              labelStyle: const TextStyle(
-                                color: Color.fromARGB(255, 0, 0, 0),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Colors.redAccent,
-                                  width: 2,
-                                ),
-                              ),
-
-                              labelText: 'Mot de passe',
-                              suffixIcon: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                                icon: Icon(
-                                  color: const Color.fromARGB(255, 0, 0, 0),
-                                  _obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                ),
-                              ),
-                            ),
-                            obscureText: _obscurePassword,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Connectez-vous à Linda Shop",
+                          style: GoogleFonts.roboto(
+                            fontSize: 14,
+                            color: Colors.grey,
                           ),
-                          const SizedBox(height: 45),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
-                              style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all<Color>(
-                                  const Color.fromARGB(255, 255, 82, 82),
-                                ),
-                              ),
-                              onPressed: () => login(context),
-                              child: Text(
-                                "Se connecter",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                ),
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // EMAIL
+                        TextField(
+                          controller: emailCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Colors.redAccent,
+                                width: 2,
                               ),
                             ),
                           ),
+                        ),
 
-                          const SizedBox(height: 30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  final email = emailCtrl.text.trim();
-                                  if (email.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Veuillez entrer votre adresse email.',
-                                        ),
-                                      ),
-                                    );
-                                    return;
-                                  }
+                        const SizedBox(height: 20),
 
-                                  FirebaseAuth.instance
-                                      .sendPasswordResetEmail(email: email)
-                                      .then((_) {
-                                        showDialog(
-                                          context: context,
-                                          builder: (_) => AlertDialog(
-                                            title: const Text('Email envoyé'),
-                                            content: const Text(
-                                              'Un lien de réinitialisation a été envoyé à votre adresse email si vous ne le voyez pas , verifiez vos spams.',
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                child: const Text('OK'),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      })
-                                      .catchError((e) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Erreur : ${e.message ?? e.toString()}',
-                                            ),
-                                          ),
-                                        );
-                                      });
-                                },
-                                child: const Text(
-                                  "Mot de passe oublié ?",
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: Colors.blueAccent,
-                                  ),
-                                ),
+                        // MOT DE PASSE
+                        TextField(
+                          controller: passwordCtrl,
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
+                            labelText: 'Mot de passe',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
                               ),
-                            ],
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Colors.redAccent,
+                                width: 2,
+                              ),
+                            ),
                           ),
+                        ),
 
-                          const SizedBox(height: 10),
+                        const SizedBox(height: 30),
 
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Nouveau sur Linda Shop ?",
-                                style: GoogleFonts.roboto(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
+                        // BOUTON
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(
+                                255,
+                                255,
+                                82,
+                                82,
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const Inscription(),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () => login(context),
+                            child: const Text(
+                              "Se connecter",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // MOT DE PASSE OUBLIÉ
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              final email = emailCtrl.text.trim();
+                              if (email.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Veuillez entrer votre adresse email.',
                                     ),
-                                  );
-                                },
-                                child: Text(
-                                  "Inscrivez-vous",
-                                  style: const TextStyle(
-                                    color: Colors.blueAccent,
-                                    fontSize: 16,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: Colors.blueAccent,
                                   ),
+                                );
+                                return;
+                              }
+                              FirebaseAuth.instance.sendPasswordResetEmail(
+                                email: email,
+                              );
+                            },
+                            child: const Text(
+                              "Mot de passe oublié ?",
+                              style: TextStyle(
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const Divider(height: 30),
+
+                        // INSCRIPTION
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Nouveau sur Linda Shop ? "),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const Inscription(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Inscrivez-vous",
+                                style: TextStyle(
+                                  color: Colors.blueAccent,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
     );

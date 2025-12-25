@@ -185,180 +185,187 @@ class _InscriptionState extends State<Inscription> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
         title: Text(
           "Inscription",
-          style: GoogleFonts.roboto(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          style: GoogleFonts.roboto(fontSize: 28, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-                cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                controller: nameCtrl,
-                decoration: InputDecoration(
-                  labelStyle: const TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color.fromARGB(255, 0, 0, 0),
+          padding: const EdgeInsets.all(20),
+          child: Card(
+            elevation: 6,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // TITRE
+                  Text(
+                    "Créer un compte ✨",
+                    style: GoogleFonts.roboto(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Colors.redAccent,
-                      width: 2,
-                    ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "Rejoignez Linda Shop",
+                    style: GoogleFonts.roboto(fontSize: 14, color: Colors.grey),
                   ),
-                  labelText: 'Nom',
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-                cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                controller: emailCtrl,
-                decoration: InputDecoration(
-                  labelStyle: const TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color.fromARGB(255, 0, 0, 0),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Colors.redAccent,
-                      width: 2,
-                    ),
-                  ),
-                  labelText: 'Email',
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-                cursorColor: const Color.fromARGB(255, 0, 0, 0),
-                controller: passwordCtrl,
-                decoration: InputDecoration(
-                  labelStyle: const TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color.fromARGB(255, 0, 0, 0),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Colors.redAccent,
-                      width: 2,
-                    ),
-                  ),
-                  labelText: 'Mot de passe',
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                    icon: Icon(
-                      color: const Color.fromARGB(255, 0, 0, 0),
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                  ),
-                ),
-                obscureText: _obscurePassword,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Text(
-                      "* 9 characters maximum",
-                      style: TextStyle(fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 45),
 
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all<Color>(
-                      const Color.fromARGB(255, 255, 82, 82),
-                    ),
-                  ),
-                  onPressed: () => signup(),
-                  child: Text(
-                    "M'inscrire",
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.all(19.0),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "vous avez deja un compte ?",
-                        style: GoogleFonts.roboto(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                  const SizedBox(height: 30),
+
+                  // NOM
+                  TextField(
+                    controller: nameCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Nom',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: Colors.redAccent,
+                          width: 2,
                         ),
                       ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // EMAIL
+                  TextField(
+                    controller: emailCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: Colors.redAccent,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // MOT DE PASSE
+                  TextField(
+                    controller: passwordCtrl,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'Mot de passe',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: Colors.redAccent,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "* 9 caractères maximum",
+                      style: GoogleFonts.roboto(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // BOUTON
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 255, 82, 82),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: signup,
+                      child: const Text(
+                        "M'inscrire",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  const Divider(),
+
+                  // LIEN CONNEXION
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("vous avez déjà un compte ? "),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => Connection()),
+                            MaterialPageRoute(
+                              builder: (_) => const Connection(),
+                            ),
                           );
                         },
-                        child: Text(
-                          "connectez-vous",
+                        child: const Text(
+                          "Connectez-vous",
                           style: TextStyle(
                             color: Colors.blueAccent,
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.blueAccent,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

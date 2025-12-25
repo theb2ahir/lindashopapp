@@ -104,11 +104,7 @@ class _PanierPageState extends State<PanierPage> {
         automaticallyImplyLeading: false,
         title: Text(
           'Mon Panier',
-          style: GoogleFonts.poppins(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -135,7 +131,7 @@ class _PanierPageState extends State<PanierPage> {
               return Center(
                 child: Text(
                   'Aucun article dans le panier',
-                  style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
+                  style: GoogleFonts.poppins(fontSize: 15),
                 ),
               );
             }
@@ -177,11 +173,12 @@ class _PanierPageState extends State<PanierPage> {
                   padding: const EdgeInsets.all(9),
                   margin: EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.black.withValues(alpha: 0.05)
+                            : Colors.white.withValues(alpha: 0.05),
                         blurRadius: 6,
                         offset: Offset(0, 3),
                       ),
@@ -212,7 +209,6 @@ class _PanierPageState extends State<PanierPage> {
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
                               ),
                             ),
                             const SizedBox(height: 6),

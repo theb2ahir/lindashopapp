@@ -32,7 +32,6 @@ class ProduitsRecommandes extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
               ),
             ),
           );
@@ -93,7 +92,6 @@ class ProduitsRecommandes extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
                     ),
                   ),
                   subtitle: Column(
@@ -104,7 +102,9 @@ class ProduitsRecommandes extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[700],
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.grey[700],
                         ),
                       ),
                       const SizedBox(height: 4),

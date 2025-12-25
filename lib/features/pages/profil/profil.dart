@@ -41,11 +41,7 @@ class _ProfileState extends State<Profile> {
         automaticallyImplyLeading: false,
         title: Text(
           "Mon Profil",
-          style: GoogleFonts.poppins(
-            fontSize: 19,
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.poppins(fontSize: 19, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -59,218 +55,184 @@ class _ProfileState extends State<Profile> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          children: [
-            const SizedBox(height: 3),
-            FutureBuilder<Map<String, dynamic>>(
-              future: getUserData(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: CircularProgressIndicator(),
-                  );
-                }
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {});
+        },
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            children: [
+              const SizedBox(height: 3),
+              FutureBuilder<Map<String, dynamic>>(
+                future: getUserData(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                final userData = snapshot.data!;
-                final name = userData['name'] ?? 'Utilisateur';
-                final email = userData['email'] ?? 'Utilisateur';
+                  final userData = snapshot.data!;
+                  final name = userData['name'] ?? 'Utilisateur';
+                  final email = userData['email'] ?? 'Utilisateur';
 
-                return Column(
-                  children: [
-                    const SizedBox(height: 24),
-                    ClipRRect(
-                      child: Container(
-                        height: 140,
-                        width: 140,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF02204B),
-                          borderRadius: BorderRadius.circular(200),
-                        ),
-                        child: Center(
-                          child: Text(
-                            name.substring(0, 2).toUpperCase(),
-                            style: GoogleFonts.poppins(
-                              fontSize: 69,
-                              color: Colors.white,
+                  return Column(
+                    children: [
+                      const SizedBox(height: 24),
+                      ClipRRect(
+                        child: Container(
+                          height: 140,
+                          width: 140,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF02204B),
+                            borderRadius: BorderRadius.circular(200),
+                          ),
+                          child: Center(
+                            child: Text(
+                              name.substring(0, 2).toUpperCase(),
+                              style: GoogleFonts.poppins(
+                                fontSize: 69,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 15),
-                    Text(
-                      name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 23,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 11),
-                    Text(
-                      email,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 19),
+                      const SizedBox(height: 15),
+                      Text(name, style: GoogleFonts.poppins(fontSize: 23)),
+                      const SizedBox(height: 11),
+                      Text(email, style: GoogleFonts.poppins(fontSize: 16)),
+                      const SizedBox(height: 19),
 
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const EditProfile(),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const EditProfile(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "Editer le profil",
+                          style: GoogleFonts.poppins(fontSize: 16),
+                        ),
+                      ),
+
+                      const SizedBox(height: 35),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+
+              /// Liste des options
+              Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.favorite, color: Colors.red),
+                    title: Text(
+                      'Mes favoris',
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
+                    trailing: const Icon(Icons.arrow_right),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Favoris()),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.cancel_schedule_send),
+                    title: Text(
+                      'Non livré ?',
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
+                    trailing: const Icon(Icons.arrow_right),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const NonLivre()),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.handshake),
+                    title: Text(
+                      'Partenariat',
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
+                    trailing: const Icon(Icons.arrow_right),
+                    onTap: () async {
+                      const whatsappNumber = '+22892349698';
+                      final message = Uri.encodeComponent(
+                        "Bonjour, je souhaite discuter d’un partenariat.",
+                      );
+                      final url = 'https://wa.me/$whatsappNumber?text=$message';
+
+                      try {
+                        await launchUrl(
+                          Uri.parse(url),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Impossible d’ouvrir WhatsApp. Vérifie qu’il est installé.',
+                            ),
                           ),
                         );
-                      },
-                      child: Text(
-                        "Editer le profil",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
+                      }
+                    },
+                  ),
 
-                    const SizedBox(height: 35),
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 20),
+                  ListTile(
+                    leading: const Icon(Icons.phone),
+                    title: Text(
+                      'Appeler',
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
+                    trailing: const Icon(Icons.arrow_right),
+                    onTap: () async {
+                      const phoneNumber = '+22892349698';
+                      final Uri telUri = Uri.parse('tel:$phoneNumber');
 
-            /// Liste des options
-            Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.favorite, color: Colors.red),
-                  title: Text(
-                    'Mes favoris',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const Favoris()),
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.cancel_schedule_send,
-                    color: Colors.black,
-                  ),
-                  title: Text(
-                    'Non livré ?',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const NonLivre()),
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.handshake, color: Colors.black),
-                  title: Text(
-                    'Partenariat',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_right),
-                  onTap: () async {
-                    const whatsappNumber = '+22892349698';
-                    final message = Uri.encodeComponent(
-                      "Bonjour, je souhaite discuter d’un partenariat.",
-                    );
-                    final url = 'https://wa.me/$whatsappNumber?text=$message';
-
-                    try {
-                      await launchUrl(
-                        Uri.parse(url),
-                        mode: LaunchMode.externalApplication,
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Impossible d’ouvrir WhatsApp. Vérifie qu’il est installé.',
+                      try {
+                        await launchUrl(
+                          telUri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Impossible de passer l’appel. Vérifie les permissions.',
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  },
-                ),
+                        );
+                      }
+                    },
+                  ),
 
-                ListTile(
-                  leading: const Icon(Icons.phone, color: Colors.black),
-                  title: Text(
-                    'Appeler',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.black,
+                  ListTile(
+                    leading: const Icon(
+                      Icons.question_answer,
+                      color: Colors.green,
+                    ),
+                    title: Text(
+                      'Des inquiétudes ?',
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
+                    trailing: const Icon(Icons.arrow_right),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Inquietude()),
                     ),
                   ),
-                  trailing: const Icon(Icons.arrow_right),
-                  onTap: () async {
-                    const phoneNumber = '+22892349698';
-                    final Uri telUri = Uri.parse('tel:$phoneNumber');
 
-                    try {
-                      await launchUrl(
-                        telUri,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Impossible de passer l’appel. Vérifie les permissions.',
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
-
-                ListTile(
-                  leading: const Icon(
-                    Icons.question_answer,
-                    color: Colors.green,
-                  ),
-                  title: Text(
-                    'Des inquiétudes ?',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const Inquietude()),
-                  ),
-                ),
-
-                ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: Text(
-                    "Déconnexion",
-                    style: GoogleFonts.poppins(fontSize: 16, color: Colors.red),
-                  ),
-                  trailing: IconButton(
-                    onPressed: () async {
+                  GestureDetector(
+                    onTap: () async {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -298,12 +260,22 @@ class _ProfileState extends State<Profile> {
                         );
                       }
                     },
-                    icon: Icon(Icons.arrow_right),
+                    child: ListTile(
+                      leading: const Icon(Icons.logout, color: Colors.red),
+                      title: Text(
+                        "Déconnexion",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.red,
+                        ),
+                      ),
+                      trailing: Icon(Icons.arrow_right),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
