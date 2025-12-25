@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously, file_names
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +20,7 @@ class _InscriptionState extends State<Inscription> {
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   final nameCtrl = TextEditingController();
+  final secureStorage = const FlutterSecureStorage();
 
   void signup() async {
     final auth = FirebaseAuth.instance;
@@ -129,6 +131,7 @@ class _InscriptionState extends State<Inscription> {
         'name': nameCtrl.text,
         'email': emailCtrl.text,
         'phone': "",
+        'pinHash': "",
         'adresse': "",
         'role': "users",
         'DateCreation': DateTime.now(),
@@ -136,7 +139,7 @@ class _InscriptionState extends State<Inscription> {
 
       Navigator.pop(context);
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      final snack = ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: const Color(0xFF02204B),
           content: Row(
@@ -154,7 +157,7 @@ class _InscriptionState extends State<Inscription> {
         ),
       );
 
-      Future.delayed(const Duration(seconds: 2), () {
+      snack.closed.then((_) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const UserGuideLottie()),
