@@ -228,6 +228,26 @@ class _PaiementPageState extends State<PaiementPage> {
 
               setState(() => isLoading = true);
 
+              DocumentReference sellerRef = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(item['sellerid'])
+                  .collection('sellercommandes')
+                  .add({
+                    'produits': [
+                      {
+                        'productname': item['productname'],
+                        'quantity': item['quantity'],
+                        'imageurl': item['productImageUrl'],
+                        'productprice': item['productprice'],
+                      },
+                    ],
+                    'status': 'en verification',
+                    'livree': false,
+                    'date': DateTime.now(),
+                  });
+
+              String sellerDocId = sellerRef.id;
+
               try {
                 final userDoc = await FirebaseFirestore.instance
                     .collection('users')
@@ -267,6 +287,8 @@ class _PaiementPageState extends State<PaiementPage> {
                       'prixTotal': total,
                       'UsereReseau': 'Yas',
                       'userId': uid,
+                      "sellerid": item['sellerid'],
+                      "sellerCommandedocId": sellerDocId,
                       'sms': sms,
                       'firstCheck': firstetapegood,
                       'nomberitem': item['quantity'],

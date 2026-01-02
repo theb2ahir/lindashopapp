@@ -98,6 +98,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             'email': userData['email'] ?? '',
             'phone': userData['phone'] ?? '',
             'quantity': quantity,
+            'sellerid': widget.produit['sellerid'],
             'productname': widget.produit['name'],
             'productprice': prixFinal,
             'productImageUrl': widget.produit['imageURL'],

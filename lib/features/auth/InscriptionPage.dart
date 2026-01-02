@@ -205,168 +205,170 @@ class _InscriptionState extends State<Inscription> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // TITRE
-                  Text(
-                    "Créer un compte ✨",
-                    style: GoogleFonts.roboto(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Rejoignez Linda Shop",
-                    style: GoogleFonts.roboto(fontSize: 14, color: Colors.grey),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // NOM
-                  TextField(
-                    controller: nameCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Nom',
-                      prefixIcon: const Icon(Icons.person_outline),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(
-                          color: Colors.redAccent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // EMAIL
-                  TextField(
-                    controller: emailCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(
-                          color: Colors.redAccent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // MOT DE PASSE
-                  TextField(
-                    controller: passwordCtrl,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Mot de passe',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(
-                          color: Colors.redAccent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "* 9 caractères maximum",
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // TITRE
+                    Text(
+                      "Créer un compte ✨",
                       style: GoogleFonts.roboto(
-                        fontSize: 12,
-                        color: Colors.grey,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // BOUTON
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 255, 82, 82),
-                        shape: RoundedRectangleBorder(
+                    const SizedBox(height: 6),
+                    Text(
+                      "Rejoignez Linda Shop",
+                      style: GoogleFonts.roboto(fontSize: 14, color: Colors.grey),
+                    ),
+              
+                    const SizedBox(height: 30),
+              
+                    // NOM
+                    TextField(
+                      controller: nameCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Nom',
+                        prefixIcon: const Icon(Icons.person_outline),
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
-                      ),
-                      onPressed: signup,
-                      child: const Text(
-                        "M'inscrire",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  const Divider(),
-
-                  // LIEN CONNEXION
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("vous avez déjà un compte ? "),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const Connection(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "Connectez-vous",
-                          style: TextStyle(
-                            color: Colors.blueAccent,
-                            fontWeight: FontWeight.bold,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(
+                            color: Colors.redAccent,
+                            width: 2,
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+              
+                    const SizedBox(height: 20),
+              
+                    // EMAIL
+                    TextField(
+                      controller: emailCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(
+                            color: Colors.redAccent,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+              
+                    const SizedBox(height: 20),
+              
+                    // MOT DE PASSE
+                    TextField(
+                      controller: passwordCtrl,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Mot de passe',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(
+                            color: Colors.redAccent,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+              
+                    const SizedBox(height: 6),
+              
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "* 9 caractères maximum",
+                        style: GoogleFonts.roboto(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+              
+                    const SizedBox(height: 30),
+              
+                    // BOUTON
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 255, 82, 82),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: signup,
+                        child: const Text(
+                          "M'inscrire",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+              
+                    const SizedBox(height: 20),
+              
+                    const Divider(),
+              
+                    // LIEN CONNEXION
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("vous avez déjà un compte ? "),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const Connection(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            "Connectez-vous",
+                            style: TextStyle(
+                              color: Colors.blueAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

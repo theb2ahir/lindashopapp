@@ -522,7 +522,7 @@ Widget _statusBadge(String status, BuildContext context) {
   Color color;
 
   switch (status.toLowerCase()) {
-    case 'Paiement validé , en attente de livraison':
+    case 'Paiement validé , en attente de livraison' || 'livrer':
       color = Colors.green;
       break;
     case 'en verification':

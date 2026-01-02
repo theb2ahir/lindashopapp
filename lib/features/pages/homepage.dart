@@ -1,11 +1,15 @@
+// ignore_for_file: unrelated_type_equality_checks
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lindashopp/features/pages/guide.dart';
 import 'package:lindashopp/features/pages/products/allproduct.dart';
 import 'package:lindashopp/features/pages/favoris.dart';
 import 'package:lindashopp/features/pages/notifications.dart';
 import 'package:lindashopp/features/pages/products/promopage.dart';
+import 'package:lindashopp/features/pages/utils/banners.dart';
 import 'package:lindashopp/features/pages/utils/productcolumn.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -17,6 +21,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   String promoEleve = "";
+
   final List<String> tabTitles = [
     "Tous",
     "Électronique",
@@ -26,6 +31,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     "Sports & bien-être",
     "Électro-ménager",
   ];
+
+  int _currentIndex = 0;
+  final PageController _pageController = PageController(viewportFraction: 0.95);
 
   Future<void> fetchPromotionMax() async {
     final snapshot = await FirebaseFirestore.instance
@@ -94,6 +102,32 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final List<PromoBanner> promoBanners = [
+      PromoBanner(
+        image: "assets/images/promo.jpg",
+        title:
+            "Des promotions exceptionnelles vous attendent : économisez plus et faites-vous plaisir 🎁🔥",
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PromoPage()),
+          );
+        },
+      ),
+      PromoBanner(
+        image: "assets/images/bigevent.jpg",
+        title:
+            "Offres spéciales en quantité limitée, saisissez l’opportunité dès aujourd’hui 🎉⏳",
+        onTap: () {},
+      ),
+      PromoBanner(
+        image: "assets/images/newproduct.jpg",
+        title:
+            "Plus de 200 nouveautés sélectionnées pour vous offrir encore plus de choix et de qualité ✅✨",
+        onTap: () {},
+      ),
+    ];
+
     return DefaultTabController(
       length: 7,
       child: Scaffold(
@@ -254,74 +288,94 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ],
               ),
             ),
+            SizedBox(
+              height: 140,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: promoBanners.length,
+                onPageChanged: (index) {
+                  setState(() => _currentIndex = index);
+                },
+                itemBuilder: (context, index) {
+                  final promo = promoBanners[index];
 
-            // 🏷️ Bannière promo
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: 100,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color.fromARGB(255, 131, 131, 131),
-                      blurRadius: 10,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Image.asset(
-                        "assets/images/promo.jpg",
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    ),
-                    Positioned(
-                      right: 6,
-                      bottom: 16,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const PromoPage(),
+                  return GestureDetector(
+                    onTap: promo.onTap,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: Stack(
+                          children: [
+                            // Image
+                            Image.asset(
+                              promo.image,
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            31,
-                            145,
-                            207,
-                          ),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          "Voir les promotions",
-                          style: GoogleFonts.poppins(fontSize: 16),
+                            // Gradient overlay
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [
+                                    Colors.black.withValues(alpha: 0.55),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            Positioned(
+                              top: 30,
+                              right: 10,
+                              child: SizedBox(
+                                width: 350,
+                                child: Text(
+                                  maxLines: 4,
+                                  promo.title,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                promoBanners.length,
+                (index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: _currentIndex == index ? 22 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: _currentIndex == index
+                        ? AppColors.darkRed
+                        : Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
               ),
             ),
 
             const SizedBox(height: 12),
-
             // 🧭 Onglets
             TabBar(
               isScrollable: true,

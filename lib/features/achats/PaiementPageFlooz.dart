@@ -230,6 +230,26 @@ class _PaiementPage2State extends State<PaiementPage2> {
 
               setState(() => isLoading = true);
 
+              DocumentReference sellerRef = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(item['sellerid'])
+                  .collection('sellercommandes')
+                  .add({
+                    'produits': [
+                      {
+                        'productname': item['productname'],
+                        'quantity': item['quantity'],
+                        'imageurl': item['productImageUrl'],
+                        'productprice': item['productprice'],
+                      },
+                    ],
+                    'status': 'en verification',
+                    'livree': false,
+                    'date': DateTime.now(),
+                  });
+
+              String sellerDocId = sellerRef.id;
+
               try {
                 final userDoc = await FirebaseFirestore.instance
                     .collection('users')
@@ -269,6 +289,8 @@ class _PaiementPage2State extends State<PaiementPage2> {
                       'lati': item['latitude'],
                       'prixTotal': total,
                       'userId': uid,
+                      "sellerid": item['sellerid'],
+                      "sellerCommandedocId": sellerDocId,
                       'sms': sms,
                       'firstCheck': firstetapegood,
                       'UsereReseau': 'flooz',

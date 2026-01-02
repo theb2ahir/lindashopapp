@@ -33,6 +33,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
   String sms = "";
   bool canProceedToSendCommande = false;
   bool firstetapegood = false;
+
   @override
   void initState() {
     super.initState();
@@ -196,7 +197,6 @@ class _BuyAllPageState extends State<BuyAllPage> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -341,6 +341,41 @@ class _BuyAllPageState extends State<BuyAllPage> {
 
     final infouserRef = FirebaseFirestore.instance.collection('infouser');
 
+    // 1️⃣ Grouper les produits par vendeur
+    Map<String, List<Map<String, dynamic>>> commandesParVendeur = {};
+    for (var item in widget.commandes) {
+      final sellerId = item['sellerid'];
+      if (sellerId != null && sellerId.isNotEmpty) {
+        commandesParVendeur.putIfAbsent(sellerId, () => []);
+        commandesParVendeur[sellerId]!.add({
+          'productname': item['productname'],
+          'quantity': item['quantity'],
+          'imageurl': item['productImageUrl'],
+          'productprice': item['productprice'],
+        });
+      }
+    }
+
+    // 2️⃣ Créer les documents vendeur
+    Map<String, String> sellerCommandIds = {}; // sellerId -> docId
+    for (final entry in commandesParVendeur.entries) {
+      final sellerId = entry.key;
+      final produits = entry.value;
+
+      DocumentReference sellerRef = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(sellerId)
+          .collection('sellercommandes')
+          .add({
+            'produits': produits,
+            'status': 'en verification',
+            'livree': false,
+            'date': DateTime.now(),
+          });
+
+      sellerCommandIds[sellerId] = sellerRef.id;
+    }
+
     try {
       for (var item in widget.commandes) {
         final userAdresse = userData['adresse'];
@@ -353,6 +388,10 @@ class _BuyAllPageState extends State<BuyAllPage> {
         final productname = item['productname'];
         final lati = item['latitude'];
         final longi = item['longitude'];
+        final String sellerid = item['sellerid'] ?? '';
+        final String? sellerDocId = sellerid.isNotEmpty
+            ? sellerCommandIds[sellerid]
+            : null;
         DocumentReference acrRef = await FirebaseFirestore.instance
             .collection('users')
             .doc(uid)
@@ -392,6 +431,8 @@ class _BuyAllPageState extends State<BuyAllPage> {
           "prixTotal": totalGeneral,
           "acrid": acrId,
           "userid": userid,
+          "sellerid": sellerid.isNotEmpty ? sellerid : null,
+          "sellerCommandedocId": sellerDocId,
           'timestamp': DateTime.now(),
         });
 
@@ -433,6 +474,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
 
         showCommandeDialog();
       }
+
       NotificationService.showNotification(
         title: "Paiement effectué",
         body:

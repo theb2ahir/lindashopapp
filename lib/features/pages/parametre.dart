@@ -23,6 +23,46 @@ class _ParametreState extends State<Parametre> {
   TextEditingController villeCtrl = TextEditingController();
   TextEditingController quartierCtrl = TextEditingController();
   TextEditingController precisionCtrl = TextEditingController();
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  final firestore = FirebaseFirestore.instance;
+
+  Future<int> getUsersMessageSizedNotRead(String userId) async {
+    final messages = await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('messages')
+        .where('sender', isEqualTo: 'ADMIN')
+        .where('isRead', isEqualTo: false)
+        .get();
+    return messages.docs.isNotEmpty ? messages.docs.length : 0;
+  }
+
+  Future<int> getUsersMessageSizedRead(String userId) async {
+    final messages = await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('messages')
+        .where('sender', isEqualTo: 'ADMIN')
+        .where('isRead', isEqualTo: true)
+        .get();
+    return messages.docs.isNotEmpty ? messages.docs.length : 0;
+  }
+
+  Future<void> markAllMessagesAsRead(String userId) async {
+    // Récupère tous les messages de l'utilisateur
+    final snapshot = await firestore
+        .collection('users')
+        .doc(uid)
+        .collection('messages')
+        .where('isRead', isEqualTo: false)
+        .where('sender', isEqualTo: 'ADMIN')
+        .get();
+    if (snapshot.docs.isEmpty) return;
+    // Met à jour chaque message pour le marquer comme lu
+    for (var doc in snapshot.docs) {
+      await doc.reference.update({'isRead': true});
+    }
+  }
 
   Future<void> loadUserData() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
@@ -194,12 +234,77 @@ class _ParametreState extends State<Parametre> {
                 ListTile(
                   leading: const Icon(Icons.question_mark_sharp),
                   title: const Text("Support client Linda shop"),
-                  onTap: () {
+                  onTap: () async {
+                    await markAllMessagesAsRead(uid);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => SupportClient()),
                     );
                   },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FutureBuilder<int>(
+                        future: getUsersMessageSizedNotRead(uid),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Text(
+                              "...",
+                              style: TextStyle(
+                                color: Colors.grey.shade700,
+                                fontSize: 12,
+                              ),
+                            );
+                          }
+                          if (snapshot.hasError) {
+                            return Text(
+                              "Erreur",
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            );
+                          }
+                          return Text(
+                            "${(snapshot.data ?? 0).toString()} non lus / ",
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 12,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 4),
+                      FutureBuilder<int>(
+                        future: getUsersMessageSizedRead(uid),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Text(
+                              "...",
+                              style: TextStyle(
+                                color: Colors.grey.shade700,
+                                fontSize: 12,
+                              ),
+                            );
+                          }
+                          if (snapshot.hasError) {
+                            return Text(
+                              "Erreur",
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            );
+                          }
+                          return Text(
+                            "${(snapshot.data ?? 0).toString()} lus",
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 12,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward_ios, size: 16),
+                    ],
+                  ),
                 ),
 
                 // Déconnexion

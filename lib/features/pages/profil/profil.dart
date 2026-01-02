@@ -9,6 +9,7 @@ import 'package:lindashopp/features/pages/favoris.dart';
 import 'package:lindashopp/features/pages/inquietude.dart';
 import 'package:lindashopp/features/pages/nonlivre.dart';
 import 'package:lindashopp/features/pages/parametre.dart';
+import 'package:lindashopp/sellerspace/selleracceuil.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'editprofile.dart';
@@ -24,14 +25,33 @@ class _ProfileState extends State<Profile> {
   TextEditingController usernameCtrl = TextEditingController();
   TextEditingController useremailCtrl = TextEditingController();
   TextEditingController phoneCtrl = TextEditingController();
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  String role = "";
 
   Future<Map<String, dynamic>> getUserData() async {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
     final doc = await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .get();
     return doc.data()!;
+  }
+
+  Future<void> loadUserData() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+    if (mounted) {
+      setState(() {
+        role = doc.data()!['role'];
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
   }
 
   @override
@@ -132,6 +152,64 @@ class _ProfileState extends State<Profile> {
               /// Liste des options
               Column(
                 children: [
+                  if (role == "seller")
+                    ListTile(
+                      leading: Icon(
+                        Icons.storefront_outlined,
+                        color: Colors.blue,
+                      ),
+                      title: Text(
+                        "Ma boutique",
+                        style: GoogleFonts.poppins(fontSize: 16),
+                      ),
+                      onTap: () async {
+                        final userDoc = await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(uid)
+                            .get();
+
+                        final userData = userDoc.data();
+
+                        // 🔹 Vérifier si le numéro et l'adresse sont présents
+                        if (userData == null ||
+                            userData['phone'] == null ||
+                            userData['phone'].toString().isEmpty ||
+                            userData['adresse'] == null ||
+                            userData['adresse'].toString().isEmpty) {
+                          if (!mounted) return;
+                          final snack = ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Color(0xFF02204B),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              duration: Duration(seconds: 2),
+                              content: Text(
+                                "Veuillez renseigné votre numero de telephone et votre adresse",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          );
+                          snack.closed.then((_) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => EditProfile()),
+                            );
+                          });
+                          return; // Stoppe le paiement
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => SellerAcceuil()),
+                          );
+                        }
+                      },
+                      trailing: const Icon(Icons.arrow_right),
+                    ),
                   ListTile(
                     leading: const Icon(Icons.favorite, color: Colors.red),
                     title: Text(
