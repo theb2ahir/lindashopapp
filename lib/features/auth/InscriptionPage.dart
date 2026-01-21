@@ -28,7 +28,6 @@ class _InscriptionState extends State<Inscription> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
     return Scaffold(
       body: Center(
         child: Column(
@@ -50,7 +49,9 @@ class _InscriptionState extends State<Inscription> {
               style: GoogleFonts.poppins(
                 fontSize: size.width > 400 ? 32 : 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
               ),
             ),
 
@@ -61,7 +62,12 @@ class _InscriptionState extends State<Inscription> {
               child: Text(
                 "Achetez, gérez , vendez et profitez d'une expérience simple et rapide.",
                 textAlign: TextAlign.center,
-                style: GoogleFonts.roboto(color: Colors.white70, fontSize: 14),
+                style: GoogleFonts.roboto(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                  fontSize: size.width > 400 ? 16 : 14,
+                ),
               ),
             ),
 
@@ -70,7 +76,9 @@ class _InscriptionState extends State<Inscription> {
             ElevatedButton(
               onPressed: _openSheet,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -82,11 +90,43 @@ class _InscriptionState extends State<Inscription> {
               child: Text(
                 "Commencer",
                 style: GoogleFonts.poppins(
-                  color: Colors.redAccent,
+                  color: Theme.of(context).primaryColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
               ),
+            ),
+
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Déjà inscrit ?",
+                  style: GoogleFonts.poppins(
+                    fontSize: size.width > 400 ? 14 : 12,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Connection()),
+                    );
+                  },
+                  child: Text(
+                    "Connectez-vous",
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: size.width > 400 ? 14 : 12,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -297,12 +337,9 @@ class _SignupBottomSheetState extends State<SignupBottomSheet> {
       builder: (_, controller) {
         return Container(
           decoration: BoxDecoration(
-            color: const Color.fromARGB(
-              255,
-              12,
-              12,
-              12,
-            ).withValues(alpha: 0.94),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Color.fromARGB(255, 12, 12, 12).withValues(alpha: 0.94)
+                : Colors.white.withValues(alpha: 0.94),
             borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           ),
           padding: const EdgeInsets.all(20),
@@ -314,7 +351,9 @@ class _SignupBottomSheetState extends State<SignupBottomSheet> {
                   width: 50,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[800]
+                        : Colors.grey[300],
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -328,6 +367,9 @@ class _SignupBottomSheetState extends State<SignupBottomSheet> {
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
                 ),
               ),
 
@@ -354,6 +396,12 @@ class _SignupBottomSheetState extends State<SignupBottomSheet> {
                 obscureText: obscure,
                 decoration: InputDecoration(
                   labelText: "Mot de passe",
+                  labelStyle: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                  ),
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -380,7 +428,7 @@ class _SignupBottomSheetState extends State<SignupBottomSheet> {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text(
+                child: Text(
                   "S'inscrire",
                   style: TextStyle(
                     fontSize: 16,
@@ -398,6 +446,9 @@ class _SignupBottomSheetState extends State<SignupBottomSheet> {
                     "Déjà inscrit ?",
                     style: GoogleFonts.poppins(
                       fontSize: size.width > 400 ? 14 : 12,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
                     ),
                   ),
                   TextButton(
@@ -434,6 +485,12 @@ class _SignupBottomSheetState extends State<SignupBottomSheet> {
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: GoogleFonts.poppins(
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black,
+        ),
         prefixIcon: Icon(icon),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
       ),

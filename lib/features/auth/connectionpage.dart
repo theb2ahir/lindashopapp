@@ -315,10 +315,7 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                       },
                                       child: const Text(
                                         "Mot de passe oublié ?",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          decoration: TextDecoration.underline,
-                                        ),
+                                        style: TextStyle(color: Colors.blue),
                                       ),
                                     ),
                                   ),
