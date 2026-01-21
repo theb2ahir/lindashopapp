@@ -345,6 +345,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     final produitId = widget.produitId;
     final collectionName = widget.collectionName;
     final nom = widget.produit['name'] ?? 'Sans nom';
@@ -399,26 +400,32 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ? Center(
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(23),
-                              child: Image.network(imageUrl, height: 350),
+                              child: Image.network(
+                                imageUrl,
+                                height: size.height > 800 ? 350 : 250,
+                              ),
                             ),
                           )
-                        : const Icon(Icons.image, size: 200),
+                        : Icon(
+                            Icons.image,
+                            size: size.height > 800 ? 200 : 150,
+                          ),
 
-                    const SizedBox(height: 35),
+                    SizedBox(height: size.height > 800 ? 35 : 25),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Text(
                           nom,
-                          style: const TextStyle(
-                            fontSize: 24,
+                          style: TextStyle(
+                            fontSize: size.width > 400 ? 24 : 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 13),
+                    SizedBox(height: size.height > 800 ? 13 : 8),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -427,7 +434,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             StarRating(rating: avis.toDouble()),
-                            const SizedBox(width: 10),
+                            SizedBox(width: size.width > 400 ? 10 : 8),
                             Text.rich(
                               TextSpan(
                                 children: [
@@ -437,21 +444,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       avis.toString().substring(0, 3),
                                       style: TextStyle(
                                         color: Colors.red,
-                                        fontSize: 14,
+                                        fontSize: size.width > 400 ? 14 : 12,
                                       ),
                                     ),
                                   ),
                                   TextSpan(
                                     text: " avis",
                                     style: GoogleFonts.poppins(
-                                      fontSize: 13,
+                                      fontSize: size.width > 400 ? 13 : 11,
                                       color: Colors.grey[600],
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 14),
+                            SizedBox(height: size.height > 800 ? 14 : 10),
                           ],
                         ),
 
@@ -460,14 +467,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             Icon(
                               Icons.local_offer,
                               color: livraison ? Colors.green : Colors.red,
-                              size: 16,
+                              size: size.width > 400 ? 16 : 14,
                             ),
                             Text(
                               livraison
                                   ? "Livraison gratuite"
                                   : "Livraison payante",
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
+                                fontSize: size.width > 400 ? 16 : 14,
                                 fontWeight: FontWeight.bold,
                                 color: livraison ? Colors.green : Colors.red,
                               ),
@@ -477,7 +484,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ],
                     ),
 
-                    const SizedBox(height: 13),
+                    SizedBox(height: size.height > 800 ? 13 : 8),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -485,7 +492,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         Text(
                           '$prix fcfa',
                           style: GoogleFonts.poppins(
-                            fontSize: 23,
+                            fontSize: size.width > 400 ? 23 : 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.green,
                           ),
@@ -493,8 +500,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
                         Text(
                           "- ${pourcentage.toString()} %",
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: size.width > 400 ? 16 : 14,
                             color: Colors.red,
                             fontWeight: FontWeight.bold,
                           ),
@@ -502,21 +509,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ],
                     ),
 
-                    const SizedBox(height: 18),
+                    SizedBox(height: size.height > 800 ? 18 : 12),
 
                     Row(
                       children: [
                         Text(
                           "Description",
                           style: GoogleFonts.poppins(
-                            fontSize: 20,
+                            fontSize: size.width > 400 ? 20 : 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 10),
+                    SizedBox(height: size.height > 800 ? 10 : 6),
 
                     SizedBox(
                       width: double.infinity,
@@ -528,7 +535,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               child: Text(
                                 description ?? '',
                                 textAlign: TextAlign.start,
-                                style: GoogleFonts.poppins(fontSize: 16),
+                                style: GoogleFonts.poppins(
+                                  fontSize: size.width > 400 ? 16 : 14,
+                                ),
                               ),
                             ),
                           ),
@@ -545,6 +554,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Container(
@@ -558,18 +568,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   : Colors.black,
                             ),
                           ),
-                          height: 50,
+                          height: size.height > 800 ? 50 : 40,
 
                           child: Row(
                             children: [
                               IconButton(
                                 onPressed: decrement,
-                                icon: const Icon(Icons.remove),
+                                icon: Icon(
+                                  Icons.remove,
+                                  size: size.width > 400 ? 16 : 10,
+                                ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 8,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: size.width > 400 ? 20 : 13,
+                                  vertical: size.width > 400 ? 8 : 3,
                                 ),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
@@ -583,17 +596,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ),
                                 child: Text(
                                   "$quantity",
-                                  style: const TextStyle(fontSize: 18),
+                                  style: TextStyle(
+                                    fontSize: size.width > 400 ? 18 : 13,
+                                  ),
                                 ),
                               ),
                               IconButton(
                                 onPressed: increment,
-                                icon: const Icon(Icons.add),
+                                icon: Icon(
+                                  Icons.add,
+                                  size: size.width > 400 ? 16 : 10,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        SizedBox(width: size.width > 400 ? 10 : 8),
                         SizedBox(
                           child: Row(
                             children: [
@@ -604,7 +622,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 icon: Icon(
                                   Icons.favorite,
                                   color: Colors.red,
-                                  size: 23,
+                                  size: size.width > 400 ? 23 : 18,
                                 ),
                               ),
                               IconButton(
@@ -614,7 +632,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 icon: Icon(
                                   Icons.add_shopping_cart,
                                   color: const Color.fromARGB(255, 50, 193, 55),
-                                  size: 30,
+                                  size: size.width > 400 ? 30 : 25,
                                 ),
                               ),
                               IconButton(
@@ -639,12 +657,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                 Text(
                                                   "Donnez une note",
                                                   style: TextStyle(
-                                                    fontSize: 18,
+                                                    fontSize: size.width > 400
+                                                        ? 18
+                                                        : 16,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
 
-                                                const SizedBox(height: 15),
+                                                SizedBox(
+                                                  height: size.height > 800
+                                                      ? 15
+                                                      : 10,
+                                                ),
 
                                                 // ⭐ lignes d'étoiles
                                                 Row(
@@ -658,7 +682,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                         index < selectedStars
                                                             ? Icons.star
                                                             : Icons.star_border,
-                                                        size: 32,
+                                                        size: size.width > 400
+                                                            ? 32
+                                                            : 28,
                                                         color: Colors.amber,
                                                       ),
                                                       onPressed: () {
@@ -671,7 +697,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                   }),
                                                 ),
 
-                                                const SizedBox(height: 20),
+                                                SizedBox(
+                                                  height: size.height > 800
+                                                      ? 20
+                                                      : 16,
+                                                ),
 
                                                 ElevatedButton(
                                                   onPressed: selectedStars == 0
@@ -721,7 +751,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                                     seconds: 3,
                                                                   ),
                                                               content: Row(
-                                                                children: const [
+                                                                children: [
                                                                   Icon(
                                                                     Icons
                                                                         .check_circle,
@@ -729,7 +759,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                                         .lightGreenAccent,
                                                                   ),
                                                                   SizedBox(
-                                                                    width: 12,
+                                                                    width:
+                                                                        size.width >
+                                                                            400
+                                                                        ? 12
+                                                                        : 10,
                                                                   ),
                                                                   Expanded(
                                                                     child: Text(
@@ -738,7 +772,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                                         color: Colors
                                                                             .white,
                                                                         fontSize:
-                                                                            16,
+                                                                            size.width >
+                                                                                400
+                                                                            ? 16
+                                                                            : 14,
                                                                       ),
                                                                     ),
                                                                   ),
@@ -793,10 +830,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                             children: [
                                               Center(
                                                 child: Container(
-                                                  width: 50,
-                                                  height: 5,
-                                                  margin: const EdgeInsets.only(
-                                                    bottom: 16,
+                                                  width: size.width > 400
+                                                      ? 50
+                                                      : 40,
+                                                  height: size.height > 800
+                                                      ? 5
+                                                      : 3,
+                                                  margin: EdgeInsets.only(
+                                                    bottom: size.height > 800
+                                                        ? 16
+                                                        : 12,
                                                   ),
                                                   decoration: BoxDecoration(
                                                     color: Colors.grey[400],
@@ -812,11 +855,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                               Text(
                                                 "Caractéristiques Techniques",
                                                 style: GoogleFonts.poppins(
-                                                  fontSize: 20,
+                                                  fontSize: size.width > 400
+                                                      ? 20
+                                                      : 16,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                              const SizedBox(height: 10),
+                                              SizedBox(
+                                                height: size.height > 800
+                                                    ? 10
+                                                    : 6,
+                                              ),
                                               ...caracteristiqueTechnique.map(
                                                 (e) => ListTile(
                                                   contentPadding:
@@ -828,25 +877,37 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                   title: Text(
                                                     e.toString(),
                                                     style: GoogleFonts.poppins(
-                                                      fontSize: 16,
+                                                      fontSize: size.width > 400
+                                                          ? 16
+                                                          : 14,
                                                     ),
                                                   ),
                                                 ),
                                               ),
-                                              const Divider(
-                                                height: 30,
-                                                thickness: 1.5,
+                                              Divider(
+                                                height: size.height > 800
+                                                    ? 30
+                                                    : 25,
+                                                thickness: size.height > 800
+                                                    ? 1.5
+                                                    : 1,
                                               ),
 
                                               // 📌 Avantages et Utilisation
                                               Text(
                                                 "Avantages & Utilisation",
                                                 style: GoogleFonts.poppins(
-                                                  fontSize: 20,
+                                                  fontSize: size.width > 400
+                                                      ? 20
+                                                      : 16,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                              const SizedBox(height: 10),
+                                              SizedBox(
+                                                height: size.height > 800
+                                                    ? 10
+                                                    : 6,
+                                              ),
                                               ...avantageEtUtilsation.map(
                                                 (e) => ListTile(
                                                   contentPadding:
@@ -858,25 +919,37 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                   title: Text(
                                                     e.toString(),
                                                     style: GoogleFonts.poppins(
-                                                      fontSize: 16,
+                                                      fontSize: size.width > 400
+                                                          ? 16
+                                                          : 14,
                                                     ),
                                                   ),
                                                 ),
                                               ),
-                                              const Divider(
-                                                height: 30,
-                                                thickness: 1.5,
+                                              Divider(
+                                                height: size.height > 800
+                                                    ? 30
+                                                    : 25,
+                                                thickness: size.height > 800
+                                                    ? 1.5
+                                                    : 1,
                                               ),
 
                                               // 📌 Contenu du Package
                                               Text(
                                                 "Contenu du Package",
                                                 style: GoogleFonts.poppins(
-                                                  fontSize: 20,
+                                                  fontSize: size.width > 400
+                                                      ? 20
+                                                      : 16,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                              const SizedBox(height: 10),
+                                              SizedBox(
+                                                height: size.height > 800
+                                                    ? 10
+                                                    : 6,
+                                              ),
                                               ...contenuDuPackage.map(
                                                 (e) => ListTile(
                                                   contentPadding:
@@ -888,12 +961,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                   title: Text(
                                                     e.toString(),
                                                     style: GoogleFonts.poppins(
-                                                      fontSize: 16,
+                                                      fontSize: size.width > 400
+                                                          ? 16
+                                                          : 14,
                                                     ),
                                                   ),
                                                 ),
                                               ),
-                                              const SizedBox(height: 20),
+                                              SizedBox(
+                                                height: size.height > 800
+                                                    ? 20
+                                                    : 16,
+                                              ),
                                             ],
                                           ),
                                         );

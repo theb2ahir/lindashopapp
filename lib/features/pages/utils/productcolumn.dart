@@ -20,6 +20,7 @@ class ProductColumn extends StatefulWidget {
 class _ProductColumnState extends State<ProductColumn> {
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection(widget.collectionName)
@@ -112,12 +113,13 @@ class _ProductColumnState extends State<ProductColumn> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // 🖼️ Image du produit
                         Image.network(
                           imageUrl,
                           width: double.infinity,
-                          height: 150,
+                          height: size.height > 800 ? 150 : 100,
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) =>
                               const Icon(Icons.image_not_supported),
@@ -128,7 +130,7 @@ class _ProductColumnState extends State<ProductColumn> {
                             );
                           },
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: size.height > 800 ? 6 : 4),
 
                         // 🧾 Détails du produit
                         Column(
@@ -137,19 +139,19 @@ class _ProductColumnState extends State<ProductColumn> {
                             Text(
                               nom,
                               style: GoogleFonts.poppins(
-                                fontSize: 14,
+                                fontSize: size.width > 400 ? 14 : 12,
                                 fontWeight: FontWeight.bold,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: size.height > 800 ? 4 : 3),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   "$prix F",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
+                                    fontSize: size.width > 400 ? 12 : 10,
                                     fontWeight: FontWeight.bold,
                                     color:
                                         Theme.of(context).brightness ==
@@ -165,9 +167,9 @@ class _ProductColumnState extends State<ProductColumn> {
                                       color: moyenne > 3
                                           ? Colors.yellow
                                           : Colors.red,
-                                      size: 14,
+                                      size: size.width > 400 ? 14 : 10,
                                     ),
-                                    const SizedBox(width: 4),
+                                    SizedBox(width: size.width > 400 ? 4 : 2),
                                     Text(moyenne.toStringAsFixed(1)),
                                   ],
                                 ),

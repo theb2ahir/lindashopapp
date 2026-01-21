@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:lindashopp/features/pages/acceuilpage.dart';
 
 class AddProductSteps extends StatefulWidget {
   const AddProductSteps({super.key});
@@ -44,16 +45,44 @@ class _AddProductStepsState extends State<AddProductSteps> {
   bool ctdone = false;
   bool cpdone = false;
   bool loading = false;
+  // 🔹 Variables
+  int nbrajouts = 0;
+  String subscription = "";
 
+  // 🔹 Fonction pour savoir si deux dates sont le même jour
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  // 🔹 Récupérer les infos utilisateur et reset journalier
   Future<void> getUserData() async {
     final doc = await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .get();
+
+    final Timestamp? lastAddTs = doc.data()!['lastAddDate'];
+    final DateTime now = DateTime.now();
+
+    int newCount = doc.data()!['nbrajouts'] ?? 0;
+
+    // Reset journalier si la dernière ajout date d'un autre jour
+    if (lastAddTs != null) {
+      final lastDate = lastAddTs.toDate();
+      if (!isSameDay(lastDate, now)) {
+        newCount = 0;
+        await FirebaseFirestore.instance.collection('users').doc(uid).update({
+          'nbrajouts': 0, // reset côté Firestore
+        });
+      }
+    }
+
     setState(() {
       role = doc.data()!['role'];
       username = doc.data()!['name'];
       sellerId = uid;
+      nbrajouts = newCount;
+      subscription = doc.data()!['subscription'];
     });
   }
 
@@ -136,9 +165,21 @@ class _AddProductStepsState extends State<AddProductSteps> {
       );
       return;
     }
+    if (productname == "" ||
+        description == "" ||
+        price == 0 ||
+        pccs == "" ||
+        avantages.isEmpty ||
+        caracteristiques.isEmpty ||
+        contenuPaquet.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez remplir tous les champs')),
+      );
+      return;
+    }
 
     setState(() => loading = true);
-
+    int newCount = nbrajouts + 1;
     String imageURL;
     try {
       imageURL = await _uploadImageToCloudinary(_imageFile!);
@@ -163,25 +204,31 @@ class _AddProductStepsState extends State<AddProductSteps> {
 
       await FirebaseFirestore.instance.collection('reviewproduct').add(product);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Produit ajouté avec succès !')),
+        const SnackBar(content: Text('Produit envoyer avec succès !')),
       );
 
-      setState(() => _imageFile = null);
-      _nameController.clear();
-      productname = "";
-      _descriptionController.clear();
-      description = "";
-      _pccsController.clear();
-      pccs = "";
-      _prixController.clear();
-      price = 0;
-      _pourcentageController.clear();
-      pourcentage = 0;
-      _livraison = true;
-      avantages = [];
-      caracteristiques = [];
-      contenuPaquet = [];
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'nbrajouts': newCount,
+        'lastAddDate': FieldValue.serverTimestamp(),
+      });
+
       setState(() {
+        nbrajouts = newCount;
+        _imageFile = null;
+        _nameController.clear();
+        productname = "";
+        _descriptionController.clear();
+        description = "";
+        _pccsController.clear();
+        pccs = "";
+        _prixController.clear();
+        price = 0;
+        _pourcentageController.clear();
+        pourcentage = 0;
+        _livraison = true;
+        avantages = [];
+        caracteristiques = [];
+        contenuPaquet = [];
         cpdone = false;
         ctdone = false;
         audone = false;
@@ -219,914 +266,950 @@ class _AddProductStepsState extends State<AddProductSteps> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          IntroductionScreen(
-            pages: [
-              // texte et design accrocheur pour demarrer l'ajout du produit
-              PageViewModel(
-                titleWidget: SafeArea(
-                  child: Column(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AcceuilPage()),
+          );
+        }
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            IntroductionScreen(
+              pages: [
+                // texte et design accrocheur pour demarrer l'ajout du produit
+                PageViewModel(
+                  titleWidget: SafeArea(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Ajouter un produit",
+                          style: GoogleFonts.poppins(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  bodyWidget: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Ajouter un produit a votre boutique en toute simpliciter en suivant les étapes ci apres ✅ (6 étapes)",
+                          style: GoogleFonts.poppins(fontSize: 16),
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: const [
+                              StepInstructionTile(
+                                step: 1,
+                                title: "Choisir une image",
+                                description:
+                                    "Ajoutez une image claire et attrayante du produit.",
+                              ),
+                              SizedBox(height: 20),
+                              StepInstructionTile(
+                                step: 2,
+                                title: "Informations du produit",
+                                description:
+                                    "Renseignez le nom, la description et le prix du produit.",
+                              ),
+                              SizedBox(height: 20),
+                              StepInstructionTile(
+                                step: 3,
+                                title: "Mise en avant & promotion",
+                                description:
+                                    "Expliquez pourquoi choisir ce produit et indiquez le pourcentage de promotion si applicable.",
+                              ),
+                              SizedBox(height: 20),
+                              StepInstructionTile(
+                                step: 4,
+                                title: "Détails du produit",
+                                description:
+                                    "Ajoutez les avantages utilisations, caractéristiques techniques et le contenu du paquet. ces informations ont un impact significatif lors de la recherche des produits par les clients.",
+                              ),
+                              SizedBox(height: 20),
+                              StepInstructionTile(
+                                step: 5,
+                                title: "Catégorie & livraison",
+                                description:
+                                    "Choisissez la catégorie du produit et activez le bouton pour une livraison payante et désactivez le pour une livraison gratuite.",
+                              ),
+                              SizedBox(height: 20),
+                              StepInstructionTile(
+                                step: 6,
+                                title: "Aperçu & validation",
+                                description:
+                                    "Vérifiez toutes les informations avant de valider et publier le produit.",
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // choisir une image
+                PageViewModel(
+                  titleWidget: SafeArea(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Choisir une image",
+                          style: GoogleFonts.poppins(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  bodyWidget: Column(
                     children: [
                       Text(
-                        "Ajouter un produit",
-                        style: GoogleFonts.poppins(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
+                        "Choisissez une image claire et attrayante du produit.",
+                        style: GoogleFonts.poppins(fontSize: 16),
+                      ),
+                      const SizedBox(height: 30),
+
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: 300,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color.fromARGB(54, 245, 245, 245)
+                                  : Colors.grey.shade300,
+                            ),
+                            child: _imageFile != null
+                                ? Image.file(_imageFile!, fit: BoxFit.cover)
+                                : Center(
+                                    child: GestureDetector(
+                                      onTap: _pickImage,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          color:
+                                              Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? const Color.fromARGB(
+                                                  54,
+                                                  245,
+                                                  245,
+                                                  245,
+                                                )
+                                              : Colors.grey.shade300,
+                                          border: Border.all(
+                                            color:
+                                                Theme.of(context).brightness ==
+                                                    Brightness.dark
+                                                ? Colors.white
+                                                : Colors.black,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.add_a_photo),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                "Ajouter une image",
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+                      if (_imageFile != null)
+                        NextStepHint(
+                          nextStepText:
+                              "Prochaine étape : nom du produit, description et prix",
                         ),
+                    ],
+                  ),
+                ),
+
+                // ajouter nom , description et prix
+                PageViewModel(
+                  titleWidget: SafeArea(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Ajouter les informations primaires du produit",
+                          style: GoogleFonts.poppins(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  bodyWidget: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Renseignez le nom, la description et le prix du produit.",
+                        style: GoogleFonts.poppins(fontSize: 16),
+                      ),
+                      const SizedBox(height: 30),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 16),
+                                _buildTextField(
+                                  hintText: 'Le nom du produit',
+                                  maxlines: 1,
+                                  controller: _nameController,
+                                  label: 'Nom du produit',
+                                ),
+                                const SizedBox(height: 20),
+                                _buildTextField(
+                                  hintText: 'Une description de votre produit',
+                                  maxlines: 3,
+                                  controller: _descriptionController,
+                                  label: 'Description',
+                                ),
+                                const SizedBox(height: 20),
+                                _buildTextField(
+                                  hintText: 'Le prix du produit',
+                                  maxlines: 1,
+                                  controller: _prixController,
+                                  label: 'Prix',
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _saveNDPinfo,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 32,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          backgroundColor:
+                              Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                          foregroundColor:
+                              Theme.of(context).brightness == Brightness.dark
+                              ? Colors.black
+                              : Colors.white,
+                          elevation: 2,
+                        ),
+                        child: const Text(
+                          ' Enregistrer',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (productname.isNotEmpty &&
+                          description.isNotEmpty &&
+                          price != 0)
+                        NextStepHint(
+                          nextStepText:
+                              "Prochaine étape : pourquoi choisir ce produit et le pourcentage si sujette a une promotion",
+                        ),
+                    ],
+                  ),
+                ),
+
+                // pourquoi choisir ce produit et le pourcentage si sujette a une promotion
+                PageViewModel(
+                  titleWidget: SafeArea(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Dites à vos clients pourquoi ils doivent choisi ce produit",
+                          style: GoogleFonts.poppins(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  bodyWidget: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "en suite Renseignez le pourcentage ce produit est sujette a une promotion.",
+                        style: GoogleFonts.poppins(fontSize: 16),
+                      ),
+                      const SizedBox(height: 30),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 23),
+                                _buildTextField(
+                                  hintText:
+                                      'Dites leurs pourquoi choisir ce produit',
+                                  maxlines: 2,
+                                  controller: _pccsController,
+                                  label: 'PCCS',
+                                ),
+                                const SizedBox(height: 33),
+                                _buildTextField(
+                                  hintText: "Le pourcentage de la remise",
+                                  maxlines: 1,
+                                  controller: _pourcentageController,
+                                  label: 'Pourcentage',
+                                  keyboardType: TextInputType.number,
+                                  isRequired: false,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  "*Remplire se champ uniquement si le produit ci apres est sujette a une promotion",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 35),
+                                ElevatedButton(
+                                  onPressed: _savePCCSPinfo,
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 32,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                    backgroundColor:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black,
+                                    foregroundColor:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.black
+                                        : Colors.white,
+                                    elevation: 2,
+                                  ),
+                                  child: const Text(
+                                    ' Enregistrer',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 34),
+
+                                if (pccs.isNotEmpty)
+                                  NextStepHint(
+                                    nextStepText:
+                                        "Prochaine étape : ajouter les avantages et utilisations, caractéristiques techniques et le contenu du paquet",
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                bodyWidget: SingleChildScrollView(
-                  child: Column(
+
+                // ajouter avantages_utilisations  , caracteristiques_techniques et contenu_du_paquet
+                PageViewModel(
+                  titleWidget: SafeArea(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Renseignez les avantages utilisations , caractéristiques techniques et contenu du paquet du produit",
+                          style: GoogleFonts.poppins(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  bodyWidget: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Ajouter un produit a votre boutique en toute simpliciter en suivant les étapes ci apres ✅ (6 étapes)",
+                        "Ajouter au moins 3 infromations chacune afin d'avoir un bon aperçu du produit et capter le plus de clients possible.",
                         style: GoogleFonts.poppins(fontSize: 16),
                       ),
-
                       const SizedBox(height: 30),
 
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
-                          children: const [
-                            StepInstructionTile(
-                              step: 1,
-                              title: "Choisir une image",
-                              description:
-                                  "Ajoutez une image claire et attrayante du produit.",
+                          children: [
+                            const SizedBox(height: 16),
+                            Column(
+                              children: [
+                                // Bouton pour ajouter des avantages
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    final result = await showModalBottomSheet<String>(
+                                      context: context,
+                                      isScrollControlled:
+                                          true, // permet d'avoir le clavier visible
+                                      builder: (context) => Padding(
+                                        padding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(
+                                            context,
+                                          ).viewInsets.bottom,
+                                        ),
+                                        child: SimpleListAdder(
+                                          title:
+                                              "Ajouter des avantages et utilisations",
+                                          list: [],
+                                          onValidate: (val) {
+                                            setState(() {
+                                              audone = true;
+                                            });
+                                            Navigator.pop(context, val);
+                                          },
+                                        ),
+                                      ),
+                                    );
+
+                                    if (result != null && result.isNotEmpty) {
+                                      setState(() {
+                                        avantages.addAll(result.split(', '));
+                                      });
+                                    }
+                                  },
+
+                                  style: ButtonStyle(
+                                    padding: WidgetStateProperty.all(
+                                      const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                        horizontal: 32,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "${audone ? "✅" : "❌"}  Ajouter les avantages et utilisations",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                // Bouton pour caractéristiques techniques
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    final result =
+                                        await showModalBottomSheet<String>(
+                                          context: context,
+                                          isScrollControlled: true,
+                                          builder: (context) => Padding(
+                                            padding: EdgeInsets.only(
+                                              bottom: MediaQuery.of(
+                                                context,
+                                              ).viewInsets.bottom,
+                                            ),
+                                            child: SimpleListAdder(
+                                              title:
+                                                  "Ajouter des caractéristiques techniques",
+                                              list: [],
+                                              onValidate: (val) {
+                                                setState(() {
+                                                  ctdone = true;
+                                                });
+                                                Navigator.pop(context, val);
+                                              },
+                                            ),
+                                          ),
+                                        );
+
+                                    if (result != null && result.isNotEmpty) {
+                                      setState(() {
+                                        caracteristiques.addAll(
+                                          result.split(', '),
+                                        );
+                                      });
+                                    }
+                                  },
+                                  style: ButtonStyle(
+                                    padding: WidgetStateProperty.all(
+                                      const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                        horizontal: 32,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "${ctdone ? "✅" : "❌"} Ajouter les caractéristiques techniques",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Bouton pour contenu du paquet
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    final result =
+                                        await showModalBottomSheet<String>(
+                                          context: context,
+                                          isScrollControlled: true,
+                                          builder: (context) => Padding(
+                                            padding: EdgeInsets.only(
+                                              bottom: MediaQuery.of(
+                                                context,
+                                              ).viewInsets.bottom,
+                                            ),
+                                            child: SimpleListAdder(
+                                              title:
+                                                  "Ajouter contenu du paquet",
+                                              list: [],
+                                              onValidate: (val) {
+                                                setState(() {
+                                                  cpdone = true;
+                                                });
+                                                Navigator.pop(context, val);
+                                              },
+                                            ),
+                                          ),
+                                        );
+
+                                    if (result != null && result.isNotEmpty) {
+                                      setState(() {
+                                        contenuPaquet.addAll(
+                                          result.split(', '),
+                                        );
+                                      });
+                                    }
+                                  },
+                                  style: ButtonStyle(
+                                    padding: WidgetStateProperty.all(
+                                      const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                        horizontal: 32,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "${cpdone ? "✅" : "❌"} Ajouter les données du contenu du paquet",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 20),
-                            StepInstructionTile(
-                              step: 2,
-                              title: "Informations du produit",
-                              description:
-                                  "Renseignez le nom, la description et le prix du produit.",
+                            const SizedBox(height: 16),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+                      if (audone == true && ctdone == true && cpdone == true)
+                        NextStepHint(
+                          nextStepText:
+                              "Prochaine étape : choisir la catégorie du produit et activez le bouton pour une livraison payante et désactivez le pour une livraison gratuite",
+                        ),
+                    ],
+                  ),
+                ),
+
+                // choisir la catégorie du produit et toggle la livraison
+                PageViewModel(
+                  titleWidget: SafeArea(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Choisissez la catégorie de votre produit",
+                          style: GoogleFonts.poppins(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  bodyWidget: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Activer le bouton pour une livraison payante et désactivez le pour une livraison gratuite",
+                        style: GoogleFonts.poppins(fontSize: 16),
+                      ),
+                      const SizedBox(height: 30),
+
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 26),
+                            Text(
+                              'Livraison ?( ${_livraison ? "Payante" : "Gratuite"} )',
+                              style: GoogleFonts.poppins(fontSize: 16),
                             ),
-                            SizedBox(height: 20),
-                            StepInstructionTile(
-                              step: 3,
-                              title: "Mise en avant & promotion",
-                              description:
-                                  "Expliquez pourquoi choisir ce produit et indiquez le pourcentage de promotion si applicable.",
+                            SwitchListTile(
+                              title: const Text('Livraison'),
+                              value: _livraison,
+                              onChanged: (v) => setState(() => _livraison = v),
                             ),
-                            SizedBox(height: 20),
-                            StepInstructionTile(
-                              step: 4,
-                              title: "Détails du produit",
-                              description:
-                                  "Ajoutez les avantages utilisations, caractéristiques techniques et le contenu du paquet. ces informations ont un impact significatif lors de la recherche des produits par les clients.",
+                            const SizedBox(height: 33),
+                            Text(
+                              'Choisissez la catégorie de votre produit',
+                              style: GoogleFonts.poppins(fontSize: 16),
                             ),
-                            SizedBox(height: 20),
-                            StepInstructionTile(
-                              step: 5,
-                              title: "Catégorie & livraison",
-                              description:
-                                  "Choisissez la catégorie du produit et activez le bouton pour une livraison payante et désactivez le pour une livraison gratuite.",
-                            ),
-                            SizedBox(height: 20),
-                            StepInstructionTile(
-                              step: 6,
-                              title: "Aperçu & validation",
-                              description:
-                                  "Vérifiez toutes les informations avant de valider et publier le produit.",
+                            const SizedBox(height: 10),
+                            DropdownButtonFormField<String>(
+                              value: _collectionName,
+                              decoration: const InputDecoration(
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(25),
+                                  ),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: 'construction',
+                                  child: Text('Construction'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'electronique',
+                                  child: Text('Electronique'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'fring',
+                                  child: Text('Habillement'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'promotions',
+                                  child: Text('Promotions'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'produit-mode-et-enfant',
+                                  child: Text('Mode & Enfant'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'produit-sport-et-bien-etre',
+                                  child: Text('Sport & Bien-être'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'produit-électro-ménagé',
+                                  child: Text('Électro-ménagé'),
+                                ),
+                              ],
+                              onChanged: (v) =>
+                                  setState(() => _collectionName = v!),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
 
-              // choisir une image
-              PageViewModel(
-                titleWidget: SafeArea(
-                  child: Column(
-                    children: [
-                      Text(
-                        "Choisir une image",
-                        style: GoogleFonts.poppins(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(height: 34),
+                      if (_livraison && _collectionName != '')
+                        NextStepHint(
+                          nextStepText:
+                              "Prochaine étape : verifiez toutes les informations et soumettre a la validation par l'equipe de Linda Shop",
                         ),
-                      ),
                     ],
                   ),
                 ),
 
-                bodyWidget: Column(
-                  children: [
-                    Text(
-                      "Choisissez une image claire et attrayante du produit.",
-                      style: GoogleFonts.poppins(fontSize: 16),
-                    ),
-                    const SizedBox(height: 30),
-
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
+                // preview du produit et valider
+                PageViewModel(
+                  titleWidget: SafeArea(
+                    child: Column(
                       children: [
-                        Container(
-                          width: double.infinity,
-                          height: 300,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                        Text(
+                          "Aperçu du produit",
+                          style: GoogleFonts.poppins(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  bodyWidget: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 6),
+                        Text(
+                          "Vérifiez les informations avant publication",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        /// 🖼️ IMAGE PRODUIT
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            width: double.infinity,
+                            height: 240,
                             color:
                                 Theme.of(context).brightness == Brightness.dark
                                 ? const Color.fromARGB(54, 245, 245, 245)
                                 : Colors.grey.shade300,
-                          ),
-                          child: _imageFile != null
-                              ? Image.file(_imageFile!, fit: BoxFit.cover)
-                              : Center(
-                                  child: GestureDetector(
-                                    onTap: _pickImage,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        color:
-                                            Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? const Color.fromARGB(
-                                                54,
-                                                245,
-                                                245,
-                                                245,
-                                              )
-                                            : Colors.grey.shade300,
-                                        border: Border.all(
-                                          color:
-                                              Theme.of(context).brightness ==
-                                                  Brightness.dark
-                                              ? Colors.white
-                                              : Colors.black,
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.add_a_photo),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              "Ajouter une image",
-                                              style: GoogleFonts.poppins(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                    if (_imageFile != null)
-                      NextStepHint(
-                        nextStepText:
-                            "Prochaine étape : nom du produit, description et prix",
-                      ),
-                  ],
-                ),
-              ),
-
-              // ajouter nom , description et prix
-              PageViewModel(
-                titleWidget: SafeArea(
-                  child: Column(
-                    children: [
-                      Text(
-                        "Ajouter les informations primaires du produit",
-                        style: GoogleFonts.poppins(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                bodyWidget: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Renseignez le nom, la description et le prix du produit.",
-                      style: GoogleFonts.poppins(fontSize: 16),
-                    ),
-                    const SizedBox(height: 30),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              const SizedBox(height: 16),
-                              _buildTextField(
-                                hintText: 'Le nom du produit',
-                                maxlines: 1,
-                                controller: _nameController,
-                                label: 'Nom du produit',
-                              ),
-                              const SizedBox(height: 20),
-                              _buildTextField(
-                                hintText: 'Une description de votre produit',
-                                maxlines: 3,
-                                controller: _descriptionController,
-                                label: 'Description',
-                              ),
-                              const SizedBox(height: 20),
-                              _buildTextField(
-                                hintText: 'Le prix du produit',
-                                maxlines: 1,
-                                controller: _prixController,
-                                label: 'Prix',
-                                keyboardType: TextInputType.number,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _saveNDPinfo,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 32,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                        foregroundColor:
-                            Theme.of(context).brightness == Brightness.dark
-                            ? Colors.black
-                            : Colors.white,
-                        elevation: 2,
-                      ),
-                      child: const Text(
-                        ' Enregistrer',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    if (productname.isNotEmpty &&
-                        description.isNotEmpty &&
-                        price != 0)
-                      NextStepHint(
-                        nextStepText:
-                            "Prochaine étape : pourquoi choisir ce produit et le pourcentage si sujette a une promotion",
-                      ),
-                  ],
-                ),
-              ),
-
-              // pourquoi choisir ce produit et le pourcentage si sujette a une promotion
-              PageViewModel(
-                titleWidget: SafeArea(
-                  child: Column(
-                    children: [
-                      Text(
-                        "Dites à vos clients pourquoi ils doivent choisi ce produit",
-                        style: GoogleFonts.poppins(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                bodyWidget: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "en suite Renseignez le pourcentage ce produit est sujette a une promotion.",
-                      style: GoogleFonts.poppins(fontSize: 16),
-                    ),
-                    const SizedBox(height: 30),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              const SizedBox(height: 23),
-                              _buildTextField(
-                                hintText:
-                                    'Dites leurs pourquoi choisir ce produit',
-                                maxlines: 2,
-                                controller: _pccsController,
-                                label: 'PCCS',
-                              ),
-                              const SizedBox(height: 33),
-                              _buildTextField(
-                                hintText: "Le pourcentage de la remise",
-                                maxlines: 1,
-                                controller: _pourcentageController,
-                                label: 'Pourcentage',
-                                keyboardType: TextInputType.number,
-                                isRequired: false,
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                "*Remplire se champ uniquement si le produit ci apres est sujette a une promotion",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red,
-                                ),
-                              ),
-
-                              const SizedBox(height: 35),
-                              ElevatedButton(
-                                onPressed: _savePCCSPinfo,
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                    horizontal: 32,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                  backgroundColor:
-                                      Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black,
-                                  foregroundColor:
-                                      Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.black
-                                      : Colors.white,
-                                  elevation: 2,
-                                ),
-                                child: const Text(
-                                  ' Enregistrer',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 34),
-
-                              if (pccs.isNotEmpty)
-                                NextStepHint(
-                                  nextStepText:
-                                      "Prochaine étape : ajouter les avantages et utilisations, caractéristiques techniques et le contenu du paquet",
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // ajouter avantages_utilisations  , caracteristiques_techniques et contenu_du_paquet
-              PageViewModel(
-                titleWidget: SafeArea(
-                  child: Column(
-                    children: [
-                      Text(
-                        "Renseignez les avantages utilisations , caractéristiques techniques et contenu du paquet du produit",
-                        style: GoogleFonts.poppins(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                bodyWidget: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Ajouter au moins 3 infromations chacune afin d'avoir un bon aperçu du produit et capter le plus de clients possible.",
-                      style: GoogleFonts.poppins(fontSize: 16),
-                    ),
-                    const SizedBox(height: 30),
-
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          Column(
-                            children: [
-                              // Bouton pour ajouter des avantages
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final result = await showModalBottomSheet<String>(
-                                    context: context,
-                                    isScrollControlled:
-                                        true, // permet d'avoir le clavier visible
-                                    builder: (context) => Padding(
-                                      padding: EdgeInsets.only(
-                                        bottom: MediaQuery.of(
-                                          context,
-                                        ).viewInsets.bottom,
-                                      ),
-                                      child: SimpleListAdder(
-                                        title:
-                                            "Ajouter des avantages et utilisations",
-                                        list: [],
-                                        onValidate: (val) {
-                                          setState(() {
-                                            audone = true;
-                                          });
-                                          Navigator.pop(context, val);
-                                        },
-                                      ),
-                                    ),
-                                  );
-
-                                  if (result != null && result.isNotEmpty) {
-                                    setState(() {
-                                      avantages.addAll(result.split(', '));
-                                    });
-                                  }
-                                },
-
-                                style: ButtonStyle(
-                                  padding: WidgetStateProperty.all(
-                                    const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 32,
-                                    ),
-                                  ),
-                                ),
-                                child: Text(
-                                  "${audone ? "✅" : "❌"}  Ajouter les avantages et utilisations",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              // Bouton pour caractéristiques techniques
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final result = await showModalBottomSheet<String>(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (context) => Padding(
-                                      padding: EdgeInsets.only(
-                                        bottom: MediaQuery.of(
-                                          context,
-                                        ).viewInsets.bottom,
-                                      ),
-                                      child: SimpleListAdder(
-                                        title:
-                                            "Ajouter des caractéristiques techniques",
-                                        list: [],
-                                        onValidate: (val) {
-                                          setState(() {
-                                            ctdone = true;
-                                          });
-                                          Navigator.pop(context, val);
-                                        },
-                                      ),
-                                    ),
-                                  );
-
-                                  if (result != null && result.isNotEmpty) {
-                                    setState(() {
-                                      caracteristiques.addAll(
-                                        result.split(', '),
-                                      );
-                                    });
-                                  }
-                                },
-                                style: ButtonStyle(
-                                  padding: WidgetStateProperty.all(
-                                    const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 32,
-                                    ),
-                                  ),
-                                ),
-                                child: Text(
-                                  "${ctdone ? "✅" : "❌"} Ajouter les caractéristiques techniques",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Bouton pour contenu du paquet
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final result =
-                                      await showModalBottomSheet<String>(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        builder: (context) => Padding(
-                                          padding: EdgeInsets.only(
-                                            bottom: MediaQuery.of(
-                                              context,
-                                            ).viewInsets.bottom,
-                                          ),
-                                          child: SimpleListAdder(
-                                            title: "Ajouter contenu du paquet",
-                                            list: [],
-                                            onValidate: (val) {
-                                              setState(() {
-                                                cpdone = true;
-                                              });
-                                              Navigator.pop(context, val);
-                                            },
-                                          ),
-                                        ),
-                                      );
-
-                                  if (result != null && result.isNotEmpty) {
-                                    setState(() {
-                                      contenuPaquet.addAll(result.split(', '));
-                                    });
-                                  }
-                                },
-                                style: ButtonStyle(
-                                  padding: WidgetStateProperty.all(
-                                    const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 32,
-                                    ),
-                                  ),
-                                ),
-                                child: Text(
-                                  "${cpdone ? "✅" : "❌"} Ajouter les données du contenu du paquet",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-                    if (audone == true && ctdone == true && cpdone == true)
-                      NextStepHint(
-                        nextStepText:
-                            "Prochaine étape : choisir la catégorie du produit et activez le bouton pour une livraison payante et désactivez le pour une livraison gratuite",
-                      ),
-                  ],
-                ),
-              ),
-
-              // choisir la catégorie du produit et toggle la livraison
-              PageViewModel(
-                titleWidget: SafeArea(
-                  child: Column(
-                    children: [
-                      Text(
-                        "Choisissez la catégorie de votre produit",
-                        style: GoogleFonts.poppins(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                bodyWidget: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Activer le bouton pour une livraison payante et désactivez le pour une livraison gratuite",
-                      style: GoogleFonts.poppins(fontSize: 16),
-                    ),
-                    const SizedBox(height: 30),
-
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 26),
-                          Text(
-                            'Livraison ?( ${_livraison ? "Payante" : "Gratuite"} )',
-                            style: GoogleFonts.poppins(fontSize: 16),
-                          ),
-                          SwitchListTile(
-                            title: const Text('Livraison'),
-                            value: _livraison,
-                            onChanged: (v) => setState(() => _livraison = v),
-                          ),
-                          const SizedBox(height: 33),
-                          Text(
-                            'Choisissez la catégorie de votre produit',
-                            style: GoogleFonts.poppins(fontSize: 16),
-                          ),
-                          const SizedBox(height: 10),
-                          DropdownButtonFormField<String>(
-                            value: _collectionName,
-                            decoration: const InputDecoration(
-                              filled: true,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(25),
-                                ),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: 'construction',
-                                child: Text('Construction'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'electronique',
-                                child: Text('Electronique'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'fring',
-                                child: Text('Habillement'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'promotions',
-                                child: Text('Promotions'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'produit-mode-et-enfant',
-                                child: Text('Mode & Enfant'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'produit-sport-et-bien-etre',
-                                child: Text('Sport & Bien-être'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'produit-électro-ménagé',
-                                child: Text('Électro-ménagé'),
-                              ),
-                            ],
-                            onChanged: (v) =>
-                                setState(() => _collectionName = v!),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 34),
-                    if (_livraison && _collectionName != '')
-                      NextStepHint(
-                        nextStepText:
-                            "Prochaine étape : verifiez toutes les informations et soumettre a la validation par l'equipe de Linda Shop",
-                      ),
-                  ],
-                ),
-              ),
-
-              // preview du produit et valider
-              PageViewModel(
-                titleWidget: SafeArea(
-                  child: Column(
-                    children: [
-                      Text(
-                        "Aperçu du produit",
-                        style: GoogleFonts.poppins(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                bodyWidget: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 6),
-                      Text(
-                        "Vérifiez les informations avant publication",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      /// 🖼️ IMAGE PRODUIT
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          width: double.infinity,
-                          height: 240,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color.fromARGB(54, 245, 245, 245)
-                              : Colors.grey.shade300,
-                          child: _imageFile != null
-                              ? Image.file(_imageFile!, fit: BoxFit.cover)
-                              : const Icon(Icons.image, size: 80),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      /// 🏷️ NOM + PRIX
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              productname.isEmpty
-                                  ? "Nom du produit"
-                                  : productname,
-                              style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "${price.toStringAsFixed(0)} FCFA",
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.indigo[900],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      /// 📦 COLLECTION
-                      Text(
-                        "Catégorie : $_collectionName",
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.grey,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      /// 🧾 DESCRIPTION
-                      _PreviewSection(
-                        title: "Description",
-                        child: Text(
-                          description.isEmpty
-                              ? "Aucune description"
-                              : description,
-                          style: GoogleFonts.poppins(fontSize: 14),
-                        ),
-                      ),
-
-                      /// ⭐ AVANTAGES
-                      if (avantages.isNotEmpty)
-                        _PreviewSection(
-                          title: "Avantages",
-                          child: Column(
-                            children: avantages
-                                .map((e) => _BulletText(text: e))
-                                .toList(),
+                            child: _imageFile != null
+                                ? Image.file(_imageFile!, fit: BoxFit.cover)
+                                : const Icon(Icons.image, size: 80),
                           ),
                         ),
 
-                      /// ⚙️ CARACTÉRISTIQUES
-                      if (caracteristiques.isNotEmpty)
-                        _PreviewSection(
-                          title: "Caractéristiques",
-                          child: Column(
-                            children: caracteristiques
-                                .map((e) => _BulletText(text: e))
-                                .toList(),
-                          ),
-                        ),
+                        const SizedBox(height: 20),
 
-                      /// 📦 CONTENU DU PAQUET
-                      if (contenuPaquet.isNotEmpty)
-                        _PreviewSection(
-                          title: "Contenu du paquet",
-                          child: Column(
-                            children: contenuPaquet
-                                .map((e) => _BulletText(text: e))
-                                .toList(),
-                          ),
-                        ),
-
-                      /// 🚚 LIVRAISON
-                      _PreviewSection(
-                        title: "Livraison",
-                        child: Row(
+                        /// 🏷️ NOM + PRIX
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(
-                              _livraison ? Icons.check_circle : Icons.cancel,
-                              color: _livraison ? Colors.green : Colors.red,
+                            Expanded(
+                              child: Text(
+                                productname.isEmpty
+                                    ? "Nom du produit"
+                                    : productname,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
-                            const SizedBox(width: 8),
                             Text(
-                              _livraison
-                                  ? "Livraison payante"
-                                  : "Livraison gratuite",
-                              style: GoogleFonts.poppins(fontSize: 14),
+                              "${price.toStringAsFixed(0)} FCFA",
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : Colors.indigo[900],
+                              ),
                             ),
                           ],
                         ),
-                      ),
 
-                      const SizedBox(height: 30),
+                        const SizedBox(height: 4),
 
-                      /// 👉 PROCHAINE ÉTAPE
-                      NextStepHint(
-                        nextStepText:
-                            "Si tout est correct, cliquez sur Terminer",
-                      ),
-                    ],
+                        /// 📦 COLLECTION
+                        Text(
+                          "Catégorie : $_collectionName",
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.grey,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        /// 🧾 DESCRIPTION
+                        _PreviewSection(
+                          title: "Description",
+                          child: Text(
+                            description.isEmpty
+                                ? "Aucune description"
+                                : description,
+                            style: GoogleFonts.poppins(fontSize: 14),
+                          ),
+                        ),
+
+                        /// ⭐ AVANTAGES
+                        if (avantages.isNotEmpty)
+                          _PreviewSection(
+                            title: "Avantages",
+                            child: Column(
+                              children: avantages
+                                  .map((e) => _BulletText(text: e))
+                                  .toList(),
+                            ),
+                          ),
+
+                        /// ⚙️ CARACTÉRISTIQUES
+                        if (caracteristiques.isNotEmpty)
+                          _PreviewSection(
+                            title: "Caractéristiques",
+                            child: Column(
+                              children: caracteristiques
+                                  .map((e) => _BulletText(text: e))
+                                  .toList(),
+                            ),
+                          ),
+
+                        /// 📦 CONTENU DU PAQUET
+                        if (contenuPaquet.isNotEmpty)
+                          _PreviewSection(
+                            title: "Contenu du paquet",
+                            child: Column(
+                              children: contenuPaquet
+                                  .map((e) => _BulletText(text: e))
+                                  .toList(),
+                            ),
+                          ),
+
+                        /// 🚚 LIVRAISON
+                        _PreviewSection(
+                          title: "Livraison",
+                          child: Row(
+                            children: [
+                              Icon(
+                                _livraison ? Icons.check_circle : Icons.cancel,
+                                color: _livraison ? Colors.green : Colors.red,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _livraison
+                                    ? "Livraison payante"
+                                    : "Livraison gratuite",
+                                style: GoogleFonts.poppins(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        /// 👉 PROCHAINE ÉTAPE
+                        NextStepHint(
+                          nextStepText:
+                              "Si tout est correct, cliquez sur Terminer",
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
 
-            // ------------- BOUTONS -------------
-            skip: Text(
-              "Passer",
-              style: TextStyle(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
-                fontWeight: FontWeight.bold,
+              // ------------- BOUTONS -------------
+              skip: Text(
+                "Passer",
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            back: Icon(
-              Icons.arrow_back,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.indigo[900],
-            ),
-            next: Icon(
-              Icons.arrow_forward,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.indigo[900],
-            ),
-            done: Text(
-              "Terminer",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+              back: Icon(
+                Icons.arrow_back,
                 color: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white
                     : Colors.indigo[900],
               ),
-            ),
+              next: Icon(
+                Icons.arrow_forward,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.indigo[900],
+              ),
+              done: Text(
+                "Terminer",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.indigo[900],
+                ),
+              ),
 
-            onDone: _addProduct,
-            dotsDecorator: DotsDecorator(
-              activeColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.indigo[900],
-              color: Colors.indigo[900]!.withValues(alpha: 0.3),
-              size: const Size(3, 3),
-              activeSize: const Size(6, 6),
-              activeShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
+              onDone: () async {
+                if (subscription == "PREMIUM") {
+                  await _addProduct();
+                } else if (subscription == "STANDARD") {
+                  if (nbrajouts < 15) {
+                    await _addProduct();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Vous avez atteint le nombre maximum de 15 produits par jour",
+                        ),
+                      ),
+                    );
+                  }
+                }
+              },
+              dotsDecorator: DotsDecorator(
+                activeColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.indigo[900],
+                color: Colors.indigo[900]!.withValues(alpha: 0.3),
+                size: const Size(3, 3),
+                activeSize: const Size(6, 6),
+                activeShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
               ),
             ),
-          ),
 
-          if (loading)
-            const FullScreenLoader(message: "Envoie du produit en cours..."),
-        ],
+            if (loading)
+              const FullScreenLoader(message: "Envoie du produit en cours..."),
+          ],
+        ),
       ),
     );
   }

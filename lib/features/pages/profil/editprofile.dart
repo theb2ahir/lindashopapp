@@ -354,12 +354,16 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
           "Éditer mon profil",
-          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: size.width > 400 ? 25 : 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: isLoading
@@ -371,8 +375,8 @@ class _EditProfileState extends State<EditProfile> {
                   if (user != null)
                     ClipRRect(
                       child: Container(
-                        height: 140,
-                        width: 140,
+                        height: size.height > 800 ? 140 : 100,
+                        width: size.height > 800 ? 140 : 100,
                         decoration: BoxDecoration(
                           color: const Color(0xFF02204B),
                           borderRadius: BorderRadius.circular(200),
@@ -381,7 +385,7 @@ class _EditProfileState extends State<EditProfile> {
                           child: Text(
                             user!['name'].substring(0, 2).toUpperCase(),
                             style: GoogleFonts.poppins(
-                              fontSize: 60,
+                              fontSize: size.width > 400 ? 69 : 50,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -394,7 +398,7 @@ class _EditProfileState extends State<EditProfile> {
                       radius: 50,
                       backgroundImage: AssetImage('assets/images/profil.jpg'),
                     ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: size.height > 800 ? 20 : 16),
                   ListTile(
                     leading: Icon(Icons.person),
                     title: TextFormField(
@@ -402,13 +406,13 @@ class _EditProfileState extends State<EditProfile> {
                       decoration: InputDecoration(
                         labelText: 'Nom',
                         labelStyle: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: size.height > 800 ? 10 : 6),
                   ListTile(
                     leading: Icon(Icons.email),
                     title: TextFormField(
@@ -417,13 +421,13 @@ class _EditProfileState extends State<EditProfile> {
                       decoration: InputDecoration(
                         labelText: 'Email',
                         labelStyle: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: size.height > 800 ? 10 : 6),
                   ListTile(
                     leading: Icon(Icons.phone),
                     title: TextFormField(
@@ -431,13 +435,13 @@ class _EditProfileState extends State<EditProfile> {
                       decoration: InputDecoration(
                         labelText: 'Numéro de téléphone',
                         labelStyle: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: size.height > 800 ? 10 : 6),
                   ListTile(
                     leading: Icon(Icons.lock),
                     title: Text("******..."),
@@ -445,7 +449,7 @@ class _EditProfileState extends State<EditProfile> {
                       _showChangePasswordDialog();
                     },
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: size.height > 800 ? 10 : 6),
                   ListTile(
                     leading: Icon(Icons.location_on),
                     title: TextFormField(
@@ -454,13 +458,13 @@ class _EditProfileState extends State<EditProfile> {
                         labelText:
                             'Adresse(region,ville , quartier , precision)',
                         labelStyle: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: size.height > 800 ? 30 : 20),
                   Padding(
                     padding: const EdgeInsets.all(28.0),
                     child: Container(
@@ -483,16 +487,16 @@ class _EditProfileState extends State<EditProfile> {
                             Text(
                               "Sauvegarder",
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
+                                fontSize: size.width > 400 ? 16 : 14,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: size.width > 400 ? 12 : 6),
                             if (isLoading)
-                              const SizedBox(
-                                width: 20,
-                                height: 20,
+                              SizedBox(
+                                width: size.width > 400 ? 20 : 16,
+                                height: size.height > 800 ? 20 : 16,
                                 child: CircularProgressIndicator(
                                   color: Colors.white,
                                   strokeWidth: 2,

@@ -82,6 +82,7 @@ class _PanierPageState extends State<PanierPage> {
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    final size = MediaQuery.of(context).size;
 
     if (uid == null) {
       return Scaffold(
@@ -89,7 +90,7 @@ class _PanierPageState extends State<PanierPage> {
           child: Text(
             "Utilisateur non connecté",
             style: GoogleFonts.poppins(
-              fontSize: 20,
+              fontSize: size.width > 400 ? 20 : 16,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -104,14 +105,21 @@ class _PanierPageState extends State<PanierPage> {
         automaticallyImplyLeading: false,
         title: Text(
           'Mon Panier',
-          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: size.width > 400 ? 25 : 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
             onPressed: () {
               confirmAndClear(context);
             },
-            icon: Icon(Icons.delete, color: Colors.red),
+            icon: Icon(
+              Icons.delete,
+              color: Colors.red,
+              size: size.width > 400 ? 24 : 18,
+            ),
           ),
         ],
       ),
@@ -131,7 +139,9 @@ class _PanierPageState extends State<PanierPage> {
               return Center(
                 child: Text(
                   'Aucun article dans le panier',
-                  style: GoogleFonts.poppins(fontSize: 15),
+                  style: GoogleFonts.poppins(
+                    fontSize: size.width > 400 ? 15 : 12,
+                  ),
                 ),
               );
             }
@@ -192,12 +202,12 @@ class _PanierPageState extends State<PanierPage> {
                         borderRadius: BorderRadius.circular(10),
                         child: Image.network(
                           imageUrl,
-                          width: 80,
-                          height: 80,
+                          width: size.width > 400 ? 80 : 60,
+                          height: size.height > 800 ? 80 : 60,
                           fit: BoxFit.cover,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: size.width > 400 ? 12 : 6),
 
                       // 📄 Détails du produit
                       Expanded(
@@ -207,22 +217,24 @@ class _PanierPageState extends State<PanierPage> {
                             Text(
                               productName,
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
+                                fontSize: size.width > 400 ? 16 : 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: size.height > 800 ? 6 : 4),
                             Text(
                               '$quantity x $price FCFA',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 15,
+                                fontSize: size.width > 400 ? 15 : 13,
                               ),
                             ),
-                            const SizedBox(height: 9),
+                            SizedBox(height: size.height > 800 ? 9 : 6),
                             Text(
                               displayDate,
-                              style: GoogleFonts.poppins(fontSize: 12),
+                              style: GoogleFonts.poppins(
+                                fontSize: size.width > 400 ? 12 : 10,
+                              ),
                             ),
                           ],
                         ),
@@ -257,7 +269,7 @@ class _PanierPageState extends State<PanierPage> {
                                       content: Text(
                                         "Veuillez renseigné votre numero de telephone et votre adresse",
                                         style: GoogleFonts.poppins(
-                                          fontSize: 15,
+                                          fontSize: size.width > 400 ? 15 : 13,
                                           color: Colors.white,
                                         ),
                                       ),
@@ -285,13 +297,13 @@ class _PanierPageState extends State<PanierPage> {
                                 content: Row(
                                   children: [
                                     Icon(Icons.phone, color: Colors.white),
-                                    SizedBox(width: 12),
+                                    SizedBox(width: size.width > 400 ? 12 : 6),
                                     Expanded(
                                       child: Text(
                                         'Choisissez un operateur',
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 16,
+                                          fontSize: size.width > 400 ? 16 : 14,
                                         ),
                                       ),
                                     ),
@@ -328,7 +340,7 @@ class _PanierPageState extends State<PanierPage> {
                                         "Yas",
                                         style: TextStyle(
                                           color: Colors.yellowAccent,
-                                          fontSize: 16,
+                                          fontSize: size.width > 400 ? 16 : 14,
                                         ),
                                       ),
                                     ),
@@ -462,7 +474,10 @@ class _PanierPageState extends State<PanierPage> {
                 duration: Duration(seconds: 2),
                 content: Text(
                   "Veuillez renseigné votre numero de telephone et votre adresse",
-                  style: GoogleFonts.poppins(fontSize: 15, color: Colors.white),
+                  style: GoogleFonts.poppins(
+                    fontSize: size.width > 400 ? 15 : 13,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             );
@@ -492,7 +507,7 @@ class _PanierPageState extends State<PanierPage> {
             );
           }
         },
-        child: const Icon(Icons.add_shopping_cart),
+        child: Icon(Icons.add_shopping_cart, size: size.width > 400 ? 30 : 20),
       ),
     );
   }

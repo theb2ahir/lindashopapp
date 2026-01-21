@@ -492,6 +492,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     final total = getTotalPrice();
 
     bool aLivraisonPayante = widget.commandes.any(
@@ -505,7 +506,10 @@ class _BuyAllPageState extends State<BuyAllPage> {
         automaticallyImplyLeading: false,
         title: Text(
           "Valider mon panier",
-          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: size.width > 400 ? 25 : 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -518,7 +522,9 @@ class _BuyAllPageState extends State<BuyAllPage> {
             child: Column(
               children: [
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.4,
+                  height: size.height > 800
+                      ? MediaQuery.of(context).size.height * 0.4
+                      : MediaQuery.of(context).size.height * 0.3,
                   child: ListView.builder(
                     itemCount: widget.commandes.length,
                     itemBuilder: (context, index) {
@@ -569,12 +575,12 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                   borderRadius: BorderRadius.circular(12),
                                   child: Image.network(
                                     item['productImageUrl'] ?? '',
-                                    height: 60,
-                                    width: 60,
+                                    height: size.width > 400 ? 60 : 50,
+                                    width: size.width > 400 ? 60 : 50,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: size.width > 400 ? 12 : 6),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -583,14 +589,16 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                       Text(
                                         item['productname'] ?? '',
                                         style: GoogleFonts.poppins(
-                                          fontSize: 16,
+                                          fontSize: size.width > 400 ? 16 : 14,
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      SizedBox(
+                                        height: size.height > 800 ? 4 : 2,
+                                      ),
                                       Text(
                                         '${item['quantity']} x ${item['productprice']} FCFA',
                                         style: GoogleFonts.poppins(
-                                          fontSize: 14,
+                                          fontSize: size.width > 400 ? 14 : 12,
                                           color:
                                               Theme.of(context).brightness ==
                                                   Brightness.dark
@@ -608,7 +616,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                           ? 'Livraison gratuite'
                                           : 'Livraison payante',
                                       style: TextStyle(
-                                        fontSize: 13,
+                                        fontSize: size.width > 400 ? 13 : 11,
                                         fontWeight: FontWeight.bold,
                                         color: (item['livraison'] == 'true')
                                             ? Colors.green
@@ -617,7 +625,9 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                     ),
                                     Text(
                                       '${(int.tryParse(item['productprice'].toString()) ?? 0) * (int.tryParse(item['quantity'].toString()) ?? 0)} FCFA',
-                                      style: GoogleFonts.poppins(fontSize: 16),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: size.width > 400 ? 16 : 14,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -630,8 +640,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                   ),
                 ),
 
-                const SizedBox(height: 16),
-                const SizedBox(height: 16),
+                SizedBox(height: size.height > 800 ? 16 : 12),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -667,22 +676,24 @@ class _BuyAllPageState extends State<BuyAllPage> {
                             Text(
                               "Facture",
                               style: GoogleFonts.poppins(
-                                fontSize: 19,
+                                fontSize: size.width > 400 ? 19 : 15,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 10),
+                            SizedBox(height: size.height > 800 ? 10 : 6),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   "Total panier",
-                                  style: GoogleFonts.poppins(fontSize: 16),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: size.width > 400 ? 16 : 14,
+                                  ),
                                 ),
                                 Text(
                                   "$total FCFA",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 14,
+                                    fontSize: size.width > 400 ? 14 : 12,
                                   ), // ← total panier
                                 ),
                               ],
@@ -693,25 +704,33 @@ class _BuyAllPageState extends State<BuyAllPage> {
                               children: [
                                 Text(
                                   "Frais de livraison",
-                                  style: GoogleFonts.poppins(fontSize: 16),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: size.width > 400 ? 16 : 14,
+                                  ),
                                 ),
                                 Text(
                                   "${fraisLivraison.toStringAsFixed(0)} FCFA",
-                                  style: GoogleFonts.poppins(fontSize: 14),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: size.width > 400 ? 14 : 12,
+                                  ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 19),
+                            SizedBox(height: size.height > 800 ? 19 : 12),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   "Reference de paiement",
-                                  style: GoogleFonts.poppins(fontSize: 16),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: size.width > 400 ? 16 : 14,
+                                  ),
                                 ),
                                 Text(
                                   reference,
-                                  style: GoogleFonts.poppins(fontSize: 14),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: size.width > 400 ? 14 : 12,
+                                  ),
                                 ),
                               ],
                             ),
@@ -723,7 +742,9 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                   children: [
                                     Text(
                                       "Sms coller",
-                                      style: GoogleFonts.poppins(fontSize: 17),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: size.width > 400 ? 17 : 14,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -732,26 +753,28 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                   padding: const EdgeInsets.all(12.0),
                                   child: Text(
                                     sms,
-                                    style: GoogleFonts.poppins(fontSize: 14),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: size.width > 400 ? 14 : 12,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const Divider(height: 20),
+                            Divider(height: size.height > 800 ? 20 : 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   "Total",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 19,
+                                    fontSize: size.width > 400 ? 19 : 15,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
                                   "${totalGeneral.toStringAsFixed(0)} FCFA",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 16,
+                                    fontSize: size.width > 400 ? 16 : 14,
                                     color: Colors.red,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -762,7 +785,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 30),
+                      SizedBox(height: size.height > 800 ? 30 : 20),
 
                       // 🟢 Réseaux (checkboxes)
                       SizedBox(
@@ -790,7 +813,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                 child: const Text("Moov"),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            SizedBox(width: size.width > 400 ? 16 : 14),
                             // Espace entre les boutons
                             // Bouton Yas
                             Expanded(
@@ -814,7 +837,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: size.height > 800 ? 16 : 12),
                       if (reseauChoisi != null)
                         TextButton(
                           onPressed: () {
@@ -1114,11 +1137,17 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                               Text(
                                                 "Copier et coller le SMS reçu de votre opérateur",
                                                 style: GoogleFonts.poppins(
-                                                  fontSize: 18,
+                                                  fontSize: size.width > 400
+                                                      ? 18
+                                                      : 14,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                              const SizedBox(height: 16),
+                                              SizedBox(
+                                                height: size.height > 800
+                                                    ? 16
+                                                    : 14,
+                                              ),
                                               TextField(
                                                 maxLines: 5,
                                                 controller: smsController,
@@ -1370,20 +1399,23 @@ class _BuyAllPageState extends State<BuyAllPage> {
                             "💸 Cliquez ici pour initier le payement 📲",
                             style: GoogleFonts.poppins(
                               color: Colors.teal,
-                              fontSize: 18,
+                              fontSize: size.width > 400 ? 18 : 14,
                               fontWeight: FontWeight.bold,
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ),
 
-                      const SizedBox(height: 25),
+                      SizedBox(height: size.height > 800 ? 25 : 20),
                       if (canProceedToSendCommande == true)
                         // 🔘 Bouton de validation
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
-                            minimumSize: const Size(double.infinity, 50),
+                            minimumSize: Size(
+                              double.infinity,
+                              size.height > 800 ? 50 : 40,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -1393,27 +1425,27 @@ class _BuyAllPageState extends State<BuyAllPage> {
                               : () => envoyerInfosAuServeur(context),
                           icon: isLoading
                               ? SizedBox(
-                                  width: 24,
-                                  height: 24,
+                                  width: size.width > 400 ? 24 : 18,
+                                  height: size.height > 800 ? 24 : 18,
                                   child: CircularProgressIndicator(
                                     color: Colors.white,
-                                    strokeWidth: 2,
+                                    strokeWidth: size.width > 400 ? 2 : 1,
                                   ),
                                 )
                               : const Icon(Icons.check, color: Colors.white),
                           label: isLoading
-                              ? const Text(
+                              ? Text(
                                   "Patientez...",
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: size.width > 400 ? 18 : 14,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text(
+                              : Text(
                                   "Confirmer la commande",
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: size.width > 400 ? 18 : 14,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
@@ -1425,17 +1457,20 @@ class _BuyAllPageState extends State<BuyAllPage> {
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
-                            minimumSize: const Size(double.infinity, 50),
+                            minimumSize: Size(
+                              double.infinity,
+                              size.height > 800 ? 50 : 40,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: null,
                           icon: const Icon(Icons.close),
-                          label: const Text(
+                          label: Text(
                             "Impossible de valider la commande",
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: size.width > 400 ? 18 : 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

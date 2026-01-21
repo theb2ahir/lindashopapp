@@ -50,6 +50,7 @@ class _AllproductState extends State<Allproduct> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -133,7 +134,7 @@ class _AllproductState extends State<Allproduct> {
                       child: Image.network(
                         imageUrl,
                         width: double.infinity,
-                        height: 150,
+                        height: size.height > 800 ? 150 : 100,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) =>
                             const Center(
@@ -141,23 +142,23 @@ class _AllproductState extends State<Allproduct> {
                             ),
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: size.height > 800 ? 6 : 4),
                     Text(
                       nom,
                       textAlign: TextAlign.start,
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
+                        fontSize: size.width > 400 ? 14 : 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    SizedBox(height: size.height > 800 ? 5 : 3),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           "$prix F",
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: size.width > 400 ? 12 : 10,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -165,10 +166,10 @@ class _AllproductState extends State<Allproduct> {
                           children: [
                             Icon(
                               Icons.star,
-                              size: 12,
+                              size: size.width > 400 ? 12 : 10,
                               color: moyenne > 3 ? Colors.yellow : Colors.red,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 2),
                             Text(moyenne.toStringAsFixed(1)),
                           ],
                         ),

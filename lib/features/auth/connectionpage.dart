@@ -153,6 +153,8 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: isLoading == true
           ? const Center(child: CircularProgressIndicator())
@@ -162,7 +164,7 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 40),
+                      SizedBox(height: size.height > 800 ? 40 : 20),
 
                       Center(
                         child: Padding(
@@ -181,7 +183,7 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                   Text(
                                     "Bienvenue 👋",
                                     style: GoogleFonts.roboto(
-                                      fontSize: 26,
+                                      fontSize: size.width > 400 ? 26 : 20,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -189,13 +191,13 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                   Text(
                                     "Connectez-vous avec votre adresse email et votre mot de passe",
                                     style: GoogleFonts.roboto(
-                                      fontSize: 14,
+                                      fontSize: size.width > 400 ? 14 : 12,
                                       color: Colors.grey,
                                     ),
                                   ),
-                                            
-                                  const SizedBox(height: 30),
-                                            
+
+                                  SizedBox(height: size.height > 800 ? 30 : 20),
+
                                   // EMAIL
                                   TextField(
                                     controller: emailCtrl,
@@ -216,16 +218,18 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                       ),
                                     ),
                                   ),
-                                            
-                                  const SizedBox(height: 20),
-                                            
+
+                                  SizedBox(height: size.height > 800 ? 20 : 16),
+
                                   // MOT DE PASSE
                                   TextField(
                                     controller: passwordCtrl,
                                     obscureText: _obscurePassword,
                                     decoration: InputDecoration(
                                       labelText: 'Mot de passe',
-                                      prefixIcon: const Icon(Icons.lock_outline),
+                                      prefixIcon: const Icon(
+                                        Icons.lock_outline,
+                                      ),
                                       suffixIcon: IconButton(
                                         icon: Icon(
                                           _obscurePassword
@@ -234,7 +238,8 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                         ),
                                         onPressed: () {
                                           setState(() {
-                                            _obscurePassword = !_obscurePassword;
+                                            _obscurePassword =
+                                                !_obscurePassword;
                                           });
                                         },
                                       ),
@@ -250,13 +255,13 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                       ),
                                     ),
                                   ),
-                                            
-                                  const SizedBox(height: 30),
-                                            
+
+                                  SizedBox(height: size.height > 800 ? 30 : 20),
+
                                   // BOUTON
                                   SizedBox(
                                     width: double.infinity,
-                                    height: 52,
+                                    height: size.height > 800 ? 52 : 36,
                                     child: ElevatedButton(
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color.fromARGB(
@@ -266,23 +271,25 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                           82,
                                         ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(14),
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
                                         ),
                                       ),
                                       onPressed: () => login(context),
-                                      child: const Text(
+                                      child: Text(
                                         "Se connecter",
                                         style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: size.width > 400 ? 18 : 14,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
                                       ),
                                     ),
                                   ),
-                                            
-                                  const SizedBox(height: 16),
-                                            
+
+                                  SizedBox(height: size.height > 800 ? 16 : 14),
+
                                   // MOT DE PASSE OUBLIÉ
                                   Align(
                                     alignment: Alignment.centerRight,
@@ -302,7 +309,9 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                           return;
                                         }
                                         FirebaseAuth.instance
-                                            .sendPasswordResetEmail(email: email);
+                                            .sendPasswordResetEmail(
+                                              email: email,
+                                            );
                                       },
                                       child: const Text(
                                         "Mot de passe oublié ?",
@@ -313,9 +322,8 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                       ),
                                     ),
                                   ),
-                                            
-                                  const Divider(height: 30),
-                                            
+                                  Divider(height: size.height > 800 ? 30 : 20),
+
                                   // INSCRIPTION
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -326,7 +334,8 @@ class _ConnectionState extends State<Connection> with TickerProviderStateMixin {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) => const Inscription(),
+                                              builder: (_) =>
+                                                  const Inscription(),
                                             ),
                                           );
                                         },

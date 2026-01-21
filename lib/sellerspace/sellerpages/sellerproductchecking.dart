@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:lindashopp/features/pages/acceuilpage.dart';
 
 class CheckProductPage extends StatefulWidget {
   const CheckProductPage({super.key});
@@ -16,164 +17,178 @@ class _CheckProductPageState extends State<CheckProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: Text(
-          "Vérification",
-          style: GoogleFonts.poppins(fontSize: 23, fontWeight: FontWeight.bold),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AcceuilPage()),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          title: Text(
+            "Vérification",
+            style: GoogleFonts.poppins(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("reviewproduct")
-            .where("sellerid", isEqualTo: uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Erreur de chargement',
-                style: GoogleFonts.poppins(fontSize: 15, color: Colors.red),
-              ),
-            );
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.data!.docs.isEmpty) {
-            return Center(
-              child: Text(
-                "Aucun produit à vérifier",
-                style: GoogleFonts.poppins(fontSize: 15),
-              ),
-            );
-          }
-
-          final reviews = snapshot.data!.docs;
-
-          return ListView.builder(
-            itemCount: reviews.length,
-            itemBuilder: (context, index) {
-              final data = reviews[index].data() as Map<String, dynamic>;
-              final reviewid = reviews[index].id;
-              final imageurl = data['imageURL'] ?? '';
-              final name = data['name'] ?? '';
-              final statut = data['statut'] ?? '';
-              final timestamp = data['timestamp'] as Timestamp?;
-              final parsedDate = timestamp?.toDate();
-              final displayDate = parsedDate != null
-                  ? DateFormat('dd MMM yyyy – HH:mm').format(parsedDate)
-                  : 'Date inconnue';
-
-              return ListTile(
-                leading: imageurl.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          imageurl,
-                          width: 70,
-                          height: 70,
-                          fit: BoxFit.contain,
-                        ),
-                      )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          color: Colors.grey,
-                          child: const Icon(Icons.notifications),
-                        ),
-                      ),
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        name,
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    _statusBadge(statut, context),
-                  ],
-                ),
-                subtitle: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        displayDate,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) {
-                            return AlertDialog(
-                              title: const Text("Suppression"),
-                              content: const Text(
-                                "Confirmez-vous cette suppression ?",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Annuler"),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    try {
-                                      FirebaseFirestore.instance
-                                          .collection("reviewproduct")
-                                          .doc(reviewid)
-                                          .delete();
-
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            "Produit supprimé avec succès ✅",
-                                          ),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
-                                      Navigator.pop(context);
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            "Erreur lors de la suppression : $e",
-                                          ),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  child: const Text("Supprimer"),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      icon: Icon(Icons.delete, color: Colors.red),
-                    ),
-                  ],
+        body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection("reviewproduct")
+              .where("sellerid", isEqualTo: uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Erreur de chargement',
+                  style: GoogleFonts.poppins(fontSize: 15, color: Colors.red),
                 ),
               );
-            },
-          );
-        },
+            }
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.data!.docs.isEmpty) {
+              return Center(
+                child: Text(
+                  "Aucun produit à vérifier",
+                  style: GoogleFonts.poppins(fontSize: 15),
+                ),
+              );
+            }
+
+            final reviews = snapshot.data!.docs;
+
+            return ListView.builder(
+              itemCount: reviews.length,
+              itemBuilder: (context, index) {
+                final data = reviews[index].data() as Map<String, dynamic>;
+                final reviewid = reviews[index].id;
+                final imageurl = data['imageURL'] ?? '';
+                final name = data['name'] ?? '';
+                final statut = data['statut'] ?? '';
+                final timestamp = data['timestamp'] as Timestamp?;
+                final parsedDate = timestamp?.toDate();
+                final displayDate = parsedDate != null
+                    ? DateFormat('dd MMM yyyy – HH:mm').format(parsedDate)
+                    : 'Date inconnue';
+
+                return ListTile(
+                  leading: imageurl.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            imageurl,
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.contain,
+                          ),
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            color: Colors.grey,
+                            child: const Icon(Icons.notifications),
+                          ),
+                        ),
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      _statusBadge(statut, context),
+                    ],
+                  ),
+                  subtitle: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          displayDate,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) {
+                              return AlertDialog(
+                                title: const Text("Suppression"),
+                                content: const Text(
+                                  "Confirmez-vous cette suppression ?",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text("Annuler"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      try {
+                                        FirebaseFirestore.instance
+                                            .collection("reviewproduct")
+                                            .doc(reviewid)
+                                            .delete();
+
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              "Produit supprimé avec succès ✅",
+                                            ),
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        );
+                                        Navigator.pop(context);
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "Erreur lors de la suppression : $e",
+                                            ),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: const Text("Supprimer"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        icon: Icon(Icons.delete, color: Colors.red),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

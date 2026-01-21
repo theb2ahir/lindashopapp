@@ -170,6 +170,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     final item = widget.data;
     final livraison = item['livraison'];
     final int prixUnitaire = int.tryParse(item['productprice'].toString()) ?? 0;
@@ -182,7 +183,10 @@ class _PaiementPage2State extends State<PaiementPage2> {
         automaticallyImplyLeading: false,
         title: Text(
           'Paiement via Flooz',
-          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: size.width > 400 ? 25 : 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -359,16 +363,16 @@ class _PaiementPage2State extends State<PaiementPage2> {
                             Text(
                               "Confirmation",
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: size.width > 400 ? 20 : 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: size.height > 800 ? 12 : 6),
                             Text(
                               "Ce Qr code contient toutes les informations de votre commande, il est automatiquement sauvegardé ,inutile de faire une capture d'ecran , il a pour but de faciliter la livraison et de retrouver votre commande en cas de problème",
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: size.height > 800 ? 16 : 14),
 
                             /// ⭐ IMAGE DU PRODUIT
                             CircleAvatar(
@@ -438,9 +442,12 @@ class _PaiementPage2State extends State<PaiementPage2> {
           },
           steps: [
             Step(
-              title: const Text(
+              title: Text(
                 'Informations',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: size.width > 400 ? 17 : 14,
+                ),
               ),
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,88 +457,88 @@ class _PaiementPage2State extends State<PaiementPage2> {
                     children: [
                       Text(
                         "Nom du produit :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
                       const SizedBox(width: 9),
                       Text(' ${item['productname']}'),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Prix unitaire :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' $prixUnitaire FCFA'),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Quantité :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' ${item['quantity']}'),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Frais de livraison :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' ${livraison != "true" ? 2000 : 0}  FCFA'),
                     ],
                   ),
 
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Total :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' $totalAfficher FCFA'),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "adresse :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(
                         item['addressLivraison'] != null &&
                                 item['addressLivraison'].length >= 20
@@ -540,18 +547,18 @@ class _PaiementPage2State extends State<PaiementPage2> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Transaction ID :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' $transactionId'),
                     ],
                   ),
@@ -560,14 +567,17 @@ class _PaiementPage2State extends State<PaiementPage2> {
               isActive: currentStep >= 0,
             ),
             Step(
-              title: const Text(
+              title: Text(
                 'Paiement',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: size.width > 400 ? 17 : 14,
+                ),
               ),
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Effectuez le paiement en cliquant sur le bouton ci-dessous :',
                   ),
                   const SizedBox(height: 8),
@@ -1092,20 +1102,27 @@ class _PaiementPage2State extends State<PaiementPage2> {
                     },
                     child: Text(
                       "Lancer le code USSD",
-                      style: GoogleFonts.poppins(fontSize: 16),
+                      style: GoogleFonts.poppins(
+                        fontSize: size.width > 400 ? 16 : 14,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  SizedBox(height: size.height > 800 ? 18 : 12),
                   Text(
                     "Reference de paiement : $reference",
                     style: GoogleFonts.poppins(
-                      fontSize: 16,
+                      fontSize: size.width > 400 ? 16 : 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.red,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Text(sms, style: GoogleFonts.poppins(fontSize: 17)),
+                  SizedBox(height: size.height > 800 ? 10 : 6),
+                  Text(
+                    sms,
+                    style: GoogleFonts.poppins(
+                      fontSize: size.width > 400 ? 17 : 14,
+                    ),
+                  ),
                   const SizedBox(height: 18),
                 ],
               ),
@@ -1129,7 +1146,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
                               'Transaction : ',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: size.width > 400 ? 16 : 14,
                               ),
                             ),
                             Text(transactionId),
@@ -1142,7 +1159,7 @@ class _PaiementPage2State extends State<PaiementPage2> {
                               'Montant Total : ',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: size.width > 400 ? 16 : 14,
                               ),
                             ),
                             Text('$total FCFA'),
@@ -1155,16 +1172,18 @@ class _PaiementPage2State extends State<PaiementPage2> {
                               'Référence : ',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: size.width > 400 ? 16 : 14,
                               ),
                             ),
                             Text(reference),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: size.height > 800 ? 12 : 6),
                         Text(
                           'Appuyez sur "Continuer" pour finaliser.',
-                          style: GoogleFonts.poppins(fontSize: 16),
+                          style: GoogleFonts.poppins(
+                            fontSize: size.width > 400 ? 16 : 14,
+                          ),
                         ),
                       ],
                     ),

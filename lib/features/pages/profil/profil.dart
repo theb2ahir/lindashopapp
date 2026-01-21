@@ -9,7 +9,8 @@ import 'package:lindashopp/features/pages/favoris.dart';
 import 'package:lindashopp/features/pages/inquietude.dart';
 import 'package:lindashopp/features/pages/nonlivre.dart';
 import 'package:lindashopp/features/pages/parametre.dart';
-import 'package:lindashopp/sellerspace/selleracceuil.dart';
+import 'package:lindashopp/sellerspace/checkremainingtime.dart';
+import 'package:lindashopp/sellerspace/subscription.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'editprofile.dart';
@@ -27,6 +28,8 @@ class _ProfileState extends State<Profile> {
   TextEditingController phoneCtrl = TextEditingController();
   final uid = FirebaseAuth.instance.currentUser!.uid;
   String role = "";
+  bool subscribed = false;
+  String subscription = "";
 
   Future<Map<String, dynamic>> getUserData() async {
     final doc = await FirebaseFirestore.instance
@@ -44,6 +47,8 @@ class _ProfileState extends State<Profile> {
     if (mounted) {
       setState(() {
         role = doc.data()!['role'];
+        subscribed = doc.data()!['subscribed'];
+        subscription = doc.data()!['subscription'];
       });
     }
   }
@@ -56,12 +61,16 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
           "Mon Profil",
-          style: GoogleFonts.poppins(fontSize: 19, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: size.width > 400 ? 19 : 15,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
@@ -103,8 +112,8 @@ class _ProfileState extends State<Profile> {
                       const SizedBox(height: 24),
                       ClipRRect(
                         child: Container(
-                          height: 140,
-                          width: 140,
+                          height: size.height > 800 ? 140 : 100,
+                          width: size.height > 800 ? 140 : 100,
                           decoration: BoxDecoration(
                             color: const Color(0xFF02204B),
                             borderRadius: BorderRadius.circular(200),
@@ -113,7 +122,7 @@ class _ProfileState extends State<Profile> {
                             child: Text(
                               name.substring(0, 2).toUpperCase(),
                               style: GoogleFonts.poppins(
-                                fontSize: 69,
+                                fontSize: size.width > 400 ? 69 : 50,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -121,11 +130,21 @@ class _ProfileState extends State<Profile> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 15),
-                      Text(name, style: GoogleFonts.poppins(fontSize: 23)),
-                      const SizedBox(height: 11),
-                      Text(email, style: GoogleFonts.poppins(fontSize: 16)),
-                      const SizedBox(height: 19),
+                      SizedBox(height: size.height > 800 ? 15 : 10),
+                      Text(
+                        name,
+                        style: GoogleFonts.poppins(
+                          fontSize: size.width > 400 ? 23 : 18,
+                        ),
+                      ),
+                      SizedBox(height: size.height > 800 ? 11 : 6),
+                      Text(
+                        email,
+                        style: GoogleFonts.poppins(
+                          fontSize: size.width > 400 ? 16 : 14,
+                        ),
+                      ),
+                      SizedBox(height: size.height > 800 ? 19 : 12),
 
                       ElevatedButton(
                         onPressed: () {
@@ -138,21 +157,43 @@ class _ProfileState extends State<Profile> {
                         },
                         child: Text(
                           "Editer le profil",
-                          style: GoogleFonts.poppins(fontSize: 16),
+                          style: GoogleFonts.poppins(
+                            fontSize: size.width > 400 ? 16 : 14,
+                          ),
                         ),
                       ),
 
-                      const SizedBox(height: 35),
+                      SizedBox(height: size.height > 800 ? 35 : 20),
                     ],
                   );
                 },
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: size.height > 800 ? 20 : 16),
 
               /// Liste des options
               Column(
                 children: [
-                  if (role == "seller")
+                  if (subscribed == false)
+                    ListTile(
+                      leading: const Icon(Icons.store, color: Colors.red),
+                      title: Text(
+                        'Ouvrir une boutique sur Linda Shop',
+                        style: GoogleFonts.poppins(
+                          fontSize: size.width > 400 ? 16 : 14,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.arrow_right),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SubscriptionPage(),
+                        ),
+                      ),
+                    ),
+
+                  if (role == "seller" &&
+                      subscribed == true &&
+                      subscription.isNotEmpty)
                     ListTile(
                       leading: Icon(
                         Icons.storefront_outlined,
@@ -160,7 +201,9 @@ class _ProfileState extends State<Profile> {
                       ),
                       title: Text(
                         "Ma boutique",
-                        style: GoogleFonts.poppins(fontSize: 16),
+                        style: GoogleFonts.poppins(
+                          fontSize: size.width > 400 ? 16 : 14,
+                        ),
                       ),
                       onTap: () async {
                         final userDoc = await FirebaseFirestore.instance
@@ -188,7 +231,7 @@ class _ProfileState extends State<Profile> {
                               content: Text(
                                 "Veuillez renseigné votre numero de telephone et votre adresse",
                                 style: GoogleFonts.poppins(
-                                  fontSize: 15,
+                                  fontSize: size.width > 400 ? 15 : 13,
                                   color: Colors.white,
                                 ),
                               ),
@@ -204,7 +247,9 @@ class _ProfileState extends State<Profile> {
                         } else {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => SellerAcceuil()),
+                            MaterialPageRoute(
+                              builder: (_) => CheckRemainingTime(),
+                            ),
                           );
                         }
                       },
@@ -214,7 +259,9 @@ class _ProfileState extends State<Profile> {
                     leading: const Icon(Icons.favorite, color: Colors.red),
                     title: Text(
                       'Mes favoris',
-                      style: GoogleFonts.poppins(fontSize: 16),
+                      style: GoogleFonts.poppins(
+                        fontSize: size.width > 400 ? 16 : 14,
+                      ),
                     ),
                     trailing: const Icon(Icons.arrow_right),
                     onTap: () => Navigator.push(
@@ -226,7 +273,9 @@ class _ProfileState extends State<Profile> {
                     leading: const Icon(Icons.cancel_schedule_send),
                     title: Text(
                       'Non livré ?',
-                      style: GoogleFonts.poppins(fontSize: 16),
+                      style: GoogleFonts.poppins(
+                        fontSize: size.width > 400 ? 16 : 14,
+                      ),
                     ),
                     trailing: const Icon(Icons.arrow_right),
                     onTap: () => Navigator.push(
@@ -238,7 +287,9 @@ class _ProfileState extends State<Profile> {
                     leading: const Icon(Icons.handshake),
                     title: Text(
                       'Partenariat',
-                      style: GoogleFonts.poppins(fontSize: 16),
+                      style: GoogleFonts.poppins(
+                        fontSize: size.width > 400 ? 16 : 14,
+                      ),
                     ),
                     trailing: const Icon(Icons.arrow_right),
                     onTap: () async {
@@ -269,7 +320,9 @@ class _ProfileState extends State<Profile> {
                     leading: const Icon(Icons.phone),
                     title: Text(
                       'Appeler',
-                      style: GoogleFonts.poppins(fontSize: 16),
+                      style: GoogleFonts.poppins(
+                        fontSize: size.width > 400 ? 16 : 14,
+                      ),
                     ),
                     trailing: const Icon(Icons.arrow_right),
                     onTap: () async {
@@ -300,7 +353,9 @@ class _ProfileState extends State<Profile> {
                     ),
                     title: Text(
                       'Des inquiétudes ?',
-                      style: GoogleFonts.poppins(fontSize: 16),
+                      style: GoogleFonts.poppins(
+                        fontSize: size.width > 400 ? 16 : 14,
+                      ),
                     ),
                     trailing: const Icon(Icons.arrow_right),
                     onTap: () => Navigator.push(
@@ -343,7 +398,7 @@ class _ProfileState extends State<Profile> {
                       title: Text(
                         "Déconnexion",
                         style: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                           color: Colors.red,
                         ),
                       ),

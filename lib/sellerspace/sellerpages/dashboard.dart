@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/pages/acceuilpage.dart';
+import 'package:lindashopp/sellerspace/selleracceuil.dart';
 import 'package:lindashopp/sellerspace/sellerpages/sellercommandes.dart';
+import 'package:lindashopp/sellerspace/sellerpages/sellernotifications.dart';
 import 'package:lindashopp/sellerspace/sellerpages/sellerproductchecking.dart';
 import 'package:lindashopp/sellerspace/sellerpages/sellerprouct.dart';
 
@@ -18,6 +20,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
   final uid = FirebaseAuth.instance.currentUser!.uid;
   String role = "";
   String username = "";
+  int maxToAdd = 15;
   int totalCommandes = 0;
   int totalProduitConstruction = 0;
   int totalProduitElectronique = 0;
@@ -36,6 +39,11 @@ class _SellerDashboardState extends State<SellerDashboard> {
   double objectifBenefices = 1000000;
   double pourcentageatteint = 0.0;
   bool loading = false;
+  String subscription = "";
+  DateTime? endedat;
+  DateTime? startedat;
+  int nbrajouts = 0;
+  int remainingStandard = 0;
 
   Future<void> getUserData() async {
     final doc = await FirebaseFirestore.instance
@@ -45,6 +53,10 @@ class _SellerDashboardState extends State<SellerDashboard> {
     setState(() {
       role = doc.data()!['role'];
       username = doc.data()!['name'];
+      subscription = doc.data()!['subscription'];
+      startedat = (doc.data()!['startedAt'] as Timestamp).toDate();
+      endedat = (doc.data()!['endedAt'] as Timestamp).toDate();
+      nbrajouts = doc.data()!['nbrajouts'];
     });
   }
 
@@ -106,6 +118,8 @@ class _SellerDashboardState extends State<SellerDashboard> {
       somme += (prixTotal is int) ? prixTotal.toDouble() : prixTotal;
     }
 
+    int remaining = maxToAdd - nbrajouts;
+
     setState(() {
       totalCommandes = commandeSnapshot.size;
       totalProduitConstruction = productConstructionSnapshot.size;
@@ -117,6 +131,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
       totalProduitLivrer = produitlivrereSnapshot.size;
       totalPromotions = promotionsSnapshot.size;
       totalproductreview = reviewproductSnapshot.size;
+      remainingStandard = remaining;
       totalproduit =
           totalProduitConstruction +
           totalProduitElectronique +
@@ -131,161 +146,284 @@ class _SellerDashboardState extends State<SellerDashboard> {
     });
   }
 
+  void _showExpiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // impossible de fermer sans action
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: const [
+              Icon(Icons.warning_amber_rounded, color: Colors.red),
+              SizedBox(width: 8),
+              Text("Abonnement expiré"),
+            ],
+          ),
+          content: const Text(
+            "Votre forfait est arrivé à échéance.\nVeuillez renouveler pour continuer à utiliser toutes les fonctionnalités.",
+          ),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+
+                // 🔁 Redirection vers la HomePage
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const AcceuilPage()),
+                  (route) => false,
+                );
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void checkSubscriptionExpiration(BuildContext context) {
+    if (endedat == null) return;
+
+    final now = DateTime.now();
+
+    if (now.isAfter(endedat!)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showExpiredDialog(context);
+      });
+    }
+  }
+
+  String getRemainingTime() {
+    if (endedat == null) return "—";
+
+    final now = DateTime.now();
+    final diff = endedat!.difference(now);
+
+    if (diff.isNegative) {
+      return "Expiré ❌";
+    }
+
+    final days = diff.inDays;
+    final hours = diff.inHours % 24;
+    final minutes = diff.inMinutes % 60;
+
+    return "$days j $hours h $minutes min";
+  }
+
   @override
   void initState() {
     super.initState();
     getUserData();
     _chargerStats();
+    checkSubscriptionExpiration(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => AcceuilPage()),
-            );
-          },
-        ),
-        centerTitle: true,
-        title: Text(
-          !loading ? username : "Loading...",
-          style: GoogleFonts.poppins(fontSize: 23, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AcceuilPage()),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
             onPressed: () {
-              setState(() {});
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AcceuilPage()),
+              );
             },
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 1,
-
-                children: [
-                  buildStatCard(
-                    context: context,
-                    title: "Commandes",
-                    value: !loading ? totalCommandes.toString() : "...",
-                    icon: Icons.shopping_cart_checkout_rounded,
-                    color: Colors.green,
-                    message:
-                        "Vous avez au total ${totalCommandes.toString()} commande",
-                    page: const SellerCommandes(),
+          centerTitle: true,
+          title: Text(
+            !loading ? username : "Loading...",
+            style: GoogleFonts.poppins(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: () {
+                setState(() {
+                  _chargerStats();
+                });
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.notifications),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SellerNotifications(),
                   ),
-                  buildStatCard(
-                    context: context,
-                    title: "Produits",
-                    value: !loading ? totalproduit.toString() : "...",
-                    icon: Icons.inventory_2_rounded,
-                    color: Colors.blue,
-                    message:
-                        "Vous avez au total ${totalproduit.toString()} produits",
-                    page: const SellerProduct(),
-                  ),
-                  buildStatCard(
-                    context: context,
-                    title: "En verification",
-                    value: !loading ? totalproductreview.toString() : "...",
-                    icon: Icons.verified,
-                    color: Colors.blueGrey,
-                    message:
-                        "Vous avez au total ${totalproductreview.toString()} produits",
-                    page: const CheckProductPage(),
-                  ),
-
-                  buildStatCard(
-                    context: context,
-                    title: "Livrés",
-                    value: !loading ? totalProduitLivrer.toString() : "...",
-                    icon: Icons.local_shipping_rounded,
-                    color: Colors.teal,
-                    message:
-                        "${totalProduitLivrer.toString()} de vos produits commandés ont été livrés",
-                  ),
-                  buildStatCard(
-                    context: context,
-                    title: "Construction",
-                    value: !loading
-                        ? totalProduitConstruction.toString()
-                        : "...",
-                    icon: Icons.construction_rounded,
-                    color: Colors.brown,
-                    message:
-                        "Dans la catégorie construction vous avez au total ${totalProduitConstruction.toString()} produits",
-                  ),
-                  buildStatCard(
-                    context: context,
-                    title: "Électronique",
-                    value: !loading
-                        ? totalProduitElectronique.toString()
-                        : "...",
-                    icon: Icons.devices_rounded,
-                    color: Colors.indigo,
-                    message:
-                        "Dans la catégorie électronique vous avez au total ${totalProduitElectronique.toString()} produits",
-                  ),
-                  buildStatCard(
-                    context: context,
-                    title: "Habillement",
-                    value: !loading ? totalProduitFring.toString() : "...",
-                    icon: Icons.checkroom_rounded,
-                    color: Colors.pink,
-                    message:
-                        "Dans la catégorie mode vous avez au total ${totalProduitFring.toString()} produits",
-                  ),
-                  buildStatCard(
-                    context: context,
-                    title: "Mode enfant",
-                    value: !loading ? totalProduitModeEnfant.toString() : "...",
-                    icon: Icons.child_care_rounded,
-                    color: Colors.orange,
-                    message:
-                        "Dans la catégorie mode enfant vous avez au total ${totalProduitModeEnfant.toString()} produits",
-                  ),
-                  buildStatCard(
-                    context: context,
-                    title: "Sport & Bien-être",
-                    value: !loading
-                        ? totalProduitSportBienEtre.toString()
-                        : "...",
-                    icon: Icons.fitness_center_rounded,
-                    color: Colors.green,
-                    message:
-                        "Dans la catégorie sport & bien-être vous avez au total ${totalProduitSportBienEtre.toString()} produits",
-                  ),
-                  buildStatCard(
-                    context: context,
-                    title: "Électroménager",
-                    value: !loading
-                        ? totalProduitElectroMenage.toString()
-                        : "...",
-                    icon: Icons.kitchen_rounded,
-                    color: Colors.red,
-                    message:
-                        "Dans la catégorie électroménager vous avez au total ${totalProduitElectroMenage.toString()} produits",
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ],
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  childAspectRatio: 1,
+
+                  children: [
+                    buildStatCard(
+                      context: context,
+                      title: "Souscription Linda Shop",
+                      value: !loading ? subscription : "...",
+                      icon: Icons.workspace_premium,
+                      color: const Color.fromARGB(255, 107, 176, 198),
+                      message: "Il vous reste:  ${getRemainingTime()}",
+                      page: const SellerAcceuil(),
+                    ),
+                    if (subscription == "STANDARD")
+                      buildStatCard(
+                        context: context,
+                        title: "Ajout journalier",
+                        value: !loading ? nbrajouts.toString() : "...",
+                        icon: Icons.add_circle_outline,
+                        color: Colors.indigoAccent,
+                        message:
+                            "Vous pouvez encore ajouter ${remainingStandard.toString()} produits aujourd'hui",
+                        page: const SellerAcceuil(),
+                      ),
+                    buildStatCard(
+                      context: context,
+                      title: "Commandes",
+                      value: !loading ? totalCommandes.toString() : "...",
+                      icon: Icons.shopping_cart_checkout_rounded,
+                      color: Colors.green,
+                      message:
+                          "Vous avez au total ${totalCommandes.toString()} commande",
+                      page: const SellerCommandes(),
+                    ),
+                    buildStatCard(
+                      context: context,
+                      title: "Produits",
+                      value: !loading ? totalproduit.toString() : "...",
+                      icon: Icons.inventory_2_rounded,
+                      color: Colors.blue,
+                      message:
+                          "Vous avez au total ${totalproduit.toString()} produits",
+                      page: const SellerProduct(),
+                    ),
+                    buildStatCard(
+                      context: context,
+                      title: "En verification",
+                      value: !loading ? totalproductreview.toString() : "...",
+                      icon: Icons.verified,
+                      color: Colors.blueGrey,
+                      message:
+                          "Vous avez au total ${totalproductreview.toString()} produits",
+                      page: const CheckProductPage(),
+                    ),
+
+                    buildStatCard(
+                      context: context,
+                      title: "Livrés",
+                      value: !loading ? totalProduitLivrer.toString() : "...",
+                      icon: Icons.local_shipping_rounded,
+                      color: Colors.teal,
+                      message:
+                          "${totalProduitLivrer.toString()} de vos produits commandés ont été livrés",
+                    ),
+                    buildStatCard(
+                      context: context,
+                      title: "Construction",
+                      value: !loading
+                          ? totalProduitConstruction.toString()
+                          : "...",
+                      icon: Icons.construction_rounded,
+                      color: Colors.brown,
+                      message:
+                          "Dans la catégorie construction vous avez au total ${totalProduitConstruction.toString()} produits",
+                    ),
+                    buildStatCard(
+                      context: context,
+                      title: "Électronique",
+                      value: !loading
+                          ? totalProduitElectronique.toString()
+                          : "...",
+                      icon: Icons.devices_rounded,
+                      color: Colors.indigo,
+                      message:
+                          "Dans la catégorie électronique vous avez au total ${totalProduitElectronique.toString()} produits",
+                    ),
+                    buildStatCard(
+                      context: context,
+                      title: "Habillement",
+                      value: !loading ? totalProduitFring.toString() : "...",
+                      icon: Icons.checkroom_rounded,
+                      color: Colors.pink,
+                      message:
+                          "Dans la catégorie mode vous avez au total ${totalProduitFring.toString()} produits",
+                    ),
+                    buildStatCard(
+                      context: context,
+                      title: "Mode enfant",
+                      value: !loading
+                          ? totalProduitModeEnfant.toString()
+                          : "...",
+                      icon: Icons.child_care_rounded,
+                      color: Colors.orange,
+                      message:
+                          "Dans la catégorie mode enfant vous avez au total ${totalProduitModeEnfant.toString()} produits",
+                    ),
+                    buildStatCard(
+                      context: context,
+                      title: "Sport & Bien-être",
+                      value: !loading
+                          ? totalProduitSportBienEtre.toString()
+                          : "...",
+                      icon: Icons.fitness_center_rounded,
+                      color: Colors.green,
+                      message:
+                          "Dans la catégorie sport & bien-être vous avez au total ${totalProduitSportBienEtre.toString()} produits",
+                    ),
+                    buildStatCard(
+                      context: context,
+                      title: "Électroménager",
+                      value: !loading
+                          ? totalProduitElectroMenage.toString()
+                          : "...",
+                      icon: Icons.kitchen_rounded,
+                      color: Colors.red,
+                      message:
+                          "Dans la catégorie électroménager vous avez au total ${totalProduitElectroMenage.toString()} produits",
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

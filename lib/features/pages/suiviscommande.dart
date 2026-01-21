@@ -30,6 +30,7 @@ class _AcrListPageState extends State<AcrListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
@@ -38,7 +39,7 @@ class _AcrListPageState extends State<AcrListPage> {
           child: Text(
             "Utilisateur non connecté",
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: size.width > 400 ? 16 : 14,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -96,7 +97,10 @@ class _AcrListPageState extends State<AcrListPage> {
         centerTitle: true,
         title: Text(
           'achats',
-          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: size.width > 400 ? 25 : 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
@@ -119,7 +123,7 @@ class _AcrListPageState extends State<AcrListPage> {
                   Text(
                     "Vos  achats",
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
+                      fontSize: size.width > 400 ? 18 : 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -150,7 +154,9 @@ class _AcrListPageState extends State<AcrListPage> {
                     padding: EdgeInsets.all(16.0),
                     child: Text(
                       'Aucun achat trouvé.',
-                      style: GoogleFonts.poppins(fontSize: 14),
+                      style: GoogleFonts.poppins(
+                        fontSize: size.width > 400 ? 14 : 12,
+                      ),
                     ),
                   );
                 }
@@ -179,9 +185,9 @@ class _AcrListPageState extends State<AcrListPage> {
                         ? DateFormat('dd-MM-yy HH:mm').format(parsedDate)
                         : 'Date inconnue';
                     return Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                      margin: EdgeInsets.symmetric(
+                        horizontal: size.width > 400 ? 12 : 6,
+                        vertical: size.height > 800 ? 6 : 4,
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
@@ -207,18 +213,21 @@ class _AcrListPageState extends State<AcrListPage> {
                               child: imageUrl.isNotEmpty
                                   ? Image.network(
                                       imageUrl,
-                                      width: 70,
-                                      height: 70,
+                                      width: size.width > 400 ? 70 : 50,
+                                      height: size.height > 800 ? 70 : 50,
                                       fit: BoxFit.cover,
                                     )
                                   : Container(
-                                      width: 70,
-                                      height: 70,
+                                      width: size.width > 400 ? 70 : 50,
+                                      height: size.height > 800 ? 70 : 50,
                                       color: Colors.grey.shade200,
-                                      child: const Icon(Icons.image, size: 30),
+                                      child: Icon(
+                                        Icons.image,
+                                        size: size.width > 400 ? 30 : 20,
+                                      ),
                                     ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: size.width > 400 ? 12 : 6),
 
                             // INFOS PRODUIT
                             Expanded(
@@ -236,7 +245,9 @@ class _AcrListPageState extends State<AcrListPage> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.poppins(
-                                            fontSize: 15,
+                                            fontSize: size.width > 400
+                                                ? 15
+                                                : 13,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -244,7 +255,7 @@ class _AcrListPageState extends State<AcrListPage> {
                                       _statusBadge(status, context),
                                     ],
                                   ),
-                                  const SizedBox(height: 6),
+                                  SizedBox(height: size.height > 800 ? 6 : 4),
 
                                   GestureDetector(
                                     onTap: () {
@@ -254,14 +265,18 @@ class _AcrListPageState extends State<AcrListPage> {
                                           title: Text(
                                             "Copier la reference de paiement dans le presse papier",
                                             style: GoogleFonts.poppins(
-                                              fontSize: 19,
+                                              fontSize: size.width > 400
+                                                  ? 19
+                                                  : 15,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           content: Text(
                                             ref,
                                             style: GoogleFonts.poppins(
-                                              fontSize: 13,
+                                              fontSize: size.width > 400
+                                                  ? 13
+                                                  : 11,
                                               color:
                                                   Theme.of(
                                                         context,
@@ -289,10 +304,12 @@ class _AcrListPageState extends State<AcrListPage> {
                                                 );
                                               },
 
-                                              child: const Text(
+                                              child: Text(
                                                 "Copier",
                                                 style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: size.width > 400
+                                                      ? 16
+                                                      : 14,
                                                   color: Colors.blue,
                                                 ),
                                               ),
@@ -304,7 +321,7 @@ class _AcrListPageState extends State<AcrListPage> {
                                     child: Text(
                                       'Ref : $ref',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
+                                        fontSize: size.width > 400 ? 12 : 10,
                                         color:
                                             Theme.of(context).brightness ==
                                                 Brightness.dark
@@ -322,14 +339,18 @@ class _AcrListPageState extends State<AcrListPage> {
                                           title: Text(
                                             "Copier la transaction Id dans le presse papier",
                                             style: GoogleFonts.poppins(
-                                              fontSize: 19,
+                                              fontSize: size.width > 400
+                                                  ? 19
+                                                  : 15,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           content: Text(
                                             transactionId,
                                             style: GoogleFonts.poppins(
-                                              fontSize: 13,
+                                              fontSize: size.width > 400
+                                                  ? 13
+                                                  : 11,
                                             ),
                                           ),
                                           actions: [
@@ -351,10 +372,12 @@ class _AcrListPageState extends State<AcrListPage> {
                                                   ),
                                                 );
                                               },
-                                              child: const Text(
+                                              child: Text(
                                                 "Copier",
                                                 style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: size.width > 400
+                                                      ? 16
+                                                      : 14,
                                                   color: Colors.blue,
                                                 ),
                                               ),
@@ -366,7 +389,7 @@ class _AcrListPageState extends State<AcrListPage> {
                                     child: Text(
                                       'T_Id : $transactionId',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
+                                        fontSize: size.width > 400 ? 12 : 10,
                                         color:
                                             Theme.of(context).brightness ==
                                                 Brightness.dark
@@ -376,12 +399,12 @@ class _AcrListPageState extends State<AcrListPage> {
                                     ),
                                   ),
 
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: size.height > 800 ? 4 : 3),
 
                                   Text(
                                     '$quantity x $price FCFA',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 14,
+                                      fontSize: size.width > 400 ? 14 : 12,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -389,7 +412,7 @@ class _AcrListPageState extends State<AcrListPage> {
                                   Text(
                                     displayDate,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 11,
+                                      fontSize: size.width > 400 ? 11 : 9,
                                       color:
                                           Theme.of(context).brightness ==
                                               Brightness.dark
@@ -405,9 +428,10 @@ class _AcrListPageState extends State<AcrListPage> {
                             Column(
                               children: [
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.delete_outline,
                                     color: Colors.red,
+                                    size: size.width > 400 ? 24 : 18,
                                   ),
                                   onPressed: () async {
                                     final confirm = await showDialog<bool>(
@@ -451,13 +475,15 @@ class _AcrListPageState extends State<AcrListPage> {
                                         title: Text(
                                           "QR code",
                                           style: GoogleFonts.poppins(
-                                            fontSize: 19,
+                                            fontSize: size.width > 400
+                                                ? 19
+                                                : 15,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         content: SizedBox(
-                                          width: 250,
-                                          height: 250,
+                                          width: size.width > 400 ? 250 : 200,
+                                          height: size.height > 800 ? 250 : 200,
                                           child: QrImageView(
                                             data: qrJson,
                                             version: QrVersions.auto,
@@ -469,10 +495,12 @@ class _AcrListPageState extends State<AcrListPage> {
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
-                                            child: const Text(
+                                            child: Text(
                                               "Fermer",
                                               style: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: size.width > 400
+                                                    ? 16
+                                                    : 14,
                                                 color: Colors.blue,
                                               ),
                                             ),
@@ -493,7 +521,7 @@ class _AcrListPageState extends State<AcrListPage> {
               },
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: size.height > 800 ? 20 : 16),
 
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -502,14 +530,14 @@ class _AcrListPageState extends State<AcrListPage> {
                   Text(
                     "Produits qui pourraient vous intéresser",
                     style: GoogleFonts.poppins(
-                      fontSize: 17,
+                      fontSize: size.width > 400 ? 17 : 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: size.height > 800 ? 10 : 6),
             ProduitsRecommandes(),
           ],
         ),
@@ -521,6 +549,7 @@ class _AcrListPageState extends State<AcrListPage> {
 Widget _statusBadge(String status, BuildContext context) {
   Color color;
 
+  final size = MediaQuery.of(context).size;
   switch (status.toLowerCase()) {
     case 'Paiement validé , en attente de livraison' || 'livrer':
       color = Colors.green;
@@ -537,7 +566,10 @@ Widget _statusBadge(String status, BuildContext context) {
   }
 
   return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    padding: EdgeInsets.symmetric(
+      horizontal: size.width > 400 ? 10 : 8,
+      vertical: size.height > 800 ? 4 : 2,
+    ),
     decoration: BoxDecoration(
       color: color.withValues(alpha: 0.15),
       borderRadius: BorderRadius.circular(20),
@@ -554,7 +586,7 @@ Widget _statusBadge(String status, BuildContext context) {
             content: Text(
               status,
               style: GoogleFonts.poppins(
-                fontSize: 24,
+                fontSize: size.width > 400 ? 24 : 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -573,7 +605,7 @@ Widget _statusBadge(String status, BuildContext context) {
         overflow: TextOverflow.ellipsis,
         softWrap: false,
         style: GoogleFonts.poppins(
-          fontSize: 11,
+          fontSize: size.width > 400 ? 11 : 9,
           fontWeight: FontWeight.w600,
           color: color,
         ),

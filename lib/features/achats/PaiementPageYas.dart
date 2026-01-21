@@ -167,6 +167,7 @@ class _PaiementPageState extends State<PaiementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     final item = widget.data;
     final livraison = item['livraison'];
     final int prixUnitaire = int.tryParse(item['productprice'].toString()) ?? 0;
@@ -181,7 +182,10 @@ class _PaiementPageState extends State<PaiementPage> {
         centerTitle: true,
         title: Text(
           'Paiement via Yas togo',
-          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: size.width > 400 ? 25 : 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Center(
@@ -437,7 +441,7 @@ class _PaiementPageState extends State<PaiementPage> {
           },
           steps: [
             Step(
-              title: const Text(
+              title: Text(
                 'Informations',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
               ),
@@ -449,88 +453,88 @@ class _PaiementPageState extends State<PaiementPage> {
                     children: [
                       Text(
                         "Nom du produit :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' ${item['productname']}'),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Prix unitaire :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' $prixUnitaire FCFA'),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Quantité :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' ${item['quantity']}'),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Frais de livraison :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' ${livraison != "true" ? 2000 : 0}  FCFA'),
                     ],
                   ),
 
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Total :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' $totalAfficher FCFA'),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: size.height > 800 ? 12 : 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "adresse :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(
                         item['addressLivraison'] != null &&
                                 item['addressLivraison'].length >= 20
@@ -539,18 +543,18 @@ class _PaiementPageState extends State<PaiementPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Transaction ID :",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: size.width > 400 ? 16 : 14,
                         ),
                       ),
-                      const SizedBox(width: 9),
+                      SizedBox(width: 9),
                       Text(' $transactionId'),
                     ],
                   ),
@@ -559,14 +563,14 @@ class _PaiementPageState extends State<PaiementPage> {
               isActive: currentStep >= 0,
             ),
             Step(
-              title: const Text(
+              title: Text(
                 'Paiement',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
               ),
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Effectuez le paiement en cliquant sur le bouton ci-dessous :',
                   ),
                   const SizedBox(height: 8),
@@ -1087,26 +1091,34 @@ class _PaiementPageState extends State<PaiementPage> {
                     },
                     child: const Text("Lancer le code USSD"),
                   ),
-                  const SizedBox(height: 18),
+                  SizedBox(height: size.height > 800 ? 18 : 12),
                   Text(
                     "Reference de paiement : $reference",
                     style: GoogleFonts.poppins(
                       color: Colors.red,
-                      fontSize: 16,
+                      fontSize: size.width > 400 ? 16 : 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text(sms, style: GoogleFonts.poppins(fontSize: 17)),
+                  Text(
+                    sms,
+                    style: GoogleFonts.poppins(
+                      fontSize: size.width > 400 ? 17 : 14,
+                    ),
+                  ),
                   const SizedBox(height: 18),
                 ],
               ),
               isActive: currentStep >= 1,
             ),
             Step(
-              title: const Text(
+              title: Text(
                 'Reçu',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: size.width > 400 ? 17 : 14,
+                ),
               ),
               content: isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -1116,7 +1128,7 @@ class _PaiementPageState extends State<PaiementPage> {
                         Text('Transaction : $transactionId'),
                         Text('Montant Total : $total FCFA'),
                         Text('Référence : $reference'),
-                        const SizedBox(height: 16),
+                        SizedBox(height: size.height > 800 ? 16 : 14),
                         const Text('Appuyez sur "Continuer" pour finaliser.'),
                       ],
                     ),

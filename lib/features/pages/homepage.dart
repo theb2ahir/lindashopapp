@@ -1,5 +1,6 @@
 // ignore_for_file: unrelated_type_equality_checks
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,6 +22,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   String promoEleve = "";
+  final uid = FirebaseAuth.instance.currentUser!.uid;
 
   final List<String> tabTitles = [
     "Tous",
@@ -31,6 +33,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     "Sports & bien-être",
     "Électro-ménager",
   ];
+  @override
+  void initState() {
+    super.initState();
+    fetchPromotionMax();
+    saveFcmToken();
+    _tabController = TabController(length: 7, vsync: this);
+  }
 
   int _currentIndex = 0;
   final PageController _pageController = PageController(viewportFraction: 0.95);
@@ -84,15 +93,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return querySnapshot.docs.length;
   }
 
+  Future<void> saveFcmToken() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+
+    final token = await FirebaseMessaging.instance.getToken();
+
+    if (token != null) {
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'fcmToken': token,
+      });
+    }
+  }
+
   int? selectedIndex; // null = aucune sélection
   late TabController _tabController;
   String searchQuery = '';
-  @override
-  void initState() {
-    super.initState();
-    fetchPromotionMax();
-    _tabController = TabController(length: 7, vsync: this);
-  }
 
   @override
   void dispose() {
@@ -102,6 +117,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     final List<PromoBanner> promoBanners = [
       PromoBanner(
         image: "assets/images/promo.jpg",
@@ -137,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           title: Text(
             "Lindashop",
             style: GoogleFonts.poppins(
-              fontSize: 33,
+              fontSize: size.width > 400 ? 33 : 25,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -146,10 +163,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               alignment: Alignment.topRight,
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.favorite,
                     color: Color.fromARGB(255, 255, 18, 1),
-                    size: 24,
+                    size: size.width > 400 ? 24 : 18,
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -172,21 +189,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       top: 4,
                       right: 4,
                       child: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.red),
                         ),
-                        constraints: const BoxConstraints(
-                          minWidth: 20,
-                          minHeight: 20,
+                        constraints: BoxConstraints(
+                          minWidth: size.width > 400 ? 20 : 16,
+                          minHeight: size.height > 800 ? 20 : 16,
                         ),
                         child: Text(
                           '${snapshot.data}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.black,
-                            fontSize: 12,
+                            fontSize: size.width > 400 ? 12 : 10,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
@@ -202,7 +219,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             alignment: Alignment.topRight,
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications, size: 24),
+                icon: Icon(
+                  Icons.notifications,
+                  size: size.width > 400 ? 24 : 18,
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -234,15 +254,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           color: const Color.fromARGB(255, 4, 4, 4),
                         ),
                       ),
-                      constraints: const BoxConstraints(
-                        minWidth: 20,
-                        minHeight: 20,
+                      constraints: BoxConstraints(
+                        minWidth: size.width > 400 ? 20 : 16,
+                        minHeight: size.height > 800 ? 20 : 16,
                       ),
                       child: Text(
                         '${snapshot.data}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.black,
-                          fontSize: 12,
+                          fontSize: size.width > 400 ? 12 : 10,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
@@ -262,7 +282,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               child: Column(
                 children: [
                   Container(
-                    height: 40,
+                    height: size.height > 800 ? 40 : 28,
                     margin: const EdgeInsets.symmetric(horizontal: 1),
                     child: TextField(
                       onChanged: (value) {
@@ -270,13 +290,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           searchQuery = value;
                         });
                       },
-                      style: const TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: size.width > 400 ? 18 : 13),
                       decoration: InputDecoration(
-                        hintStyle: GoogleFonts.poppins(fontSize: 18),
+                        hintStyle: GoogleFonts.poppins(
+                          fontSize: size.width > 400 ? 18 : 15,
+                        ),
                         hintText: "Rechercher un produit...",
                         filled: true,
                         fillColor: const Color.fromARGB(72, 224, 162, 160),
-                        prefixIcon: const Icon(Icons.search),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          size: size.width > 400 ? 18 : 15,
+                        ),
                         contentPadding: const EdgeInsets.symmetric(vertical: 0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -289,7 +314,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ),
             SizedBox(
-              height: 140,
+              height: size.height > 800 ? 140 : 100,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: promoBanners.length,
@@ -329,16 +354,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             ),
 
                             Positioned(
-                              top: 30,
-                              right: 10,
+                              top: size.height > 800 ? 30 : 20,
+                              right: size.width > 400 ? 10 : 5,
                               child: SizedBox(
-                                width: 350,
+                                width: size.width > 400 ? 350 : 250,
                                 child: Text(
                                   maxLines: 4,
                                   promo.title,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 18,
+                                    fontSize: size.width > 400 ? 18 : 14,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white,
                                   ),
@@ -364,7 +389,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   duration: const Duration(milliseconds: 300),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   width: _currentIndex == index ? 22 : 8,
-                  height: 8,
+                  height: size.height > 800 ? 8 : 6,
                   decoration: BoxDecoration(
                     color: _currentIndex == index
                         ? AppColors.darkRed
@@ -375,13 +400,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: size.height > 800 ? 12 : 6),
             // 🧭 Onglets
             TabBar(
               isScrollable: true,
               dividerColor: Colors.transparent,
               tabAlignment: TabAlignment.start,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 20),
+              labelPadding: EdgeInsets.symmetric(
+                horizontal: size.width > 400 ? 20 : 12,
+              ),
               controller: _tabController,
               tabs: const [
                 Tab(

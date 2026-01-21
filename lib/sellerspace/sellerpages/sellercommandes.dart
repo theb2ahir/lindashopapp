@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:lindashopp/features/pages/acceuilpage.dart';
 
 class SellerCommandes extends StatefulWidget {
   const SellerCommandes({super.key});
@@ -61,209 +62,224 @@ class _SellerCommandesState extends State<SellerCommandes> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: Text(
-          "Commandes",
-          style: GoogleFonts.poppins(fontSize: 23, fontWeight: FontWeight.bold),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AcceuilPage()),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          title: Text(
+            "Commandes",
+            style: GoogleFonts.poppins(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('sellercommandes')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Erreur de chargement'));
-          }
+        body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .collection('sellercommandes')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(child: Text('Erreur de chargement'));
+            }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          final commandes = snapshot.data!.docs;
+            final commandes = snapshot.data!.docs;
 
-          if (commandes.isEmpty) {
-            return Center(
-              child: Text(
-                'Aucune commande pour le moment.',
-                style: GoogleFonts.poppins(fontSize: 15),
-              ),
-            );
-          }
-          return ListView.builder(
-            itemCount: commandes.length,
-            itemBuilder: (context, index) {
-              final doc = commandes[index];
-              final data = doc.data() as Map<String, dynamic>? ?? {};
-              final status = data['status']?.toString() ?? '';
-              final timestamp = data['date'] as Timestamp?;
-              final parsedDate = timestamp?.toDate();
-              final displayDate = parsedDate != null
-                  ? DateFormat('dd-MM-yy HH:mm').format(parsedDate)
-                  : 'Date inconnue';
+            if (commandes.isEmpty) {
+              return Center(
+                child: Text(
+                  'Aucune commande pour le moment.',
+                  style: GoogleFonts.poppins(fontSize: 15),
+                ),
+              );
+            }
+            return ListView.builder(
+              itemCount: commandes.length,
+              itemBuilder: (context, index) {
+                final doc = commandes[index];
+                final data = doc.data() as Map<String, dynamic>? ?? {};
+                final status = data['status']?.toString() ?? '';
+                final timestamp = data['date'] as Timestamp?;
+                final parsedDate = timestamp?.toDate();
+                final displayDate = parsedDate != null
+                    ? DateFormat('dd-MM-yy HH:mm').format(parsedDate)
+                    : 'Date inconnue';
 
-              final produits = (data['produits'] as List<dynamic>? ?? []);
+                final produits = (data['produits'] as List<dynamic>? ?? []);
 
-              return Column(
-                children: produits.map((prod) {
-                  final product = prod as Map<String, dynamic>;
-                  final imageUrl = product['imageurl'] ?? '';
-                  final productName = product['productname'] ?? 'Sans nom';
-                  final quantity = product['quantity'] ?? 0;
-                  final price = product['productprice'] ?? 0;
+                return Column(
+                  children: produits.map((prod) {
+                    final product = prod as Map<String, dynamic>;
+                    final imageUrl = product['imageurl'] ?? '';
+                    final productName = product['productname'] ?? 'Sans nom';
+                    final quantity = product['quantity'] ?? 0;
+                    final price = product['productprice'] ?? 0;
 
-                  return Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.black.withValues(alpha: 0.05)
-                              : Colors.white.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // IMAGE
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: imageUrl.isNotEmpty
-                                ? Image.network(
-                                    imageUrl,
-                                    width: 70,
-                                    height: 70,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Container(
-                                    width: 70,
-                                    height: 70,
-                                    color: Colors.grey.shade200,
-                                    child: const Icon(Icons.image, size: 30),
-                                  ),
-                          ),
-                          const SizedBox(width: 12),
-
-                          // INFOS
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // NOM + STATUT
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        productName,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    _statusBadge(status, context),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  '$quantity x $price FCFA',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  displayDate,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 11,
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // ACTIONS
-                          Column(
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () async {
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text("Supprimer"),
-                                      content: const Text(
-                                        "Voulez-vous vraiment supprimer cette commande ?",
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, false),
-                                          child: const Text("Annuler"),
-                                        ),
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, true),
-                                          child: const Text("Supprimer"),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-
-                                  if (confirm == true) {
-                                    // Supprime le produit du tableau produits
-                                    final List produitsList = List.from(
-                                      doc['produits'],
-                                    );
-                                    produitsList.removeWhere(
-                                      (p) => p['productname'] == productName,
-                                    );
-                                    await FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(uid)
-                                        .collection('sellercommandes')
-                                        .doc(doc.id)
-                                        .update({'produits': produitsList});
-                                  }
-                                },
-                              ),
-                            ],
+                    return Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.black.withValues(alpha: 0.05)
+                                : Colors.white.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-          );
-        },
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // IMAGE
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: imageUrl.isNotEmpty
+                                  ? Image.network(
+                                      imageUrl,
+                                      width: 70,
+                                      height: 70,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      width: 70,
+                                      height: 70,
+                                      color: Colors.grey.shade200,
+                                      child: const Icon(Icons.image, size: 30),
+                                    ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            // INFOS
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // NOM + STATUT
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          productName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      _statusBadge(status, context),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    '$quantity x $price FCFA',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    displayDate,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // ACTIONS
+                            Column(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text("Supprimer"),
+                                        content: const Text(
+                                          "Voulez-vous vraiment supprimer cette commande ?",
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, false),
+                                            child: const Text("Annuler"),
+                                          ),
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, true),
+                                            child: const Text("Supprimer"),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (confirm == true) {
+                                      // Supprime le produit du tableau produits
+                                      final List produitsList = List.from(
+                                        doc['produits'],
+                                      );
+                                      produitsList.removeWhere(
+                                        (p) => p['productname'] == productName,
+                                      );
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(uid)
+                                          .collection('sellercommandes')
+                                          .doc(doc.id)
+                                          .update({'produits': produitsList});
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

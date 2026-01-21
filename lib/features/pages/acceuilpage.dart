@@ -48,28 +48,29 @@ class AcceuilPageState extends State<AcceuilPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       body: IndexedStack(index: myIndex, children: screenList),
       bottomNavigationBar: BottomNavigationBar(
-        iconSize: 27,
-        selectedIconTheme: const IconThemeData(
+        iconSize: size.width > 400 ? 30 : 25,
+        selectedIconTheme: IconThemeData(
           color: Color.fromARGB(255, 190, 53, 49),
-          size: 30,
+          size: size.width > 400 ? 30 : 25,
         ),
         unselectedIconTheme: IconThemeData(
           color: Theme.of(context).brightness == Brightness.dark
               ? Colors.white
               : const Color(0xFF02204B),
-          size: 27,
+          size: size.width > 400 ? 27 : 22,
         ),
         showSelectedLabels: true,
         showUnselectedLabels: true,
         selectedLabelStyle: GoogleFonts.poppins(
-          fontSize: 18,
+          fontSize: size.width > 400 ? 18 : 14,
           fontWeight: FontWeight.bold,
         ),
         unselectedLabelStyle: GoogleFonts.poppins(
-          fontSize: 10,
+          fontSize: size.width > 400 ? 10 : 8,
           fontWeight: FontWeight.bold,
         ),
         selectedItemColor: const Color.fromARGB(255, 190, 53, 49),
@@ -114,15 +115,15 @@ class AcceuilPageState extends State<AcceuilPage> {
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
+                        constraints: BoxConstraints(
+                          minWidth: size.width > 400 ? 18 : 16,
+                          minHeight: size.height > 800 ? 18 : 16,
                         ),
                         child: Text(
                           '${snapshot.data}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 11,
+                            fontSize: size.width > 400 ? 11 : 9,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
@@ -163,15 +164,15 @@ class AcceuilPageState extends State<AcceuilPage> {
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
+                        constraints: BoxConstraints(
+                          minWidth: size.width > 400 ? 18 : 16,
+                          minHeight: size.height > 800 ? 18 : 16,
                         ),
                         child: Text(
                           '${snapshot.data}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 11,
+                            fontSize: size.width > 400 ? 11 : 9,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
