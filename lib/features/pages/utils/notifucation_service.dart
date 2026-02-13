@@ -1,94 +1,64 @@
-import 'package:flutter/foundation.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class NotificationService {
-  static final FlutterLocalNotificationsPlugin _notificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin localNotifications =
+    FlutterLocalNotificationsPlugin();
 
-  static Future<void> init() async {
-    // Android : icône par défaut
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel',
+  'High Importance Notifications',
+  description: 'Notifications importantes',
+  importance: Importance.max,
+);
 
-    // iOS : permissions
-    final iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+Future<void> initLocalNotifications() async {
+  const AndroidInitializationSettings androidSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // Initialisation globale
-    final settings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
+  const InitializationSettings settings = InitializationSettings(
+    android: androidSettings,
+  );
 
-    await _notificationsPlugin.initialize(
-      settings,
-      onDidReceiveNotificationResponse: (response) {
-        if (kDebugMode) {
-          print('Notification tapée : ${response.payload}');
-        }
-      },
-    );
+  await localNotifications.initialize(settings: settings);
 
-    // Permission Android 13+ (ignore automatiquement sur <13)
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      final androidImpl =
-      _notificationsPlugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+  await localNotifications
+      .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin
+      >()
+      ?.createNotificationChannel(channel);
+}
 
-      if (androidImpl != null) {
-        final granted = await androidImpl.requestNotificationsPermission();
-        if (kDebugMode) {
-          print("Permission notifications Android (13+) : $granted");
-        }
-      }
+void showForegroundNotification(String title, String body) {
+  localNotifications.show(
+    id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    title: title,
+    body: body,
+    notificationDetails: const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'high_importance_channel',
+        'High Importance Notifications',
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+    ),
+  );
+}
+
+void listenToForegroundNotifications() {
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    final notification = message.notification;
+
+    if (notification != null) {
+      showForegroundNotification(
+        notification.title ?? '',
+        notification.body ?? '',
+      );
     }
+  });
+}
 
-    // Création du channel Android (obligatoire Android 8+)
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'default_channel',
-      'Notifications',
-      description: 'Canal pour les notifications de l\'application',
-      importance: Importance.max,
-    );
+Future<void> requestFCMPermissions() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-    final androidPlugin =
-    _notificationsPlugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    await androidPlugin?.createNotificationChannel(channel);
-  }
-
-  // Afficher notification
-  static Future<void> showNotification({
-    required String title,
-    required String body,
-  }) async {
-    const androidDetails = AndroidNotificationDetails(
-      'default_channel',
-      'Notifications',
-      channelDescription: 'Canal pour les notifications de l\'application',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _notificationsPlugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      title,
-      body,
-      details,
-    );
-  }
+  await messaging.requestPermission(alert: true, badge: true, sound: true);
 }

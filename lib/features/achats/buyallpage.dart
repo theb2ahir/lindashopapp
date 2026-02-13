@@ -6,7 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lindashopp/features/pages/utils/notifucation_service.dart';
+import 'package:lindashopp/features/achats/paymentsucces.dart';
+import 'package:lindashopp/features/pages/utils/getadminfcmtoken.dart';
+import 'package:lindashopp/features/pages/utils/sendnotif.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
@@ -24,6 +26,8 @@ class BuyAllPage extends StatefulWidget {
 }
 
 class _BuyAllPageState extends State<BuyAllPage> {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+
   late String transactionId;
   int total = 0;
   int totalGeneral = 0;
@@ -33,26 +37,41 @@ class _BuyAllPageState extends State<BuyAllPage> {
   String sms = "";
   bool canProceedToSendCommande = false;
   bool firstetapegood = false;
+  double deliveryPrice = 0.0;
+  String _adminToken = "";
 
   @override
   void initState() {
     super.initState();
+    _initCommande();
+  }
+
+  bool _permissionChecked = false;
+  String reference = "";
+  Future<void> _initCommande() async {
+    getToken();
     transactionId = generateTransactionId();
+
+    deliveryPrice = await getDeliveryPrice();
+
     final total = getTotalPrice();
-    bool aLivraisonPayante = widget.commandes.any(
-      (item) => item['livraison'] != 'true',
+
+    final bool aLivraisonPayante = widget.commandes.any(
+      (item) => item['livraison'] == false || item['livraison'] == 'false',
     );
 
-    double fraisLivraison = aLivraisonPayante ? 2000 : 0;
-    final suffixe = suffixeAdeuxChiffresAleatoire();
-    double totalGenerale = total + fraisLivraison + suffixe;
+    final double fraisLivraison = aLivraisonPayante ? deliveryPrice : 0;
 
-    final totalGeneralString = totalGenerale.toInt().toString();
+    final suffixe = suffixeAdeuxChiffresAleatoire();
+
+    final double totalGenerale = total + fraisLivraison + suffixe;
 
     setState(() {
       totalGeneral = totalGenerale.toInt();
       suffixeActuel = suffixe;
     });
+
+    final totalGeneralString = totalGeneral.toString();
 
     ussdCodes.addAll({
       'Moov': "*155*1*1*96368151*96368151*$totalGeneralString*2#",
@@ -60,8 +79,29 @@ class _BuyAllPageState extends State<BuyAllPage> {
     });
   }
 
-  bool _permissionChecked = false;
-  String reference = "";
+  Future<void> getToken() async {
+    final token = await getAdminToken();
+    if (token != null) {
+      setState(() {
+        _adminToken = token;
+      });
+    }
+  }
+
+  Future<double> getDeliveryPrice() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('delivery')
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      setState(() {
+        deliveryPrice = (snapshot.docs.first.data()['price'] ?? 0).toDouble();
+      });
+      return (snapshot.docs.first.data()['price'] ?? 0).toDouble();
+    }
+    return 0.0;
+  }
 
   suffixeAdeuxChiffresAleatoire() {
     final random = Random();
@@ -82,20 +122,19 @@ class _BuyAllPageState extends State<BuyAllPage> {
   }
 
   int? extraireMontant(String sms) {
-    // Cherche "Envoi de" suivi éventuellement d'espaces, puis des chiffres
-    final montantRegex = RegExp(
-      r"Envoi de\s*([\d\s]+)\s*FCFA",
+    final regex = RegExp(
+      r"Envoi de\s*([\d\s,\.]+)\s*FCFA",
       caseSensitive: false,
     );
-    final match = montantRegex.firstMatch(sms);
+
+    final match = regex.firstMatch(sms);
 
     if (match != null) {
-      // Supprimer les espaces dans le nombre (ex: "1 000" -> "1000")
-      String montantStr = match.group(1)!.replaceAll(' ', '');
+      final montantStr = match.group(1)!.replaceAll(RegExp(r"[^\d]"), '');
       return int.tryParse(montantStr);
     }
 
-    return null; // si aucun montant trouvé
+    return null;
   }
 
   Future<void> _checkPayment() async {
@@ -193,7 +232,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
             child: Column(
               children: [
                 Text(
-                  "Ce Qr code contient toutes les informations de votre commande , il est automatiquement sauvegardé inutile de faire une capture d'ecran , il a pour but de faciliter la livraison et de retrouver votre commande en cas de problème",
+                  "Ce Qr code contient toutes les informations de votre commande , faite une capture d'ecran , il a pour but de faciliter la livraison et de retrouver votre commande en cas de problème",
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -230,7 +269,18 @@ class _BuyAllPageState extends State<BuyAllPage> {
                     minimumSize: const Size(double.infinity, 45),
                   ),
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PaymentSuccessPage(
+                          transactionId: transactionId,
+                          reference: reference,
+                          reseau: reseauChoisi.toString(),
+                          totalGeneral: totalGeneral.toDouble(),
+                          commandes: widget.commandes,
+                        ),
+                      ),
+                    );
                   },
                   child: const Text("Fermer"),
                 ),
@@ -261,12 +311,48 @@ class _BuyAllPageState extends State<BuyAllPage> {
   String? reseauChoisi;
   final Map<String, String> ussdCodes = {};
 
+  Future<void> notifierVendeurs({
+    required Map<String, List<Map<String, dynamic>>> commandesParVendeur,
+    required String clientName,
+    required int totalGeneral,
+  }) async {
+    for (final entry in commandesParVendeur.entries) {
+      final sellerId = entry.key;
+      final produits = entry.value;
+      try {
+        final sellerDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(sellerId)
+            .get();
+
+        if (!sellerDoc.exists) continue;
+
+        final data = sellerDoc.data();
+        final String? sellerToken = data?['fcmToken'];
+
+        if (sellerToken == null || sellerToken.isEmpty) continue;
+
+        final String productsNames = produits
+            .map((p) => p['productname'])
+            .join(', ');
+
+        await sendNotification(
+          sellerToken,
+          "Nouvelle commande",
+          "Votre produit $productsNames  a été commandé, veiller renseigner l'adresse de recuperation",
+        );
+      } catch (e) {
+        debugPrint("Erreur notif vendeur $sellerId : $e");
+      }
+    }
+  }
+
   Future<void> envoyerInfosAuServeur(BuildContext context) async {
-    if (isLoading) return; // évite double clic
+    if (isLoading) return;
 
     setState(() => isLoading = true);
-    final uid = FirebaseAuth.instance.currentUser?.uid;
 
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(
@@ -275,7 +361,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
       return;
     }
 
-    if (reseauChoisi == null || reference == "") {
+    if (reseauChoisi == null || reference.isEmpty) {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -286,208 +372,198 @@ class _BuyAllPageState extends State<BuyAllPage> {
       return;
     }
 
+    /// 🔹 Récupération user
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .get();
 
     final userData = userDoc.data();
-
     if (userData == null ||
         userData['phone'] == null ||
-        userData['phone'].toString().isEmpty ||
         userData['adresse'] == null ||
+        userData['phone'].toString().isEmpty ||
         userData['adresse'].toString().isEmpty) {
       setState(() => isLoading = false);
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF02204B),
+          backgroundColor: const Color(0xFF02204B),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
           content: Row(
             children: [
               IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const EditProfile()),
-                  );
-                },
                 icon: const Icon(Icons.edit, color: Colors.white),
-              ),
-              TextButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const EditProfile()),
                   );
                 },
+              ),
+              const Expanded(
                 child: Text(
                   "Veuillez compléter votre profil",
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
-              const SizedBox(width: 9),
             ],
           ),
         ),
       );
-      return; // Stoppe le paiement
-    }
-
-    final infouserRef = FirebaseFirestore.instance.collection('infouser');
-
-    // 1️⃣ Grouper les produits par vendeur
-    Map<String, List<Map<String, dynamic>>> commandesParVendeur = {};
-    for (var item in widget.commandes) {
-      final sellerId = item['sellerid'];
-      if (sellerId != null && sellerId.isNotEmpty) {
-        commandesParVendeur.putIfAbsent(sellerId, () => []);
-        commandesParVendeur[sellerId]!.add({
-          'productname': item['productname'],
-          'quantity': item['quantity'],
-          'imageurl': item['productImageUrl'],
-          'productprice': item['productprice'],
-        });
-      }
-    }
-
-    // 2️⃣ Créer les documents vendeur
-    Map<String, String> sellerCommandIds = {}; // sellerId -> docId
-    for (final entry in commandesParVendeur.entries) {
-      final sellerId = entry.key;
-      final produits = entry.value;
-
-      DocumentReference sellerRef = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(sellerId)
-          .collection('sellercommandes')
-          .add({
-            'produits': produits,
-            'status': 'en verification',
-            'livree': false,
-            'date': DateTime.now(),
-          });
-
-      sellerCommandIds[sellerId] = sellerRef.id;
+      return;
     }
 
     try {
+      /// 1️⃣ Grouper les produits par vendeur
+      Map<String, List<Map<String, dynamic>>> commandesParVendeur = {};
+
       for (var item in widget.commandes) {
-        final userAdresse = userData['adresse'];
-        final userephone = userData['phone'];
-        final useremail = userData['email'];
-        final usernamemiff = userData['name'];
-        final productprice = item['productprice'];
-        final nomberitem = item['quantity'];
-        final livraison = item['livraison'];
-        final productname = item['productname'];
-        final lati = item['latitude'];
-        final longi = item['longitude'];
-        final String sellerid = item['sellerid'] ?? '';
-        final String? sellerDocId = sellerid.isNotEmpty
-            ? sellerCommandIds[sellerid]
-            : null;
-        DocumentReference acrRef = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('acr')
-            .add({
-              'imageUrl': item['productImageUrl'],
-              'productname': item['productname'],
-              'quantity': item['quantity'],
-              'productprice': item['productprice'],
-              'transactionId': transactionId,
-              'reference': reference,
-              'reseau': reseauChoisi,
-              "Qrjson": "",
-              'status': 'en verification',
-              'date': DateTime.now(),
-            });
-
-        final userid = uid;
-        String acrId = acrRef.id;
-        await infouserRef.add({
-          "UserAdresse": userAdresse,
-          "productprice": productprice,
-          "nomberitem": nomberitem,
-          "livraison": livraison,
-          "productname": productname,
-          "useremail": useremail,
-          "userephone": userephone,
-          "usernamemiff": usernamemiff,
-          'userId': uid,
-          "firstCheck": firstetapegood,
-          "sms": sms,
-          "lati": lati,
-          "longi": longi,
-          'transactionId': transactionId,
-          'ref': reference,
-          "UsereReseau": reseauChoisi,
-          "prixTotal": totalGeneral,
-          "acrid": acrId,
-          "userid": userid,
-          "sellerid": sellerid.isNotEmpty ? sellerid : null,
-          "sellerCommandedocId": sellerDocId,
-          'timestamp': DateTime.now(),
-        });
-
-        String commandeId = infouserRef.id;
-
-        final Map<String, dynamic> qrData = {
-          "transactionId": transactionId,
-          "reference": reference,
-          "total": totalGeneral,
-          "commandeId": commandeId,
-          "sms": sms,
-          "reseau": reseauChoisi,
-          "userid": uid,
-          "commandes": widget.commandes.map((item) {
-            return {
-              "productname": item['productname'],
-              "quantity": item['quantity'],
-              "price": item['productprice'],
-            };
-          }).toList(),
-        };
-
-        final String qrJson = jsonEncode(qrData);
-
-        acrRef.update({"Qrjson": qrJson});
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('notifications')
-            .add({
-              'imageUrl':
-                  "https://res.cloudinary.com/dccsqxaxu/image/upload/v1753640623/LindaLogo2_jadede.png",
-              'notifText':
-                  "Votre commande de ${item['quantity']} x ${item['productname']} a été enregistrée avec succès. Merci pour votre achat !",
-              'type': 'commande', // utile pour filtrer
-              'date': DateTime.now(),
-            });
-
-        showCommandeDialog();
+        final sellerId = item['sellerid'];
+        if (sellerId != null && sellerId.toString().isNotEmpty) {
+          commandesParVendeur.putIfAbsent(sellerId, () => []);
+          commandesParVendeur[sellerId]!.add({
+            'productname': item['productname'],
+            'quantity': item['quantity'],
+            'imageurl': item['productImageUrl'],
+            'productprice': item['productprice'],
+          });
+        }
       }
 
-      NotificationService.showNotification(
-        title: "Paiement effectué",
-        body:
-            "Vos commandes ont été enregistrées avec succès, nous allons verifier votre paiement et modifier le statut en consequence , rendez-vous sur la page commande",
+      /// 2️⃣ Créer les commandes vendeur
+      Map<String, String> sellerCommandIds = {};
+
+      for (final entry in commandesParVendeur.entries) {
+        final sellerId = entry.key;
+        final produits = entry.value;
+
+        final sellerRef = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(sellerId)
+            .collection('sellercommandes')
+            .add({
+              'produits': produits,
+              'status': 'en verification',
+              'livree': false,
+              'pickupadresse': '',
+              'date': DateTime.now(),
+            });
+
+        sellerCommandIds[sellerId] = sellerRef.id;
+      }
+
+      /// 3️⃣ Construire la liste finale des items
+      final List<Map<String, dynamic>> items = widget.commandes.map((item) {
+        final String sellerId = item['sellerid'] ?? '';
+
+        return {
+          "sellerid": sellerId.isNotEmpty ? sellerId : null,
+          "sellerCommandedocId": sellerId.isNotEmpty
+              ? sellerCommandIds[sellerId]
+              : null,
+          "productname": item['productname'],
+          "quantity": item['quantity'],
+          "productprice": item['productprice'],
+          "livraison": item['livraison'],
+          "imageurl": item['productImageUrl'],
+        };
+      }).toList();
+
+      /// 4️⃣ Créer UN SEUL document commande (infouser)
+      final infouserRef = FirebaseFirestore.instance.collection('infouser');
+
+      final acref = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('acr')
+          .add({
+            "items": items,
+            "transactionId": transactionId,
+            "reference": reference,
+            "reseau": reseauChoisi,
+            "Qrjson": "",
+            "status": "en verification",
+            "prixTotal": totalGeneral,
+            "deliveryPrice": deliveryPrice,
+            "date": DateTime.now(),
+          });
+
+      String acrId = acref.id;
+
+      final commandeRef = await infouserRef.add({
+        "userid": uid,
+        "usernamemiff": userData['name'],
+        "useremail": userData['email'],
+        "userephone": userData['phone'],
+        "UserAdresse": userData['adresse'],
+        "sms": sms,
+        "lati": widget.commandes.first['latitude'],
+        "longi": widget.commandes.first['longitude'],
+        "transactionId": transactionId,
+        "ref": reference,
+        "UsereReseau": reseauChoisi,
+        "prixTotal": totalGeneral,
+        "firstCheck": firstetapegood,
+        "status": "en verification",
+        "items": items,
+        "acrid": acrId,
+        "timestamp": DateTime.now(),
+      });
+
+      /// 5️⃣ QR CODE (1 fois)
+      final qrData = {
+        "transactionId": transactionId,
+        "reference": reference,
+        "total": totalGeneral,
+        "commandeId": commandeRef.id,
+        "sms": sms,
+        "reseau": reseauChoisi,
+        "userid": uid,
+        "items": items,
+      };
+
+      final String qrJson = jsonEncode(qrData);
+
+      await acref.update({'Qrjson': qrJson});
+
+      /// 6️⃣ Notifications
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('notifications')
+          .add({
+            'imageUrl':
+                "https://res.cloudinary.com/dccsqxaxu/image/upload/v1753640623/LindaLogo2_jadede.png",
+            'notifText': "Votre commande a été enregistrée avec succès.",
+            'type': 'commande',
+            'date': DateTime.now(),
+          });
+
+      await sendNotification(
+        _adminToken,
+        "Nouvelle commande",
+        "${userData['name']} a passé une commande de $totalGeneral FCFA",
+      );
+      await notifierVendeurs(
+        commandesParVendeur: commandesParVendeur,
+        clientName: userData['name'],
+        totalGeneral: totalGeneral,
       );
 
-      Navigator.pop(context);
+      showCommandeDialog();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur : $e"), backgroundColor: Colors.red),
       );
+    } finally {
+      setState(() => isLoading = false);
     }
-    setState(() => isLoading = false);
   }
 
   @override
@@ -499,7 +575,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
       (item) => item['livraison'] != 'true',
     );
 
-    double fraisLivraison = aLivraisonPayante ? 2000 : 0;
+    double fraisLivraison = aLivraisonPayante ? deliveryPrice : 0;
     double totalGeneral = total + fraisLivraison;
     return Scaffold(
       appBar: AppBar(
@@ -612,19 +688,19 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                 Column(
                                   children: [
                                     Text(
-                                      (item['livraison'] == 'true')
+                                      (item['livraison'] == true)
                                           ? 'Livraison gratuite'
                                           : 'Livraison payante',
                                       style: TextStyle(
                                         fontSize: size.width > 400 ? 13 : 11,
                                         fontWeight: FontWeight.bold,
-                                        color: (item['livraison'] == 'true')
+                                        color: (item['livraison'] == true)
                                             ? Colors.green
                                             : Colors.red,
                                       ),
                                     ),
                                     Text(
-                                      '${(int.tryParse(item['productprice'].toString()) ?? 0) * (int.tryParse(item['quantity'].toString()) ?? 0)} FCFA',
+                                      '${(int.tryParse(item['productprice']) ?? 0) * item['quantity']} FCFA',
                                       style: GoogleFonts.poppins(
                                         fontSize: size.width > 400 ? 16 : 14,
                                       ),
@@ -910,7 +986,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                           vertical: 14,
                                                         ),
                                                   ),
-                                                  onPressed: () {
+                                                  onPressed: () async {
                                                     final smsText =
                                                         smsController.text
                                                             .trim();
@@ -945,7 +1021,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                       ).pop();
                                                       // Ferme le premier dialog
                                                       // enlencher la verification du paiement
-                                                      _checkPayment();
+                                                      await _checkPayment();
                                                       // Deuxième popup : confirmation
                                                       showDialog(
                                                         context: context,
@@ -1037,8 +1113,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                                                 );
                                                                               },
                                                                         );
-                                                                      } else if (canProceedToSendCommande ==
-                                                                          false) {
+                                                                      } else {
                                                                         showDialog(
                                                                           context:
                                                                               context,
@@ -1188,7 +1263,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                           vertical: 14,
                                                         ),
                                                   ),
-                                                  onPressed: () {
+                                                  onPressed: () async {
                                                     final smsText =
                                                         smsController.text
                                                             .trim();
@@ -1224,7 +1299,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                       ).pop();
 
                                                       // enlencher la verification du paiement
-                                                      _checkPayment();
+                                                      await _checkPayment();
 
                                                       // Deuxième popup : confirmation
                                                       showDialog(
@@ -1293,6 +1368,9 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                                       ),
                                                                     ),
                                                                     onPressed: () {
+                                                                      Navigator.of(
+                                                                        context,
+                                                                      ).pop();
                                                                       if (canProceedToSendCommande ==
                                                                           true) {
                                                                         showDialog(
@@ -1314,8 +1392,7 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                                                 );
                                                                               },
                                                                         );
-                                                                      } else if (canProceedToSendCommande ==
-                                                                          false) {
+                                                                      } else {
                                                                         showDialog(
                                                                           context:
                                                                               context,
@@ -1336,9 +1413,6 @@ class _BuyAllPageState extends State<BuyAllPage> {
                                                                               },
                                                                         );
                                                                       }
-                                                                      Navigator.of(
-                                                                        context,
-                                                                      ).pop();
                                                                       setState(() {
                                                                         ussdAlreadylaunched =
                                                                             true;

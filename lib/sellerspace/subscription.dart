@@ -115,6 +115,8 @@ class _SubscriptionCardState extends State<SubscriptionCard> {
   bool canProceed = false;
   bool good = false;
   bool loading = false;
+  bool alreadyopen = false;
+  bool alreadyopenyas = false;
 
   @override
   void initState() {
@@ -137,6 +139,7 @@ class _SubscriptionCardState extends State<SubscriptionCard> {
       'startedAt': dateaujourdhui,
       'endedAt': endedAt,
       'amountPaid': montantpayer,
+      'nbrajouts': 0,
       'sellerid': uid,
       'role': "seller",
       'datePaid': DateTime.now(),
@@ -202,20 +205,19 @@ class _SubscriptionCardState extends State<SubscriptionCard> {
   }
 
   int? extraireMontant(String sms) {
-    // Cherche "Envoi de" suivi éventuellement d'espaces, puis des chiffres
-    final montantRegex = RegExp(
-      r"Envoi de\s*([\d\s]+)\s*FCFA",
+    final regex = RegExp(
+      r"Envoi de\s*([\d\s,\.]+)\s*FCFA",
       caseSensitive: false,
     );
-    final match = montantRegex.firstMatch(sms);
+
+    final match = regex.firstMatch(sms);
 
     if (match != null) {
-      // Supprimer les espaces dans le nombre (ex: "1 000" -> "1000")
-      String montantStr = match.group(1)!.replaceAll(' ', '');
+      final montantStr = match.group(1)!.replaceAll(RegExp(r"[^\d]"), '');
       return int.tryParse(montantStr);
     }
 
-    return null; // si aucun montant trouvé
+    return null;
   }
 
   _checkPayment() {
@@ -308,516 +310,1095 @@ class _SubscriptionCardState extends State<SubscriptionCard> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          content: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  final somme = widget.price + suffixeActuel;
-                                  lancerUSSD(
-                                    "*155*1*1*96368151*96368151*$somme*2#",
-                                  );
-                                  Navigator.of(context).pop();
-
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return StatefulBuilder(
-                                        builder: (context, setDialogState) {
-                                          return Dialog(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(
-                                                20.0,
-                                              ),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(
-                                                    "Copier et coller le SMS reçu de votre opérateur",
-                                                    style: GoogleFonts.poppins(
-                                                      fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 16),
-                                                  TextField(
-                                                    maxLines: 5,
-                                                    controller: smsController,
-                                                    decoration: InputDecoration(
-                                                      labelText:
-                                                          'SMS reçu de votre opérateur',
-                                                      border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              12,
-                                                            ),
-                                                      ),
-                                                      filled: true,
-                                                      fillColor:
-                                                          Theme.of(
-                                                                context,
-                                                              ).brightness ==
-                                                              Brightness.dark
-                                                          ? Colors.black
-                                                          : Colors.grey[100],
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 24),
-                                                  SizedBox(
-                                                    width: double.infinity,
-                                                    child: ElevatedButton(
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor:
-                                                            Colors.teal,
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                12,
-                                                              ),
-                                                        ),
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              vertical: 14,
-                                                            ),
-                                                      ),
-                                                      onPressed: () {
-                                                        final smsText =
-                                                            smsController.text
-                                                                .trim();
-                                                        if (smsText.isEmpty) {
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            const SnackBar(
-                                                              content: Text(
-                                                                "Veuillez copier et coller le SMS reçu de votre opérateur.",
-                                                              ),
-                                                              duration:
-                                                                  Duration(
-                                                                    seconds: 2,
-                                                                  ),
-                                                            ),
-                                                          );
-                                                          return;
-                                                        }
-
-                                                        setState(() {
-                                                          sms = smsText;
-                                                        });
-                                                        Navigator.of(
-                                                          context,
-                                                        ).pop();
-
-                                                        _checkPayment();
-
-                                                        if (good == true) {
-                                                          showDialog(
-                                                            context: context,
-                                                            builder: (context) => Dialog(
-                                                              shape: RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      20,
-                                                                    ),
-                                                              ),
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets.all(
-                                                                      20.0,
-                                                                    ),
-                                                                child: Column(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: [
-                                                                    Text(
-                                                                      "Paiement validé ✅",
-                                                                      style: GoogleFonts.poppins(
-                                                                        fontSize:
-                                                                            18,
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                      ),
-                                                                    ),
-                                                                    const SizedBox(
-                                                                      height:
-                                                                          16,
-                                                                    ),
-
-                                                                    TextButton(
-                                                                      onPressed: () async {
-                                                                        await updateUserDataForGood(
-                                                                          widget
-                                                                              .title,
-                                                                          somme,
-                                                                        );
-                                                                        Navigator.of(
-                                                                          context,
-                                                                        ).pop(); // ferme le premier dialog
-                                                                        Navigator.push(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                            builder: (_) =>
-                                                                                SellerAcceuil(),
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                                      child: Text(
-                                                                        "Fermer",
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
-
-                                                          Navigator.of(
-                                                            context,
-                                                          ).pop();
-                                                        }
-
-                                                        if (good == false) {
-                                                          showDialog(
-                                                            context: context,
-                                                            builder: (context) => Dialog(
-                                                              shape: RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      20,
-                                                                    ),
-                                                              ),
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets.all(
-                                                                      20.0,
-                                                                    ),
-                                                                child: Column(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: [
-                                                                    Text(
-                                                                      "Paiement refusé ❌",
-                                                                      style: GoogleFonts.poppins(
-                                                                        fontSize:
-                                                                            18,
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                      ),
-                                                                    ),
-                                                                    const SizedBox(
-                                                                      height:
-                                                                          16,
-                                                                    ),
-                                                                    TextButton(
-                                                                      onPressed: () async {
-                                                                        await updateUserDataForBad();
-                                                                        Navigator.of(
-                                                                          context,
-                                                                        ).pop(); // ferme le premier dialog
-                                                                        Navigator.push(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                            builder: (_) =>
-                                                                                Profile(),
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                                      child: Text(
-                                                                        "Fermer",
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        }
-                                                      },
-                                                      child: const Text(
-                                                        "Envoyer",
-                                                        style: TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                          content: loading
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 1,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        final somme =
+                                            widget.price + suffixeActuel;
+                                        if (alreadyopen == false) {
+                                          lancerUSSD(
+                                            "*155*1*1*96368151*96368151*$somme*2#",
                                           );
-                                        },
-                                      );
-                                    },
-                                  );
-                                },
-                                child: Text("Moov"),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  final somme = widget.price + suffixeActuel;
-                                  lancerUSSD("*145*1*$somme*92349698*2#");
-                                  Navigator.of(context).pop();
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return StatefulBuilder(
-                                        builder: (context, setDialogState) {
-                                          return Dialog(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(
-                                                20.0,
-                                              ),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(
-                                                    "Copier et coller le SMS reçu de votre opérateur",
-                                                    style: GoogleFonts.poppins(
-                                                      fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 16),
-                                                  TextField(
-                                                    maxLines: 5,
-                                                    controller: smsController,
-                                                    decoration: InputDecoration(
-                                                      labelText:
-                                                          'SMS reçu de votre opérateur',
-                                                      border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              12,
-                                                            ),
-                                                      ),
-                                                      filled: true,
-                                                      fillColor:
-                                                          Theme.of(
-                                                                context,
-                                                              ).brightness ==
-                                                              Brightness.dark
-                                                          ? Colors.black
-                                                          : Colors.grey[100],
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 24),
-                                                  SizedBox(
-                                                    width: double.infinity,
-                                                    child: ElevatedButton(
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor:
-                                                            Colors.teal,
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                12,
-                                                              ),
-                                                        ),
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              vertical: 14,
-                                                            ),
-                                                      ),
-                                                      onPressed: () {
-                                                        final smsText =
-                                                            smsController.text
-                                                                .trim();
-                                                        if (smsText.isEmpty) {
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            const SnackBar(
-                                                              content: Text(
-                                                                "Veuillez copier et coller le SMS reçu de votre opérateur.",
-                                                              ),
-                                                              duration:
-                                                                  Duration(
-                                                                    seconds: 2,
-                                                                  ),
-                                                            ),
-                                                          );
-                                                          return;
-                                                        }
+                                          setState(() {
+                                            alreadyopen = true;
+                                          });
 
-                                                        setState(() {
-                                                          sms = smsText;
-                                                        });
-                                                        Navigator.of(
-                                                          context,
-                                                        ).pop();
-                                                        // Ferme le premier dialog
-                                                        // enlencher la verification du paiement
-
-                                                        _checkPayment();
-                                                        // Deuxième popup : confirmation
-                                                        if (good == true) {
-                                                          showDialog(
-                                                            context: context,
-                                                            builder: (context) => Dialog(
-                                                              shape: RoundedRectangleBorder(
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (context) {
+                                              return StatefulBuilder(
+                                                builder: (context, setDialogState) {
+                                                  return Dialog(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
+                                                          ),
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            20.0,
+                                                          ),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Text(
+                                                            "Copier et coller le SMS reçu de votre opérateur",
+                                                            style:
+                                                                GoogleFonts.poppins(
+                                                                  fontSize: 18,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 16,
+                                                          ),
+                                                          TextField(
+                                                            maxLines: 5,
+                                                            controller:
+                                                                smsController,
+                                                            decoration: InputDecoration(
+                                                              labelText:
+                                                                  'SMS reçu de votre opérateur',
+                                                              border: OutlineInputBorder(
                                                                 borderRadius:
                                                                     BorderRadius.circular(
-                                                                      20,
+                                                                      12,
                                                                     ),
                                                               ),
-                                                              child: Padding(
+                                                              filled: true,
+                                                              fillColor:
+                                                                  Theme.of(
+                                                                        context,
+                                                                      ).brightness ==
+                                                                      Brightness
+                                                                          .dark
+                                                                  ? Colors.black
+                                                                  : Colors
+                                                                        .grey[100],
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 24,
+                                                          ),
+                                                          SizedBox(
+                                                            width:
+                                                                double.infinity,
+                                                            child: ElevatedButton(
+                                                              style: ElevatedButton.styleFrom(
+                                                                backgroundColor:
+                                                                    Colors.teal,
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        12,
+                                                                      ),
+                                                                ),
                                                                 padding:
-                                                                    const EdgeInsets.all(
-                                                                      20.0,
+                                                                    const EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          14,
                                                                     ),
-                                                                child: Column(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: [
-                                                                    Text(
-                                                                      "Paiement validé ✅",
-                                                                      style: GoogleFonts.poppins(
-                                                                        fontSize:
-                                                                            18,
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
+                                                              ),
+                                                              onPressed: () {
+                                                                final smsText =
+                                                                    smsController
+                                                                        .text
+                                                                        .trim();
+                                                                if (smsText
+                                                                    .isEmpty) {
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    const SnackBar(
+                                                                      content: Text(
+                                                                        "Veuillez copier et coller le SMS reçu de votre opérateur.",
+                                                                      ),
+                                                                      duration: Duration(
+                                                                        seconds:
+                                                                            2,
                                                                       ),
                                                                     ),
-                                                                    const SizedBox(
-                                                                      height:
-                                                                          16,
-                                                                    ),
+                                                                  );
+                                                                  return;
+                                                                }
 
-                                                                    TextButton(
-                                                                      onPressed: () async {
-                                                                        await updateUserDataForGood(
-                                                                          widget
-                                                                              .title,
-                                                                          somme,
-                                                                        );
-                                                                        Navigator.of(
-                                                                          context,
-                                                                        ).pop(); // ferme le premier dialog
-                                                                        Navigator.push(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                            builder: (_) =>
-                                                                                SellerAcceuil(),
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                                      child: Text(
-                                                                        "Fermer",
+                                                                setState(() {
+                                                                  sms = smsText;
+                                                                });
+                                                                Navigator.of(
+                                                                  context,
+                                                                ).pop();
+
+                                                                _checkPayment();
+
+                                                                if (good ==
+                                                                    true) {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    builder: (context) => Dialog(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                              20,
+                                                                            ),
+                                                                      ),
+                                                                      child: Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.all(
+                                                                              20.0,
+                                                                            ),
+                                                                        child: Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Paiement validé ✅",
+                                                                              style: GoogleFonts.poppins(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(
+                                                                              height: 16,
+                                                                            ),
+
+                                                                            TextButton(
+                                                                              onPressed: () async {
+                                                                                await updateUserDataForGood(
+                                                                                  widget.title,
+                                                                                  somme,
+                                                                                );
+                                                                                Navigator.of(
+                                                                                  context,
+                                                                                ).pop(); // ferme le premier dialog
+                                                                                Navigator.push(
+                                                                                  context,
+                                                                                  MaterialPageRoute(
+                                                                                    builder:
+                                                                                        (
+                                                                                          _,
+                                                                                        ) => SellerAcceuil(),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                              child: Text(
+                                                                                "Fermer",
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
                                                                       ),
                                                                     ),
-                                                                  ],
+                                                                  );
+
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop();
+                                                                }
+
+                                                                if (good ==
+                                                                    false) {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    builder: (context) => Dialog(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                              20,
+                                                                            ),
+                                                                      ),
+                                                                      child: Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.all(
+                                                                              20.0,
+                                                                            ),
+                                                                        child: Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Paiement refusé ❌",
+                                                                              style: GoogleFonts.poppins(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(
+                                                                              height: 16,
+                                                                            ),
+                                                                            TextButton(
+                                                                              onPressed: () async {
+                                                                                await updateUserDataForBad();
+                                                                                Navigator.of(
+                                                                                  context,
+                                                                                ).pop(); // ferme le premier dialog
+                                                                                Navigator.push(
+                                                                                  context,
+                                                                                  MaterialPageRoute(
+                                                                                    builder:
+                                                                                        (
+                                                                                          _,
+                                                                                        ) => Profile(),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                              child: Text(
+                                                                                "Fermer",
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              },
+                                                              child: const Text(
+                                                                "Envoyer",
+                                                                style: TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .white,
                                                                 ),
                                                               ),
                                                             ),
-                                                          );
-                                                        }
-                                                        if (good == false) {
-                                                          showDialog(
-                                                            context: context,
-                                                            builder: (context) => Dialog(
-                                                              shape: RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      20,
-                                                                    ),
-                                                              ),
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets.all(
-                                                                      20.0,
-                                                                    ),
-                                                                child: Column(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: [
-                                                                    Text(
-                                                                      "Paiement non validé ❌",
-                                                                      style: GoogleFonts.poppins(
-                                                                        fontSize:
-                                                                            18,
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                      ),
-                                                                    ),
-                                                                    const SizedBox(
-                                                                      height:
-                                                                          16,
-                                                                    ),
-                                                                    TextButton(
-                                                                      onPressed: () async {
-                                                                        await updateUserDataForBad();
-                                                                        Navigator.of(
-                                                                          context,
-                                                                        ).pop(); // ferme le premier dialog
-                                                                        Navigator.push(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                            builder: (_) =>
-                                                                                Profile(),
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                                      child: Text(
-                                                                        "Fermer",
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        }
-                                                      },
-                                                      child: const Text(
-                                                        "Envoyer",
-                                                        style: TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.white,
-                                                        ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                                  );
+                                                },
+                                              );
+                                            },
                                           );
-                                        },
-                                      );
-                                    },
-                                  );
-                                },
-                                child: Text("Yas"),
-                              ),
-                            ],
-                          ),
+                                        } else {
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (context) {
+                                              return StatefulBuilder(
+                                                builder: (context, setDialogState) {
+                                                  return Dialog(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
+                                                          ),
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            20.0,
+                                                          ),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Text(
+                                                            "Copier et coller le SMS reçu de votre opérateur",
+                                                            style:
+                                                                GoogleFonts.poppins(
+                                                                  fontSize: 18,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 16,
+                                                          ),
+                                                          TextField(
+                                                            maxLines: 5,
+                                                            controller:
+                                                                smsController,
+                                                            decoration: InputDecoration(
+                                                              labelText:
+                                                                  'SMS reçu de votre opérateur',
+                                                              border: OutlineInputBorder(
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      12,
+                                                                    ),
+                                                              ),
+                                                              filled: true,
+                                                              fillColor:
+                                                                  Theme.of(
+                                                                        context,
+                                                                      ).brightness ==
+                                                                      Brightness
+                                                                          .dark
+                                                                  ? Colors.black
+                                                                  : Colors
+                                                                        .grey[100],
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 24,
+                                                          ),
+                                                          SizedBox(
+                                                            width:
+                                                                double.infinity,
+                                                            child: ElevatedButton(
+                                                              style: ElevatedButton.styleFrom(
+                                                                backgroundColor:
+                                                                    Colors.teal,
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        12,
+                                                                      ),
+                                                                ),
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          14,
+                                                                    ),
+                                                              ),
+                                                              onPressed: () {
+                                                                final smsText =
+                                                                    smsController
+                                                                        .text
+                                                                        .trim();
+                                                                if (smsText
+                                                                    .isEmpty) {
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    const SnackBar(
+                                                                      content: Text(
+                                                                        "Veuillez copier et coller le SMS reçu de votre opérateur.",
+                                                                      ),
+                                                                      duration: Duration(
+                                                                        seconds:
+                                                                            2,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                  return;
+                                                                }
+
+                                                                setState(() {
+                                                                  sms = smsText;
+                                                                });
+                                                                Navigator.of(
+                                                                  context,
+                                                                ).pop();
+
+                                                                _checkPayment();
+
+                                                                if (good ==
+                                                                    true) {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    builder: (context) => Dialog(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                              20,
+                                                                            ),
+                                                                      ),
+                                                                      child: Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.all(
+                                                                              20.0,
+                                                                            ),
+                                                                        child: Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Paiement validé ✅",
+                                                                              style: GoogleFonts.poppins(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(
+                                                                              height: 16,
+                                                                            ),
+
+                                                                            TextButton(
+                                                                              onPressed: () async {
+                                                                                await updateUserDataForGood(
+                                                                                  widget.title,
+                                                                                  somme,
+                                                                                );
+                                                                                Navigator.of(
+                                                                                  context,
+                                                                                ).pop(); // ferme le premier dialog
+                                                                                Navigator.push(
+                                                                                  context,
+                                                                                  MaterialPageRoute(
+                                                                                    builder:
+                                                                                        (
+                                                                                          _,
+                                                                                        ) => SellerAcceuil(),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                              child: Text(
+                                                                                "Fermer",
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop();
+                                                                }
+
+                                                                if (good ==
+                                                                    false) {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    builder: (context) => Dialog(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                              20,
+                                                                            ),
+                                                                      ),
+                                                                      child: Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.all(
+                                                                              20.0,
+                                                                            ),
+                                                                        child: Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Paiement refusé ❌",
+                                                                              style: GoogleFonts.poppins(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(
+                                                                              height: 16,
+                                                                            ),
+                                                                            TextButton(
+                                                                              onPressed: () async {
+                                                                                await updateUserDataForBad();
+                                                                                Navigator.of(
+                                                                                  context,
+                                                                                ).pop(); // ferme le premier dialog
+                                                                                Navigator.push(
+                                                                                  context,
+                                                                                  MaterialPageRoute(
+                                                                                    builder:
+                                                                                        (
+                                                                                          _,
+                                                                                        ) => Profile(),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                              child: Text(
+                                                                                "Fermer",
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              },
+                                                              child: const Text(
+                                                                "Envoyer",
+                                                                style: TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          );
+                                        }
+                                      },
+                                      child: Text("Moov"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        final somme =
+                                            widget.price + suffixeActuel;
+
+                                        if (alreadyopenyas == false) {
+                                          lancerUSSD(
+                                            "*145*1*$somme*92349698*2#",
+                                          );
+                                          setState(() {
+                                            alreadyopenyas = true;
+                                          });
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (context) {
+                                              return StatefulBuilder(
+                                                builder: (context, setDialogState) {
+                                                  return Dialog(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
+                                                          ),
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            20.0,
+                                                          ),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Text(
+                                                            "Copier et coller le SMS reçu de votre opérateur",
+                                                            style:
+                                                                GoogleFonts.poppins(
+                                                                  fontSize: 18,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 16,
+                                                          ),
+                                                          TextField(
+                                                            maxLines: 5,
+                                                            controller:
+                                                                smsController,
+                                                            decoration: InputDecoration(
+                                                              labelText:
+                                                                  'SMS reçu de votre opérateur',
+                                                              border: OutlineInputBorder(
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      12,
+                                                                    ),
+                                                              ),
+                                                              filled: true,
+                                                              fillColor:
+                                                                  Theme.of(
+                                                                        context,
+                                                                      ).brightness ==
+                                                                      Brightness
+                                                                          .dark
+                                                                  ? Colors.black
+                                                                  : Colors
+                                                                        .grey[100],
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 24,
+                                                          ),
+                                                          SizedBox(
+                                                            width:
+                                                                double.infinity,
+                                                            child: ElevatedButton(
+                                                              style: ElevatedButton.styleFrom(
+                                                                backgroundColor:
+                                                                    Colors.teal,
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        12,
+                                                                      ),
+                                                                ),
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          14,
+                                                                    ),
+                                                              ),
+                                                              onPressed: () {
+                                                                final smsText =
+                                                                    smsController
+                                                                        .text
+                                                                        .trim();
+                                                                if (smsText
+                                                                    .isEmpty) {
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    const SnackBar(
+                                                                      content: Text(
+                                                                        "Veuillez copier et coller le SMS reçu de votre opérateur.",
+                                                                      ),
+                                                                      duration: Duration(
+                                                                        seconds:
+                                                                            2,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                  return;
+                                                                }
+
+                                                                setState(() {
+                                                                  sms = smsText;
+                                                                });
+                                                                Navigator.of(
+                                                                  context,
+                                                                ).pop();
+                                                                // Ferme le premier dialog
+                                                                // enlencher la verification du paiement
+
+                                                                _checkPayment();
+                                                                // Deuxième popup : confirmation
+                                                                if (good ==
+                                                                    true) {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    builder: (context) => Dialog(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                              20,
+                                                                            ),
+                                                                      ),
+                                                                      child: Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.all(
+                                                                              20.0,
+                                                                            ),
+                                                                        child: Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Paiement validé ✅",
+                                                                              style: GoogleFonts.poppins(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(
+                                                                              height: 16,
+                                                                            ),
+
+                                                                            TextButton(
+                                                                              onPressed: () async {
+                                                                                await updateUserDataForGood(
+                                                                                  widget.title,
+                                                                                  somme,
+                                                                                );
+                                                                                Navigator.of(
+                                                                                  context,
+                                                                                ).pop(); // ferme le premier dialog
+                                                                                Navigator.push(
+                                                                                  context,
+                                                                                  MaterialPageRoute(
+                                                                                    builder:
+                                                                                        (
+                                                                                          _,
+                                                                                        ) => SellerAcceuil(),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                              child: Text(
+                                                                                "Fermer",
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                                if (good ==
+                                                                    false) {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    builder: (context) => Dialog(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                              20,
+                                                                            ),
+                                                                      ),
+                                                                      child: Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.all(
+                                                                              20.0,
+                                                                            ),
+                                                                        child: Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Paiement non validé ❌",
+                                                                              style: GoogleFonts.poppins(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(
+                                                                              height: 16,
+                                                                            ),
+                                                                            TextButton(
+                                                                              onPressed: () async {
+                                                                                await updateUserDataForBad();
+                                                                                Navigator.of(
+                                                                                  context,
+                                                                                ).pop(); // ferme le premier dialog
+                                                                                Navigator.push(
+                                                                                  context,
+                                                                                  MaterialPageRoute(
+                                                                                    builder:
+                                                                                        (
+                                                                                          _,
+                                                                                        ) => Profile(),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                              child: Text(
+                                                                                "Fermer",
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              },
+                                                              child: const Text(
+                                                                "Envoyer",
+                                                                style: TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          );
+                                        } else {
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (context) {
+                                              return StatefulBuilder(
+                                                builder: (context, setDialogState) {
+                                                  return Dialog(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
+                                                          ),
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            20.0,
+                                                          ),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Text(
+                                                            "Copier et coller le SMS reçu de votre opérateur",
+                                                            style:
+                                                                GoogleFonts.poppins(
+                                                                  fontSize: 18,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 16,
+                                                          ),
+                                                          TextField(
+                                                            maxLines: 5,
+                                                            controller:
+                                                                smsController,
+                                                            decoration: InputDecoration(
+                                                              labelText:
+                                                                  'SMS reçu de votre opérateur',
+                                                              border: OutlineInputBorder(
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      12,
+                                                                    ),
+                                                              ),
+                                                              filled: true,
+                                                              fillColor:
+                                                                  Theme.of(
+                                                                        context,
+                                                                      ).brightness ==
+                                                                      Brightness
+                                                                          .dark
+                                                                  ? Colors.black
+                                                                  : Colors
+                                                                        .grey[100],
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 24,
+                                                          ),
+                                                          SizedBox(
+                                                            width:
+                                                                double.infinity,
+                                                            child: ElevatedButton(
+                                                              style: ElevatedButton.styleFrom(
+                                                                backgroundColor:
+                                                                    Colors.teal,
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        12,
+                                                                      ),
+                                                                ),
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          14,
+                                                                    ),
+                                                              ),
+                                                              onPressed: () {
+                                                                final smsText =
+                                                                    smsController
+                                                                        .text
+                                                                        .trim();
+                                                                if (smsText
+                                                                    .isEmpty) {
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    const SnackBar(
+                                                                      content: Text(
+                                                                        "Veuillez copier et coller le SMS reçu de votre opérateur.",
+                                                                      ),
+                                                                      duration: Duration(
+                                                                        seconds:
+                                                                            2,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                  return;
+                                                                }
+
+                                                                setState(() {
+                                                                  sms = smsText;
+                                                                });
+                                                                Navigator.of(
+                                                                  context,
+                                                                ).pop();
+                                                                // Ferme le premier dialog
+                                                                // enlencher la verification du paiement
+
+                                                                _checkPayment();
+                                                                // Deuxième popup : confirmation
+                                                                if (good ==
+                                                                    true) {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    builder: (context) => Dialog(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                              20,
+                                                                            ),
+                                                                      ),
+                                                                      child: Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.all(
+                                                                              20.0,
+                                                                            ),
+                                                                        child: Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Paiement validé ✅",
+                                                                              style: GoogleFonts.poppins(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(
+                                                                              height: 16,
+                                                                            ),
+
+                                                                            TextButton(
+                                                                              onPressed: () async {
+                                                                                await updateUserDataForGood(
+                                                                                  widget.title,
+                                                                                  somme,
+                                                                                );
+                                                                                Navigator.of(
+                                                                                  context,
+                                                                                ).pop(); // ferme le premier dialog
+                                                                                Navigator.push(
+                                                                                  context,
+                                                                                  MaterialPageRoute(
+                                                                                    builder:
+                                                                                        (
+                                                                                          _,
+                                                                                        ) => SellerAcceuil(),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                              child: Text(
+                                                                                "Fermer",
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                                if (good ==
+                                                                    false) {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    builder: (context) => Dialog(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                              20,
+                                                                            ),
+                                                                      ),
+                                                                      child: Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.all(
+                                                                              20.0,
+                                                                            ),
+                                                                        child: Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Paiement non validé ❌",
+                                                                              style: GoogleFonts.poppins(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(
+                                                                              height: 16,
+                                                                            ),
+                                                                            TextButton(
+                                                                              onPressed: () async {
+                                                                                await updateUserDataForBad();
+                                                                                Navigator.of(
+                                                                                  context,
+                                                                                ).pop(); // ferme le premier dialog
+                                                                                Navigator.push(
+                                                                                  context,
+                                                                                  MaterialPageRoute(
+                                                                                    builder:
+                                                                                        (
+                                                                                          _,
+                                                                                        ) => Profile(),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                              child: Text(
+                                                                                "Fermer",
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              },
+                                                              child: const Text(
+                                                                "Envoyer",
+                                                                style: TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          );
+                                        }
+                                      },
+                                      child: Text("Yas"),
+                                    ),
+                                  ],
+                                ),
                         );
                       },
                     );
                     // fermer le premier dialog
                   },
-                  child: const Text("Choisir ce forfait"),
+                  child: Text(
+                    "Choisir ce forfait",
+                    style: GoogleFonts.poppins(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black
+                          : Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -136,7 +136,6 @@ class AcceuilPageState extends State<AcceuilPage> {
             ),
             label: 'Panier',
           ),
-
           BottomNavigationBarItem(
             icon: Stack(
               clipBehavior:
@@ -157,7 +156,6 @@ class AcceuilPageState extends State<AcceuilPage> {
                           snapshot.data == 0) {
                         return const SizedBox.shrink(); // ne rien afficher si 0
                       }
-
                       return Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
@@ -185,7 +183,6 @@ class AcceuilPageState extends State<AcceuilPage> {
             ),
             label: 'Commandes',
           ),
-
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Compte'),
         ],
       ),

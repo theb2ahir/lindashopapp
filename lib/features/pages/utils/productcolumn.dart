@@ -99,6 +99,11 @@ class _ProductColumnState extends State<ProductColumn> {
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
                   decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black.withValues(alpha: 0.05),
+                    ),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -116,66 +121,87 @@ class _ProductColumnState extends State<ProductColumn> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // 🖼️ Image du produit
-                        Image.network(
-                          imageUrl,
-                          width: double.infinity,
-                          height: size.height > 800 ? 150 : 100,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.image_not_supported),
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          },
+                        Container(
+                          padding: const EdgeInsets.all(2.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black.withValues(alpha: 0.05),
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.network(
+                              imageUrl,
+                              width: double.infinity,
+                              height: size.height > 800 ? 150 : 100,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.image_not_supported),
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  },
+                            ),
+                          ),
                         ),
                         SizedBox(height: size.height > 800 ? 6 : 4),
 
                         // 🧾 Détails du produit
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              nom,
-                              style: GoogleFonts.poppins(
-                                fontSize: size.width > 400 ? 14 : 12,
-                                fontWeight: FontWeight.bold,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                nom,
+                                style: GoogleFonts.poppins(
+                                  fontSize: size.width > 400 ? 14 : 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            SizedBox(height: size.height > 800 ? 4 : 3),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "$prix F",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: size.width > 400 ? 12 : 10,
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white
-                                        : Colors.grey[700],
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.star,
-                                      color: moyenne > 3
-                                          ? Colors.yellow
-                                          : Colors.red,
-                                      size: size.width > 400 ? 14 : 10,
+                              SizedBox(height: size.height > 800 ? 4 : 3),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "$prix F",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: size.width > 400 ? 12 : 10,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : Colors.grey[700],
                                     ),
-                                    SizedBox(width: size.width > 400 ? 4 : 2),
-                                    Text(moyenne.toStringAsFixed(1)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: moyenne > 3
+                                            ? Colors.yellow
+                                            : Colors.red,
+                                        size: size.width > 400 ? 14 : 10,
+                                      ),
+                                      SizedBox(width: size.width > 400 ? 4 : 2),
+                                      Text(moyenne.toStringAsFixed(1)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

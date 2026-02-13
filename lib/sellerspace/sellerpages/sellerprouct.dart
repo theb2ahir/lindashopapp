@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/pages/acceuilpage.dart';
+import 'package:lindashopp/features/pages/utils/getadminfcmtoken.dart';
+import 'package:lindashopp/features/pages/utils/sendnotif.dart';
 
 class SellerProduct extends StatefulWidget {
   const SellerProduct({super.key});
@@ -18,11 +20,22 @@ class _SellerProductState extends State<SellerProduct> {
 
   List<QueryDocumentSnapshot> allProducts = [];
   bool loading = false;
+  String _adminToken = "";
 
   @override
   void initState() {
     super.initState();
     _fetchAllCollections();
+    getToken();
+  }
+
+  Future<void> getToken() async {
+    final token = await getAdminToken();
+    if (token != null) {
+      setState(() {
+        _adminToken = token;
+      });
+    }
   }
 
   Future<void> _fetchAllCollections() async {
@@ -122,9 +135,7 @@ class _SellerProductState extends State<SellerProduct> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.transparent
-                              : Colors.black.withValues(alpha: 0.08),
+                          color: Colors.transparent,
                           blurRadius: 10,
                           offset: const Offset(0, 6),
                         ),
@@ -215,6 +226,12 @@ class _SellerProductState extends State<SellerProduct> {
                                           setState(() {
                                             allProducts.removeAt(index);
                                           });
+
+                                          await sendNotification(
+                                            _adminToken,
+                                            "Produit",
+                                            "Un utilisateur a supprimé un produit",
+                                          );
 
                                           if (!mounted) return;
                                           ScaffoldMessenger.of(

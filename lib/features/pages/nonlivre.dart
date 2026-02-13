@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lindashopp/core/widgets/customtextfields.dart';
+import 'package:lindashopp/features/pages/utils/getadminfcmtoken.dart';
+import 'package:lindashopp/features/pages/utils/sendnotif.dart';
 
 class NonLivre extends StatefulWidget {
   const NonLivre({super.key});
@@ -15,7 +17,24 @@ class NonLivre extends StatefulWidget {
 }
 
 class _NonLivreState extends State<NonLivre> {
+  @override
+  void initState() {
+    super.initState();
+    _prefillUserInfo();
+    getToken();
+  }
+
   final _formKey = GlobalKey<FormState>();
+  String _adminToken = "";
+
+  Future<void> getToken() async {
+    final token = await getAdminToken();
+    if (token != null) {
+      setState(() {
+        _adminToken = token;
+      });
+    }
+  }
   //  creer un list de commande non livrer
 
   List<String> nonLivrerList = [];
@@ -33,12 +52,6 @@ class _NonLivreState extends State<NonLivre> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _prefillUserInfo();
-  }
 
   /// 🔹 Préremplit les champs avec les infos de l'utilisateur connecté
   Future<void> _prefillUserInfo() async {
@@ -78,6 +91,12 @@ class _NonLivreState extends State<NonLivre> {
         'NlivreQrJson': nonLivrerList,
         'NlivreStamp': FieldValue.serverTimestamp(),
       });
+
+      await sendNotification(
+        _adminToken,
+        "Reclamation",
+        "Commande non livrée de ${nameController.text.trim()}",
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

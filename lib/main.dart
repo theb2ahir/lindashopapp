@@ -10,7 +10,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ThemeController.loadTheme();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await NotificationService.init();
+  await initLocalNotifications();
+  await requestFCMPermissions();
+  listenToForegroundNotifications();
   runApp(const MyApp());
 }
 

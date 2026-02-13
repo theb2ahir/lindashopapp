@@ -11,6 +11,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:lindashopp/features/pages/utils/getadminfcmtoken.dart';
+import 'package:lindashopp/features/pages/utils/sendnotif.dart';
 
 class SupportClient extends StatefulWidget {
   const SupportClient({super.key});
@@ -28,6 +30,22 @@ class _SupportClientState extends State<SupportClient> {
   bool _isLoading = false;
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
+  String _adminToken = "";
+
+  @override
+  void initState() {
+    super.initState();
+    getToken();
+  }
+
+  Future<void> getToken() async {
+    final token = await getAdminToken();
+    if (token != null) {
+      setState(() {
+        _adminToken = token;
+      });
+    }
+  }
 
   Future<void> _pickImage() async {
     setState(() {
@@ -88,6 +106,7 @@ class _SupportClientState extends State<SupportClient> {
             'isRead': false,
             "timestamp": FieldValue.serverTimestamp(),
           });
+      await sendNotification(_adminToken, "Message", "$username : image 🖼️");
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur lors de l'envoie du message : $e")),
@@ -126,6 +145,12 @@ class _SupportClientState extends State<SupportClient> {
             "timestamp": FieldValue.serverTimestamp(),
             "isRead": false,
           });
+
+      await sendNotification(
+        _adminToken,
+        "Message",
+        "$username : ${_messageCtrl.text.trim()}",
+      );
 
       _messageCtrl.clear();
     } catch (e) {

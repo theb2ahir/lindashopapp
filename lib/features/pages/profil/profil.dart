@@ -48,7 +48,7 @@ class _ProfileState extends State<Profile> {
       setState(() {
         role = doc.data()!['role'];
         subscribed = doc.data()!['subscribed'];
-        subscription = doc.data()!['subscription'];
+        subscription = doc.data()!['subscription'] ?? false;
       });
     }
   }

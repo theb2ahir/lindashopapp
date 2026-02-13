@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lindashopp/core/widgets/customtextfields.dart';
+import 'package:lindashopp/features/pages/utils/getadminfcmtoken.dart';
+import 'package:lindashopp/features/pages/utils/sendnotif.dart';
 
 class Inquietude extends StatefulWidget {
   const Inquietude({super.key});
@@ -12,6 +14,24 @@ class Inquietude extends StatefulWidget {
 }
 
 class _InquietudeState extends State<Inquietude> {
+  @override
+  void initState() {
+    super.initState();
+    _prefillUserInfo();
+    getToken();
+  }
+
+  String _adminToken = "";
+
+  Future<void> getToken() async {
+    final token = await getAdminToken();
+    if (token != null) {
+      setState(() {
+        _adminToken = token;
+      });
+    }
+  }
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -19,12 +39,6 @@ class _InquietudeState extends State<Inquietude> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  @override
-  void initState() {
-    super.initState();
-    _prefillUserInfo();
-  }
 
   /// 🔹 Préremplit les champs avec les infos de l'utilisateur connecté
   Future<void> _prefillUserInfo() async {
@@ -58,6 +72,11 @@ class _InquietudeState extends State<Inquietude> {
         'inquietudeMessage': messageController.text,
         'inquietudeStamp': FieldValue.serverTimestamp(),
       });
+      await sendNotification(
+        _adminToken,
+        "Inquiétude",
+        "${nameController.text.trim()} a envoyé une Inquiétude",
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("inquiétude envoyées avec succès !")),
       );

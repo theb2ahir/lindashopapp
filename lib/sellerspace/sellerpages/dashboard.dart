@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lindashopp/features/pages/acceuilpage.dart';
+import 'package:lindashopp/features/pages/notifications.dart';
 import 'package:lindashopp/sellerspace/selleracceuil.dart';
 import 'package:lindashopp/sellerspace/sellerpages/sellercommandes.dart';
-import 'package:lindashopp/sellerspace/sellerpages/sellernotifications.dart';
 import 'package:lindashopp/sellerspace/sellerpages/sellerproductchecking.dart';
 import 'package:lindashopp/sellerspace/sellerpages/sellerprouct.dart';
 
@@ -273,9 +273,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const SellerNotifications(),
-                  ),
+                  MaterialPageRoute(builder: (context) => NotificationsPage()),
                 );
               },
             ),

@@ -69,8 +69,8 @@ class _AllproductState extends State<Allproduct> {
         itemCount: filteredProducts.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          crossAxisSpacing: 4,
-          mainAxisSpacing: 2,
+          crossAxisSpacing: 1,
+          mainAxisSpacing: 1,
           childAspectRatio: 0.5,
         ),
         itemBuilder: (context, index) {
@@ -117,11 +117,21 @@ class _AllproductState extends State<Allproduct> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black.withValues(alpha: 0.05),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Theme.of(context).brightness == Brightness.dark
                           ? Colors.transparent
-                          : Color.fromRGBO(255, 255, 255, 0.102),
+                          : Color.fromRGBO(
+                              255,
+                              255,
+                              255,
+                              0.102,
+                            ).withValues(alpha: 0.05),
                       blurRadius: 12,
                       offset: Offset(0, 6),
                     ),
@@ -129,51 +139,98 @@ class _AllproductState extends State<Allproduct> {
                 ),
                 child: Column(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
-                        imageUrl,
-                        width: double.infinity,
-                        height: size.height > 800 ? 150 : 100,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Center(
-                              child: Icon(Icons.image_not_supported),
-                            ),
-                      ),
-                    ),
-                    SizedBox(height: size.height > 800 ? 6 : 4),
-                    Text(
-                      nom,
-                      textAlign: TextAlign.start,
-                      style: GoogleFonts.poppins(
-                        fontSize: size.width > 400 ? 14 : 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: size.height > 800 ? 5 : 3),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "$prix F",
-                          style: GoogleFonts.poppins(
-                            fontSize: size.width > 400 ? 12 : 10,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    Container(
+                      padding: const EdgeInsets.all(2.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black.withValues(alpha: 0.05),
                         ),
-                        Row(
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
                           children: [
-                            Icon(
-                              Icons.star,
-                              size: size.width > 400 ? 12 : 10,
-                              color: moyenne > 3 ? Colors.yellow : Colors.red,
+                            Image.network(
+                              imageUrl,
+                              width: double.infinity,
+                              height: size.height > 800 ? 150 : 100,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Center(
+                                    child: Icon(Icons.image_not_supported),
+                                  ),
                             ),
-                            const SizedBox(width: 2),
-                            Text(moyenne.toStringAsFixed(1)),
+                            // Row de la note en haut à droite
+                            Positioned(
+                              bottom: 3,
+                              right: 3,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.6),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.star,
+                                      size: size.width > 400 ? 12 : 10,
+                                      color: moyenne > 3
+                                          ? Colors.yellow
+                                          : Colors.red,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      moyenne.toStringAsFixed(1),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: size.width > 400 ? 12 : 10,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                      ],
+                      ),
+                    ),
+
+                    SizedBox(height: size.height > 800 ? 6 : 4),
+                    Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Text(
+                        nom,
+                        textAlign: TextAlign.start,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        style: GoogleFonts.poppins(
+                          fontSize: size.width > 400 ? 14 : 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            "$prix F",
+                            textAlign: TextAlign.start,
+                            style: GoogleFonts.poppins(
+                              fontSize: size.width > 400 ? 12 : 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

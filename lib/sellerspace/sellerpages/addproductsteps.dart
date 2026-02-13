@@ -10,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:lindashopp/features/pages/acceuilpage.dart';
+import 'package:lindashopp/features/pages/utils/getadminfcmtoken.dart';
+import 'package:lindashopp/features/pages/utils/sendnotif.dart';
 
 class AddProductSteps extends StatefulWidget {
   const AddProductSteps({super.key});
@@ -25,6 +27,9 @@ class _AddProductStepsState extends State<AddProductSteps> {
   final TextEditingController _pccsController = TextEditingController();
   final TextEditingController _prixController = TextEditingController();
   final TextEditingController _pourcentageController = TextEditingController();
+
+  bool _ndpSaved = false;
+  bool _pccsSaved = false;
 
   File? _imageFile;
   String productname = "";
@@ -48,6 +53,14 @@ class _AddProductStepsState extends State<AddProductSteps> {
   // 🔹 Variables
   int nbrajouts = 0;
   String subscription = "";
+
+  String _adminToken = "";
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+    getToken();
+  }
 
   // 🔹 Fonction pour savoir si deux dates sont le même jour
   bool isSameDay(DateTime a, DateTime b) {
@@ -86,10 +99,13 @@ class _AddProductStepsState extends State<AddProductSteps> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getUserData();
+  Future<void> getToken() async {
+    final token = await getAdminToken();
+    if (token != null) {
+      setState(() {
+        _adminToken = token;
+      });
+    }
   }
 
   final ImagePicker _picker = ImagePicker();
@@ -108,6 +124,7 @@ class _AddProductStepsState extends State<AddProductSteps> {
       productname = _nameController.text.trim();
       description = _descriptionController.text.trim();
       price = double.tryParse(_prixController.text) ?? 0;
+      _ndpSaved = true;
     });
 
     ScaffoldMessenger.of(
@@ -126,6 +143,7 @@ class _AddProductStepsState extends State<AddProductSteps> {
     setState(() {
       pccs = _pccsController.text.trim();
       pourcentage = double.tryParse(_pourcentageController.text) ?? 0;
+      _pccsSaved = true;
     });
 
     ScaffoldMessenger.of(
@@ -211,6 +229,12 @@ class _AddProductStepsState extends State<AddProductSteps> {
         'nbrajouts': newCount,
         'lastAddDate': FieldValue.serverTimestamp(),
       });
+
+      await sendNotification(
+        _adminToken,
+        "Produit",
+        "$username a envoyé un produit pour la validation",
+      );
 
       setState(() {
         nbrajouts = newCount;
@@ -342,7 +366,7 @@ class _AddProductStepsState extends State<AddProductSteps> {
                                 step: 5,
                                 title: "Catégorie & livraison",
                                 description:
-                                    "Choisissez la catégorie du produit et activez le bouton pour une livraison payante et désactivez le pour une livraison gratuite.",
+                                    "Choisissez la catégorie du produit et activez le bouton pour une livraison gratuite et désactivez le pour une livraison payante.",
                               ),
                               SizedBox(height: 20),
                               StepInstructionTile(
@@ -519,34 +543,35 @@ class _AddProductStepsState extends State<AddProductSteps> {
                       ),
 
                       const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: _saveNDPinfo,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 32,
+                      if (_ndpSaved == false)
+                        ElevatedButton(
+                          onPressed: _saveNDPinfo,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 32,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            backgroundColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black,
+                            foregroundColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.black
+                                : Colors.white,
+                            elevation: 2,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
+                          child: const Text(
+                            ' Enregistrer',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          backgroundColor:
-                              Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black,
-                          foregroundColor:
-                              Theme.of(context).brightness == Brightness.dark
-                              ? Colors.black
-                              : Colors.white,
-                          elevation: 2,
                         ),
-                        child: const Text(
-                          ' Enregistrer',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
                       const SizedBox(height: 24),
                       if (productname.isNotEmpty &&
                           description.isNotEmpty &&
@@ -565,7 +590,7 @@ class _AddProductStepsState extends State<AddProductSteps> {
                     child: Column(
                       children: [
                         Text(
-                          "Dites à vos clients pourquoi ils doivent choisi ce produit",
+                          "Dites à vos clients pourquoi ils doivent choisir ce produit",
                           style: GoogleFonts.poppins(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
@@ -618,36 +643,37 @@ class _AddProductStepsState extends State<AddProductSteps> {
                                 ),
 
                                 const SizedBox(height: 35),
-                                ElevatedButton(
-                                  onPressed: _savePCCSPinfo,
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 32,
+                                if (_pccsSaved == false)
+                                  ElevatedButton(
+                                    onPressed: _savePCCSPinfo,
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                        horizontal: 32,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      backgroundColor:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black,
+                                      foregroundColor:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.black
+                                          : Colors.white,
+                                      elevation: 2,
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(25),
+                                    child: const Text(
+                                      ' Enregistrer',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                    backgroundColor:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black,
-                                    foregroundColor:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.black
-                                        : Colors.white,
-                                    elevation: 2,
                                   ),
-                                  child: const Text(
-                                    ' Enregistrer',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
                                 const SizedBox(height: 34),
 
                                 if (pccs.isNotEmpty)
@@ -863,7 +889,7 @@ class _AddProductStepsState extends State<AddProductSteps> {
                       if (audone == true && ctdone == true && cpdone == true)
                         NextStepHint(
                           nextStepText:
-                              "Prochaine étape : choisir la catégorie du produit et activez le bouton pour une livraison payante et désactivez le pour une livraison gratuite",
+                              "Prochaine étape : choisir la catégorie du produit et activez le bouton pour une livraison gratuite et désactivez le pour une livraison payante",
                         ),
                     ],
                   ),
@@ -889,7 +915,7 @@ class _AddProductStepsState extends State<AddProductSteps> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Activer le bouton pour une livraison payante et désactivez le pour une livraison gratuite",
+                        "Activer le bouton pour une livraison gratuite et désactivez le pour une livraison payante",
                         style: GoogleFonts.poppins(fontSize: 16),
                       ),
                       const SizedBox(height: 30),
@@ -900,7 +926,7 @@ class _AddProductStepsState extends State<AddProductSteps> {
                           children: [
                             const SizedBox(height: 26),
                             Text(
-                              'Livraison ?( ${_livraison ? "Payante" : "Gratuite"} )',
+                              'Livraison ?( ${_livraison ? "Gratuite" : "Payante"} )',
                               style: GoogleFonts.poppins(fontSize: 16),
                             ),
                             SwitchListTile(

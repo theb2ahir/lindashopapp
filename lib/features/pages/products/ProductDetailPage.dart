@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lindashopp/features/pages/profil/editprofile.dart';
 import 'package:lindashopp/features/pages/utils/avis.dart';
 import 'package:lindashopp/features/pages/acceuilpage.dart';
 import 'package:geolocator/geolocator.dart';
@@ -25,6 +26,7 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
   int quantity = 1;
 
   void increment() => setState(() => quantity++);
@@ -102,7 +104,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             'productname': widget.produit['name'],
             'productprice': prixFinal,
             'productImageUrl': widget.produit['imageURL'],
-            'livraison': widget.produit['livraison'].toString(),
+            'livraison': widget.produit['livraison'],
           };
 
           // Ajouter la commande à Firestore
@@ -196,7 +198,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             'productname': widget.produit['name'],
             'productprice': prixFinal,
             'productImageUrl': widget.produit['imageURL'],
-            'livraison': widget.produit['livraison'].toString(),
+            'livraison': widget.produit['livraison'],
           };
 
           // Ajouter la commande à Firestore
@@ -349,7 +351,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final produitId = widget.produitId;
     final collectionName = widget.collectionName;
     final nom = widget.produit['name'] ?? 'Sans nom';
-    final prix = widget.produit['prix']?.toString() ?? '0';
+    final prix = widget.produit['prix'] ?? 0;
+    final theprice = prix * quantity;
     final livraison = widget.produit['livraison'] ?? 'non spécifiée';
     final description = widget.produit['description'] ?? 'indisponible';
     final imageUrl = widget.produit['imageURL'] ?? '';
@@ -490,7 +493,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '$prix fcfa',
+                          '$theprice FCFA',
                           style: GoogleFonts.poppins(
                             fontSize: size.width > 400 ? 23 : 18,
                             fontWeight: FontWeight.bold,
@@ -616,8 +619,55 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           child: Row(
                             children: [
                               IconButton(
-                                onPressed: () {
-                                  _ajouterAuFavoris();
+                                onPressed: () async {
+                                  final userDoc = await FirebaseFirestore
+                                      .instance
+                                      .collection('users')
+                                      .doc(uid)
+                                      .get();
+
+                                  final userData = userDoc.data();
+
+                                  // 🔹 Vérifier si le numéro et l'adresse sont présents
+                                  if (userData == null ||
+                                      userData['phone'] == null ||
+                                      userData['phone'].toString().isEmpty ||
+                                      userData['adresse'] == null ||
+                                      userData['adresse'].toString().isEmpty) {
+                                    if (!mounted) return;
+                                    final snack = ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                          SnackBar(
+                                            behavior: SnackBarBehavior.floating,
+                                            backgroundColor: Color(0xFF02204B),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                            duration: Duration(seconds: 2),
+                                            content: Text(
+                                              "Veuillez renseigné votre numero de telephone et votre adresse",
+                                              style: GoogleFonts.poppins(
+                                                fontSize: size.width > 400
+                                                    ? 15
+                                                    : 13,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                    snack.closed.then((_) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => EditProfile(),
+                                        ),
+                                      );
+                                    });
+                                    return; // Stoppe le paiement
+                                  } else {
+                                    _ajouterAuFavoris();
+                                  }
                                 },
                                 icon: Icon(
                                   Icons.favorite,
@@ -626,8 +676,55 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ),
                               ),
                               IconButton(
-                                onPressed: () {
-                                  _ajouterAuPanier();
+                                onPressed: () async {
+                                  final userDoc = await FirebaseFirestore
+                                      .instance
+                                      .collection('users')
+                                      .doc(uid)
+                                      .get();
+
+                                  final userData = userDoc.data();
+
+                                  // 🔹 Vérifier si le numéro et l'adresse sont présents
+                                  if (userData == null ||
+                                      userData['phone'] == null ||
+                                      userData['phone'].toString().isEmpty ||
+                                      userData['adresse'] == null ||
+                                      userData['adresse'].toString().isEmpty) {
+                                    if (!mounted) return;
+                                    final snack = ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                          SnackBar(
+                                            behavior: SnackBarBehavior.floating,
+                                            backgroundColor: Color(0xFF02204B),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                            duration: Duration(seconds: 2),
+                                            content: Text(
+                                              "Veuillez renseigné votre numero de telephone et votre adresse",
+                                              style: GoogleFonts.poppins(
+                                                fontSize: size.width > 400
+                                                    ? 15
+                                                    : 13,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                    snack.closed.then((_) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => EditProfile(),
+                                        ),
+                                      );
+                                    });
+                                    return; // Stoppe le paiement
+                                  } else {
+                                    _ajouterAuPanier();
+                                  }
                                 },
                                 icon: Icon(
                                   Icons.add_shopping_cart,

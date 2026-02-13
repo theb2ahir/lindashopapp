@@ -23,6 +23,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   String promoEleve = "";
   final uid = FirebaseAuth.instance.currentUser!.uid;
+  int _currentIndex = 0;
+  final PageController _pageController = PageController(viewportFraction: 0.95);
 
   final List<String> tabTitles = [
     "Tous",
@@ -40,9 +42,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     saveFcmToken();
     _tabController = TabController(length: 7, vsync: this);
   }
-
-  int _currentIndex = 0;
-  final PageController _pageController = PageController(viewportFraction: 0.95);
 
   Future<void> fetchPromotionMax() async {
     final snapshot = await FirebaseFirestore.instance
@@ -121,9 +120,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     final List<PromoBanner> promoBanners = [
       PromoBanner(
-        image: "assets/images/promo.jpg",
-        title:
-            "Des promotions exceptionnelles vous attendent : économisez plus et faites-vous plaisir 🎁🔥",
+        tag: "🔥 PROMOTIONS",
+        title: "Économisez malin, sans compromis",
+        subtitle: "Des offres exclusives pensées pour votre quotidien.",
         onTap: () {
           Navigator.push(
             context,
@@ -132,15 +131,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         },
       ),
       PromoBanner(
-        image: "assets/images/bigevent.jpg",
-        title:
-            "Offres spéciales en quantité limitée, saisissez l’opportunité dès aujourd’hui 🎉⏳",
+        tag: "⏳ ÉVÉNEMENT",
+        title: "Offres limitées, impact maximal",
+        subtitle: "Ne ratez pas les meilleures opportunités du moment.",
         onTap: () {},
       ),
       PromoBanner(
-        image: "assets/images/newproduct.jpg",
-        title:
-            "Plus de 200 nouveautés sélectionnées pour vous offrir encore plus de choix et de qualité ✅✨",
+        tag: "✨ NOUVEAUTÉS",
+        title: "Plus de choix. Plus de qualité.",
+        subtitle: "Découvrez les dernières nouveautés sélectionnées.",
         onTap: () {},
       ),
     ];
@@ -314,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ),
             SizedBox(
-              height: size.height > 800 ? 140 : 100,
+              height: size.height > 800 ? 180 : 140,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: promoBanners.length,
@@ -323,54 +322,102 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 },
                 itemBuilder: (context, index) {
                   final promo = promoBanners[index];
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
 
                   return GestureDetector(
                     onTap: promo.onTap,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(22),
-                        child: Stack(
-                          children: [
-                            // Image
-                            Image.asset(
-                              promo.image,
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: isDark
+                                ? [
+                                    const Color(0xFF1E1E2C),
+                                    const Color(0xFF2A2A40),
+                                  ]
+                                : [
+                                    const Color(0xFFF8F9FF),
+                                    const Color(0xFFEDEFFF),
+                                  ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
                             ),
-                            // Gradient overlay
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: [
-                                    Colors.black.withValues(alpha: 0.55),
-                                    Colors.transparent,
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      promo.tag,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark
+                                            ? Colors.deepPurpleAccent
+                                            : Colors.indigo,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      promo.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: size.width > 400 ? 18 : 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      promo.subtitle,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        color: isDark
+                                            ? Colors.white70
+                                            : Colors.black54,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                            ),
-
-                            Positioned(
-                              top: size.height > 800 ? 30 : 20,
-                              right: size.width > 400 ? 10 : 5,
-                              child: SizedBox(
-                                width: size.width > 400 ? 350 : 250,
-                                child: Text(
-                                  maxLines: 4,
-                                  promo.title,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: size.width > 400 ? 18 : 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
+                              const SizedBox(width: 10),
+                              Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isDark
+                                      ? Colors.deepPurpleAccent
+                                      : Colors.indigo,
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 18,
+                                  color: Colors.white,
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

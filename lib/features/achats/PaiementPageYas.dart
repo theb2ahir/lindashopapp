@@ -2,13 +2,15 @@
 
 import 'dart:convert';
 import 'dart:math';
+import 'package:lindashopp/features/achats/paymentsucces.dart';
 import 'package:lindashopp/features/pages/acceuilpage.dart';
+import 'package:lindashopp/features/pages/utils/getadminfcmtoken.dart';
+import 'package:lindashopp/features/pages/utils/sendnotif.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lindashopp/features/pages/utils/notifucation_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -34,15 +36,13 @@ class _PaiementPageState extends State<PaiementPage> {
   bool canProceedToSendCommande = false;
   bool firstetapegood = false;
   int suffixe = 0;
+  String _adminToken = "";
+  double deliveryPrice = 0.0;
 
   @override
   void initState() {
     super.initState();
-    transactionId = generateTransactionId();
-    final int dasuffixe = suffixeAdeuxChiffresAleatoire();
-    setState(() {
-      suffixe = dasuffixe;
-    });
+    _initCommande();
   }
 
   @override
@@ -51,21 +51,54 @@ class _PaiementPageState extends State<PaiementPage> {
     super.dispose();
   }
 
+  Future<void> _initCommande() async {
+    getToken();
+    transactionId = generateTransactionId();
+    deliveryPrice = await getDeliveryPrice();
+    final int dasuffixe = suffixeAdeuxChiffresAleatoire();
+    setState(() {
+      suffixe = dasuffixe;
+    });
+  }
+
+  Future<double> getDeliveryPrice() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('delivery')
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      setState(() {
+        deliveryPrice = (snapshot.docs.first.data()['price'] ?? 0).toDouble();
+      });
+      return (snapshot.docs.first.data()['price'] ?? 0).toDouble();
+    }
+    return 0.0;
+  }
+
+  Future<void> getToken() async {
+    final token = await getAdminToken();
+    if (token != null) {
+      setState(() {
+        _adminToken = token;
+      });
+    }
+  }
+
   int? extraireMontant(String sms) {
-    // Cherche "Envoi de" suivi éventuellement d'espaces, puis des chiffres
-    final montantRegex = RegExp(
-      r"Envoi de\s*([\d\s]+)\s*FCFA",
+    final regex = RegExp(
+      r"Envoi de\s*([\d\s,\.]+)\s*FCFA",
       caseSensitive: false,
     );
-    final match = montantRegex.firstMatch(sms);
+
+    final match = regex.firstMatch(sms);
 
     if (match != null) {
-      // Supprimer les espaces dans le nombre (ex: "1 000" -> "1000")
-      String montantStr = match.group(1)!.replaceAll(' ', '');
+      final montantStr = match.group(1)!.replaceAll(RegExp(r"[^\d]"), '');
       return int.tryParse(montantStr);
     }
 
-    return null; // si aucun montant trouvé
+    return null;
   }
 
   Future<void> _checkPayment() async {
@@ -173,8 +206,10 @@ class _PaiementPageState extends State<PaiementPage> {
     final int prixUnitaire = int.tryParse(item['productprice'].toString()) ?? 0;
     final int quantite = int.tryParse(item['quantity'].toString()) ?? 0;
     final apayer = prixUnitaire * quantite;
-    final int total = apayer + (livraison != 'true' ? 2000 : 0) + suffixe;
-    final int totalAfficher = apayer + (livraison != 'true' ? 2000 : 0);
+    final int total =
+        apayer + (livraison != true ? deliveryPrice.toInt() : 0) + suffixe;
+    final int totalAfficher =
+        apayer + (livraison != true ? deliveryPrice.toInt() : 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -232,25 +267,42 @@ class _PaiementPageState extends State<PaiementPage> {
 
               setState(() => isLoading = true);
 
-              DocumentReference sellerRef = await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(item['sellerid'])
-                  .collection('sellercommandes')
-                  .add({
-                    'produits': [
-                      {
-                        'productname': item['productname'],
-                        'quantity': item['quantity'],
-                        'imageurl': item['productImageUrl'],
-                        'productprice': item['productprice'],
-                      },
-                    ],
-                    'status': 'en verification',
-                    'livree': false,
-                    'date': DateTime.now(),
-                  });
+              String sellerDocId = "";
 
-              String sellerDocId = sellerRef.id;
+              if (item['sellerid'] != null &&
+                  item['sellerid'].toString().isNotEmpty) {
+                DocumentReference sellerRef = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(item['sellerid'])
+                    .collection('sellercommandes')
+                    .add({
+                      'produits': [
+                        {
+                          'productname': item['productname'],
+                          'quantity': item['quantity'],
+                          'imageurl': item['productImageUrl'],
+                          'productprice': item['productprice'],
+                        },
+                      ],
+                      'status': 'en verification',
+                      'livree': false,
+                      'date': DateTime.now(),
+                    });
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(item['sellerid'])
+                    .collection('notifications')
+                    .add({
+                      'imageUrl':
+                          "https://res.cloudinary.com/dccsqxaxu/image/upload/v1753640623/LindaLogo2_jadede.png",
+                      'notifText':
+                          "Votre produit ${item['productname']} a été commandé",
+                      'type': 'commande', // utile pour filtrer
+                      'date': DateTime.now(),
+                    });
+
+                sellerDocId = sellerRef.id;
+              }
 
               try {
                 final userDoc = await FirebaseFirestore.instance
@@ -258,53 +310,73 @@ class _PaiementPageState extends State<PaiementPage> {
                     .doc(uid)
                     .get();
 
-                final userData = userDoc.data();
+                final userData = userDoc.data() ?? {};
                 // Ajouter à 'acr' et récupérer l'ID du document
                 DocumentReference acrRef = await FirebaseFirestore.instance
                     .collection('users')
                     .doc(uid)
                     .collection('acr')
                     .add({
-                      'imageUrl': item['productImageUrl'],
-                      'productname': item['productname'],
-                      'quantity': item['quantity'],
+                      'transactionId': transactionId,
                       'reference': reference,
-                      "transactionId": transactionId,
                       'reseau': "Yas",
-                      "Qrjson": "",
-                      'date': DateTime.now(),
-                      'productprice': item['productprice'],
+                      'Qrjson': "",
                       'status': 'en verification',
+                      'prixTotal': total,
+                      'deliveryPrice': deliveryPrice,
+                      'items': [
+                        {
+                          "sellerid": item['sellerid'] != ""
+                              ? item['sellerid']
+                              : null,
+                          "sellerCommandedocId": item['sellerid'] != ""
+                              ? sellerDocId
+                              : null,
+                          'productname': item['productname'] ?? "",
+                          'quantity': item['quantity'] ?? 0,
+                          'productprice': item['productprice'] ?? 0,
+                          'livraison': item['livraison'] ?? false,
+                          'imageurl': item['productImageUrl'] ?? "",
+                        },
+                      ],
+                      'date': DateTime.now(),
                     });
-                final userid = uid; // ✅ Ici tu récupères l'ID
                 String acrId = acrRef.id; // ✅ Ici tu récupères l'ID
 
                 // Ensuite, ajouter dans 'infouser' avec l'acrid obtenu
                 DocumentReference infouserRef = await FirebaseFirestore.instance
                     .collection('infouser')
                     .add({
-                      'userid': userid,
-                      'acrid': acrId, // ✅ On envoie l'ID ici
-                      'transactionId': transactionId,
-                      'longi': item['longitude'],
-                      'lati': item['latitude'],
-                      'prixTotal': total,
-                      'UsereReseau': 'Yas',
-                      'userId': uid,
-                      "sellerid": item['sellerid'],
-                      "sellerCommandedocId": sellerDocId,
+                      'userid': uid ?? "",
+                      'usernamemiff': userData['name'] ?? "Utilisateur",
+                      'useremail': userData['email'] ?? "",
+                      'userephone': userData['phone'] ?? "",
+                      'UserAdresse': userData['adresse'] ?? "",
                       'sms': sms,
-                      'firstCheck': firstetapegood,
-                      'nomberitem': item['quantity'],
-                      'productname': item['productname'],
-                      'productprice': item['productprice'],
-                      'livraison': item['livraison'],
-                      'timestamp': DateTime.now(),
-                      'usernamemiff': userData?['name'],
-                      'userephone': userData?['phone'],
-                      'useremail': userData?['email'],
-                      'UserAdresse': userData?['adresse'],
+                      'lati': item['latitude'] ?? 0.0,
+                      'longi': item['longitude'] ?? 0.0,
+                      'transactionId': transactionId,
                       'ref': reference,
+                      'UsereReseau': 'Yas',
+                      'prixTotal': total,
+                      'firstCheck': firstetapegood,
+                      'items': [
+                        {
+                          "sellerid": item['sellerid'] != ""
+                              ? item['sellerid']
+                              : null,
+                          "sellerCommandedocId": item['sellerid'] != ""
+                              ? sellerDocId
+                              : null,
+                          'productname': item['productname'] ?? "",
+                          'quantity': item['quantity'] ?? 0,
+                          'productprice': item['productprice'] ?? 0,
+                          'livraison': item['livraison'] ?? false,
+                          'imageurl': item['productImageUrl'] ?? "",
+                        },
+                      ],
+                      'acrid': acrId, // ✅ On envoie l'ID ici
+                      'timestamp': DateTime.now(),
                     });
 
                 String commandeId = infouserRef.id;
@@ -313,12 +385,25 @@ class _PaiementPageState extends State<PaiementPage> {
                   "transactionId": transactionId,
                   "reference": reference,
                   "total": total,
-                  "userid": uid,
+                  "commandeId": commandeId,
                   "sms": sms,
                   "reseau": "Yas",
-                  "commandeId": commandeId,
-                  "productname": item['productname'],
-                  "quantity": item['quantity'],
+                  "userid": uid ?? "",
+                  "items": [
+                    {
+                      "sellerid": item['sellerid'] != ""
+                          ? item['sellerid']
+                          : null,
+                      "sellerCommandedocId": item['sellerid'] != ""
+                          ? sellerDocId
+                          : null,
+                      'productname': item['productname'] ?? "",
+                      'quantity': item['quantity'] ?? 0,
+                      'productprice': item['productprice'] ?? 0,
+                      'livraison': item['livraison'] ?? false,
+                      'imageurl': item['productImageUrl'] ?? "",
+                    },
+                  ],
                 };
 
                 final String qrJson = jsonEncode(qrData);
@@ -338,13 +423,30 @@ class _PaiementPageState extends State<PaiementPage> {
                       'date': DateTime.now(),
                     });
 
-                setState(() => isLoading = false);
-
-                NotificationService.showNotification(
-                  title: "Payement",
-                  body:
-                      "Payement enregistrer nous allons verifier votre paiement et modifier le statut en consequence , rendez-vous sur la page commande",
+                await sendNotification(
+                  _adminToken,
+                  "Commande",
+                  "${userData['name'] ?? 'Utilisateur'} a passer la commande  de ( ${item['quantity']} x ${item['productname']} ) , prix total : $total FCFA",
                 );
+                if (item['sellerid'] != null &&
+                    item['sellerid'].toString().isNotEmpty) {
+                  final sellerMainDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(item['sellerid'])
+                      .get();
+                  final sellerMainData = sellerMainDoc.data();
+                  final String? token = sellerMainData?['fcmToken'];
+
+                  if (token != null && token.isNotEmpty) {
+                    await sendNotification(
+                      token,
+                      "Commande",
+                      "Vous avez une nouvelle commande de : ${item['productname']}",
+                    );
+                  }
+                }
+
+                setState(() => isLoading = false);
 
                 showDialog(
                   context: context,
@@ -368,7 +470,7 @@ class _PaiementPageState extends State<PaiementPage> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              "Ce Qr code contient toutes les informations de votre commande , il est automatiquement sauvegardé , il a pour but de faciliter la livraison et de retrouver votre commande en cas de problème",
+                              "Ce Qr code contient toutes les informations de votre commande, faite une capture d'ecran , il a pour but de faciliter la livraison et de retrouver votre commande en cas de problème",
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 16),
@@ -415,7 +517,28 @@ class _PaiementPageState extends State<PaiementPage> {
                                 ),
                                 minimumSize: Size(double.infinity, 45),
                               ),
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => PaymentSuccessPage(
+                                      transactionId: transactionId,
+                                      reference: reference,
+                                      totalGeneral: total.toDouble(),
+                                      reseau: "yas",
+                                      commandes: [
+                                        {
+                                          'productname': item['productname'],
+                                          'quantity': item['quantity'],
+                                          'productprice': item['productprice'],
+                                          'livraison': item['livraison'],
+                                          'imageurl': item['productImageUrl'],
+                                        },
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                               child: const Text("Fermer"),
                             ),
                           ],
@@ -504,7 +627,7 @@ class _PaiementPageState extends State<PaiementPage> {
                         ),
                       ),
                       SizedBox(width: 9),
-                      Text(' ${livraison != "true" ? 2000 : 0}  FCFA'),
+                      Text(' ${livraison != true ? deliveryPrice : 0}  FCFA'),
                     ],
                   ),
 
